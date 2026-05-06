@@ -118,3 +118,4 @@ Admin: http://localhost:8000/admin
 ## Credenciais padrão (após seeder)
 - Email: admin@igreja.com
 - Senha: senha123
+# site-igreja
