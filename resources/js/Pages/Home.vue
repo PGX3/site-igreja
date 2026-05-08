@@ -35,7 +35,6 @@
 
       <div class="absolute bottom-12 right-10 flex flex-col items-center gap-3">
         <div class="w-px h-16 bg-gradient-to-b from-[var(--blue)]/60 to-transparent animate-pulse-blue"></div>
-        <span class="text-[8px] tracking-[0.3em] uppercase text-white/25 [writing-mode:vertical-lr]">Scroll</span>
       </div>
     </section>
 
