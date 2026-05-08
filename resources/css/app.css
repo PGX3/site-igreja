@@ -13,10 +13,12 @@
     --border: rgba(0,167,255,0.15);
   }
 
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; 
+  font-family: Arial, Helvetica, sans-serif;
+  }
 
   body {
-    font-family: 'Barlow', sans-serif;
+    font-family: 'arial', sans-serif;
     background-color: var(--dark);
     color: #fff;
     -webkit-font-smoothing: antialiased;
@@ -40,14 +42,15 @@
   }
 
   .section-title {
-    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 3em;
     @apply font-bold leading-[0.92] tracking-tight;
   }
 
   .btn-primary {
     @apply inline-block font-black uppercase tracking-[0.2em] text-xs px-10 py-4
            transition-all duration-300;
-    font-family: 'Barlow Condensed', sans-serif;
+    font-family: 'arial', sans-serif;
     background: var(--blue);
     color: #fff;
   }

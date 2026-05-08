@@ -4,12 +4,13 @@
     <!-- ══ HERO ══════════════════════════════════════════════════════════ -->
     <section id="hero" class="relative h-screen flex flex-col justify-center px-10 md:px-20 overflow-hidden">
       <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px]
-                  rounded-full pointer-events-none"
-           style="background: radial-gradient(circle, rgba(0,167,255,0.06) 0%, transparent 70%)"></div>
+                  rounded-full pointer-events-none uppercase"
+           style="background: radial-gradient(circle, rgba(0,167,255,0.06) 5%, transparent 70%)"></div>
 
-      <div class="absolute top-1/2 right-0 -translate-y-1/2 select-none pointer-events-none
-                  font-black text-[22vw] tracking-[-0.04em] leading-none text-white/[0.02]"
-           style="font-family:'Cormorant Garamond',serif">IGREJA</div>
+      <div class="absolute left-[55%] top-1/2 -translate-y-1/2 
+        pointer-events-none select-none opacity-50 z-0">
+        <LogoIcon class="w-[500px] h-[500px]" />
+      </div>
 
       <div class="absolute left-6 top-1/4 bottom-1/4 w-px bg-gradient-to-b from-transparent via-[var(--blue)]/30 to-transparent hidden md:block"></div>
 
@@ -18,9 +19,9 @@
           <div class="w-8 h-px bg-[var(--blue)]"></div>
           <p class="section-label !mb-0">Igreja em Charqueadas · {{ new Date().getFullYear() }}</p>
         </div>
-        <h1 class="section-title text-[clamp(64px,10vw,160px)] animate-fade-up text-white"
+        <h1 class=" section-title text-[clamp(64px,10vw,160px)] animate-fade-up text-white uppercase"
             style="animation-delay:0.25s; line-height:0.88">
-          {{ t('hero_titulo', 'Somos Igreja.') }}
+          {{ t('hero_titulo', 'Igreja.') }}
         </h1>
         <p class="mt-10 text-[11px] tracking-[0.3em] uppercase text-white/30 animate-fade-up"
            style="animation-delay:0.45s">
@@ -52,9 +53,7 @@
           </p>
         </div>
         <div class="reveal hidden md:flex justify-center items-center relative h-80">
-          <div class="absolute w-64 h-64 rounded-full border border-[var(--blue)]/10 animate-spin-slow"></div>
-          <div class="absolute w-44 h-44 rounded-full border border-[var(--blue)]/20" style="animation: spin-slow 20s linear infinite reverse"></div>
-          <LogoIcon :size="110" />
+          <LogoIcon :size="330" />
         </div>
       </div>
     </section>
