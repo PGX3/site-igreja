@@ -1,38 +1,84 @@
 <template>
   <AdminLayout>
-    <div class="flex items-center justify-between mb-10">
+
+    <!-- HEADER -->
+    <div class="flex items-center justify-between mb-8">
       <div>
-        <h1 class="text-3xl font-black tracking-tight">Cultos</h1>
-        <p class="text-gray-500 text-sm mt-1">Gerencie os cultos exibidos no site.</p>
+        <h1 class="text-2xl font-bold text-gray-900">Cultos</h1>
+        <p class="text-gray-500 text-sm mt-1">
+          Gerencie os cultos exibidos no site.
+        </p>
       </div>
-      <Link href="/admin/cultos/create" class="btn-primary text-xs">+ Novo Culto</Link>
+
+      <Link href="/admin/cultos/create"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-sm transition">
+        + Novo Culto
+      </Link>
     </div>
 
-    <div class="flex flex-col gap-0.5">
+    <!-- TABELA -->
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+
+      <!-- HEAD -->
+      <div class="grid grid-cols-4 px-6 py-3 bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+        <span>Nome</span>
+        <span>Dia</span>
+        <span>Status</span>
+        <span class="text-right">Ações</span>
+      </div>
+
+      <!-- ROWS -->
       <div v-for="culto in cultos" :key="culto.id"
-           class="bg-[#1a1a1a] flex items-center gap-6 px-8 py-6">
-        <div class="flex-1">
-          <p class="font-bold text-base">{{ culto.nome }}</p>
-          <p class="text-gray-500 text-xs tracking-wide mt-0.5">
-            {{ culto.dia_semana }} · {{ culto.horario }}
+           class="grid grid-cols-4 items-center px-6 py-4 border-t border-gray-100 hover:bg-gray-50 transition">
+
+        <!-- NOME -->
+        <div>
+          <p class="font-semibold text-gray-900">{{ culto.nome }}</p>
+          <p class="text-xs text-gray-500">
+            {{ culto.horario }}
           </p>
         </div>
-        <span
-          class="text-[9px] font-bold tracking-widest uppercase px-3 py-1"
-          :class="culto.ativo ? 'text-[#29b6f6] border border-[#29b6f6]/30' : 'text-white/25 border border-white/10'"
-        >
-          {{ culto.ativo ? 'Ativo' : 'Inativo' }}
-        </span>
-        <Link :href="`/admin/cultos/${culto.id}/edit`"
-              class="text-xs text-gray-500 hover:text-white transition-colors tracking-wide">
-          Editar
-        </Link>
-        <button @click="destroy(culto.id)"
-                class="text-xs text-gray-600 hover:text-red-400 transition-colors tracking-wide">
-          Excluir
-        </button>
+
+        <!-- DIA -->
+        <div class="text-sm text-gray-600">
+          {{ culto.dia_semana }}
+        </div>
+
+        <!-- STATUS -->
+        <div>
+          <span
+            class="text-xs font-semibold px-2.5 py-1 rounded-full"
+            :class="culto.ativo
+              ? 'bg-green-100 text-green-700'
+              : 'bg-gray-100 text-gray-500'"
+          >
+            {{ culto.ativo ? 'Ativo' : 'Inativo' }}
+          </span>
+        </div>
+
+        <!-- AÇÕES -->
+        <div class="flex justify-end gap-4 text-sm">
+          <Link :href="`/admin/cultos/${culto.id}/edit`"
+                class="text-gray-500 hover:text-blue-600 transition">
+            Editar
+          </Link>
+
+          <button @click="destroy(culto.id)"
+                  class="text-gray-400 hover:text-red-500 transition">
+            Excluir
+          </button>
+        </div>
+
       </div>
+
+      <!-- EMPTY STATE -->
+      <div v-if="cultos.length === 0"
+           class="text-center py-12 text-gray-400 text-sm">
+        Nenhum culto cadastrado.
+      </div>
+
     </div>
+
   </AdminLayout>
 </template>
 

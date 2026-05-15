@@ -12,9 +12,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans:      ['Barlow', ...defaultTheme.fontFamily.sans],
-        condensed: ['Barlow Condensed', ...defaultTheme.fontFamily.sans],
-        serif:     ['Cormorant Garamond', ...defaultTheme.fontFamily.serif],
+        sans:      ['Inter', ...defaultTheme.fontFamily.sans],
+        condensed: ['Arial', ...defaultTheme.fontFamily.sans],
+        serif:     ['sans-serif', ...defaultTheme.fontFamily.serif],
       },
       colors: {
         gold: '#c9a84c',

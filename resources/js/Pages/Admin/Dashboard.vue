@@ -1,42 +1,96 @@
 <template>
   <AdminLayout>
+    
+    <!-- HEADER -->
     <div class="mb-10">
-      <p class="text-[9px] tracking-[0.35em] uppercase text-[var(--blue)] mb-2">Visão Geral</p>
-      <h1 style="font-family:'Cormorant Garamond',serif" class="text-4xl font-bold text-white">Dashboard</h1>
-      <p class="text-white/30 text-[12px] mt-1">Igreja em Charqueadas · Painel de Controle</p>
+      <p class="text-xs tracking-widest uppercase text-gray-400 mb-2">
+        Visão Geral
+      </p>
+
+      <h1 class="text-3xl font-bold text-gray-900">
+        Dashboard
+      </h1>
+
+      <p class="text-gray-500 text-sm mt-1">
+        Igreja em Charqueadas · Painel de Controle
+      </p>
     </div>
 
-    <!-- Stats grid -->
-    <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-10">
-      <div v-for="stat in stats" :key="stat.label"
-           class="p-7 border transition-colors duration-300 hover:border-[var(--blue)]/30 group"
-           :class="stat.highlight ? 'border-[var(--blue)]/25 bg-[var(--blue)]/4' : 'border-[var(--border)] bg-[#111]'">
-        <p class="text-[9px] tracking-[0.3em] uppercase mb-3"
-           :class="stat.highlight ? 'text-[var(--blue)]' : 'text-white/30'">{{ stat.label }}</p>
-        <p class="text-5xl font-black tracking-tight text-white">{{ stat.value }}</p>
-        <p v-if="stat.sub" class="text-[10px] text-white/25 mt-2">{{ stat.sub }}</p>
+    <!-- STATS -->
+    <div class="grid grid-cols-2 xl:grid-cols-4 gap-6 mb-10">
+      <div
+        v-for="stat in stats"
+        :key="stat.label"
+        class="p-6 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition"
+      >
+        <p class="text-xs uppercase text-gray-400 mb-2">
+          {{ stat.label }}
+        </p>
+
+        <p class="text-3xl font-bold text-gray-900">
+          {{ stat.value }}
+        </p>
+
+        <p v-if="stat.sub" class="text-xs text-gray-400 mt-1">
+          {{ stat.sub }}
+        </p>
+
+        <!-- destaque -->
+        <div v-if="stat.highlight"
+             class="mt-3 inline-block text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded">
+          Novo
+        </div>
       </div>
     </div>
 
-    <!-- Quick actions -->
-    <div class="border border-[var(--border)] bg-[#111] p-8 mb-6">
-      <p class="text-[9px] tracking-[0.35em] uppercase text-white/30 mb-6">Ações Rápidas</p>
+    <!-- AÇÕES -->
+    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm mb-8">
+      <p class="text-xs uppercase tracking-widest text-gray-400 mb-4">
+        Ações rápidas
+      </p>
+
       <div class="flex flex-wrap gap-3">
-        <Link href="/admin/cultos/create" class="btn-primary text-[11px]">+ Novo Culto</Link>
-        <Link href="/admin/textos" class="btn-ghost text-[11px]">Editar Textos</Link>
-        <Link href="/admin/sugestoes" class="btn-ghost text-[11px]" v-if="novasSugestoes > 0">
-          Ver {{ novasSugestoes }} sugestão(ões) nova(s)
+        <Link href="/admin/cultos/create"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition">
+          + Novo Culto
         </Link>
-        <Link href="/admin/pedidos-oracao" class="btn-ghost text-[11px]" v-if="novosPedidos > 0">
-          Ver {{ novosPedidos }} pedido(s) de oração
+
+        <Link href="/admin/textos"
+              class="border border-gray-300 text-gray-700 hover:bg-gray-100 px-5 py-2.5 rounded-lg text-sm font-semibold transition">
+          Editar Textos
+        </Link>
+
+        <Link v-if="novasSugestoes > 0"
+              href="/admin/sugestoes"
+              class="border border-gray-300 text-gray-700 hover:bg-gray-100 px-5 py-2.5 rounded-lg text-sm font-semibold transition">
+          {{ novasSugestoes }} nova(s) sugestão(ões)
+        </Link>
+
+        <Link v-if="novosPedidos > 0"
+              href="/admin/pedidos-oracao"
+              class="border border-gray-300 text-gray-700 hover:bg-gray-100 px-5 py-2.5 rounded-lg text-sm font-semibold transition">
+          {{ novosPedidos }} pedido(s)
         </Link>
       </div>
     </div>
 
-    <Link href="/" target="_blank"
-          class="text-[10px] tracking-[0.25em] uppercase text-white/20 hover:text-[var(--blue)] transition-colors">
-      ↗ Visualizar site
-    </Link>
+    <!-- VER SITE -->
+    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex justify-between items-center">
+      <div>
+        <p class="text-sm font-semibold text-gray-800">
+          Visualizar site
+        </p>
+        <p class="text-sm text-gray-500">
+          Acesse o site da igreja em uma nova aba
+        </p>
+      </div>
+
+      <Link href="/" target="_blank"
+            class="border border-gray-300 px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-gray-100 transition">
+        Abrir Site ↗
+      </Link>
+    </div>
+
   </AdminLayout>
 </template>
 
@@ -55,9 +109,19 @@ const props = defineProps({
 })
 
 const stats = computed(() => [
-  { label: 'Cultos',          value: props.totalCultos    || 0, highlight: false },
-  { label: 'Textos editáveis',value: props.totalTextos    || 0, highlight: false },
-  { label: 'Novas sugestões', value: props.novasSugestoes || 0, highlight: props.novasSugestoes > 0, sub: `${props.totalSugestoes || 0} total` },
-  { label: 'Novos pedidos',   value: props.novosPedidos   || 0, highlight: props.novosPedidos > 0,   sub: `${props.totalPedidos   || 0} total` },
+  { label: 'Cultos', value: props.totalCultos || 0 },
+  { label: 'Textos editáveis', value: props.totalTextos || 0 },
+  {
+    label: 'Sugestões',
+    value: props.novasSugestoes || 0,
+    highlight: props.novasSugestoes > 0,
+    sub: `${props.totalSugestoes || 0} total`
+  },
+  {
+    label: 'Pedidos de oração',
+    value: props.novosPedidos || 0,
+    highlight: props.novosPedidos > 0,
+    sub: `${props.totalPedidos || 0} total`
+  },
 ])
 </script>

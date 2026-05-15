@@ -1,58 +1,104 @@
 <template>
   <AdminLayout>
-    <div class="mb-10">
-      <Link href="/admin/cultos" class="text-xs text-gray-500 hover:text-white transition-colors tracking-widest uppercase">
+
+    <!-- HEADER -->
+    <div class="mb-8">
+      <Link href="/admin/cultos"
+            class="text-sm text-gray-500 hover:text-gray-900 transition">
         ← Voltar
       </Link>
-      <h1 class="text-3xl font-black tracking-tight mt-4">
+
+      <h1 class="text-2xl font-bold text-gray-900 mt-4">
         {{ culto ? 'Editar Culto' : 'Novo Culto' }}
       </h1>
     </div>
 
-    <form @submit.prevent="submit" class="max-w-lg flex flex-col gap-5">
-      <div>
-        <label class="text-[10px] tracking-[0.2em] uppercase text-gray-500 block mb-2">Nome</label>
-        <input v-model="form.nome" type="text"
-               class="w-full bg-[#1a1a1a] border border-white/10 px-5 py-4 text-sm text-white
-                      outline-none focus:border-[#29b6f6] transition-colors" />
-        <p v-if="form.errors.nome" class="text-red-400 text-xs mt-1">{{ form.errors.nome }}</p>
-      </div>
+    <!-- FORM CARD -->
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-8 max-w-xl">
 
-      <div>
-        <label class="text-[10px] tracking-[0.2em] uppercase text-gray-500 block mb-2">Dia da Semana</label>
-        <select v-model="form.dia_semana"
-                class="w-full bg-[#1a1a1a] border border-white/10 px-5 py-4 text-sm text-white
-                       outline-none focus:border-[#29b6f6] transition-colors">
-          <option v-for="d in dias" :key="d" :value="d">{{ d }}</option>
-        </select>
-      </div>
+      <form @submit.prevent="submit" class="flex flex-col gap-6">
 
-      <div>
-        <label class="text-[10px] tracking-[0.2em] uppercase text-gray-500 block mb-2">Horário</label>
-        <input v-model="form.horario" type="text" placeholder="ex: 19h30"
-               class="w-full bg-[#1a1a1a] border border-white/10 px-5 py-4 text-sm text-white
-                      outline-none focus:border-[#29b6f6] transition-colors" />
-      </div>
+        <!-- NOME -->
+        <div>
+          <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-2">
+            Nome
+          </label>
 
-      <div>
-        <label class="text-[10px] tracking-[0.2em] uppercase text-gray-500 block mb-2">Descrição (opcional)</label>
-        <textarea v-model="form.descricao" rows="3"
-                  class="w-full bg-[#1a1a1a] border border-white/10 px-5 py-4 text-sm text-white
-                         outline-none focus:border-[#29b6f6] transition-colors resize-none" />
-      </div>
+          <input v-model="form.nome" type="text"
+                 class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm
+                        focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" />
 
-      <div class="flex items-center gap-3">
-        <input v-model="form.ativo" type="checkbox" id="ativo"
-               class="accent-[#29b6f6] w-4 h-4" />
-        <label for="ativo" class="text-sm text-gray-400">Exibir no site</label>
-      </div>
+          <p v-if="form.errors.nome" class="text-red-500 text-xs mt-1">
+            {{ form.errors.nome }}
+          </p>
+        </div>
 
-      <div class="pt-2">
-        <button type="submit" :disabled="form.processing" class="btn-primary">
-          {{ form.processing ? 'Salvando...' : (culto ? 'Salvar Alterações' : 'Criar Culto') }}
-        </button>
-      </div>
-    </form>
+        <!-- DIA -->
+        <div>
+          <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-2">
+            Dia da Semana
+          </label>
+
+          <select v-model="form.dia_semana"
+                  class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm
+                         focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+            <option v-for="d in dias" :key="d" :value="d">
+              {{ d }}
+            </option>
+          </select>
+        </div>
+
+        <!-- HORÁRIO -->
+        <div>
+          <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-2">
+            Horário
+          </label>
+
+          <input v-model="form.horario" type="text" placeholder="Ex: 19h30"
+                 class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm
+                        focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" />
+        </div>
+
+        <!-- DESCRIÇÃO -->
+        <div>
+          <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-2">
+            Descrição (opcional)
+          </label>
+
+          <textarea v-model="form.descricao" rows="3"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm
+                           focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none" />
+        </div>
+
+        <!-- ATIVO -->
+        <div class="flex items-center gap-3">
+          <input v-model="form.ativo" type="checkbox" id="ativo"
+                 class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+
+          <label for="ativo" class="text-sm text-gray-600">
+            Exibir no site
+          </label>
+        </div>
+
+        <!-- BOTÕES -->
+        <div class="flex items-center gap-3 pt-4">
+
+          <button type="submit"
+                  :disabled="form.processing"
+                  class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition disabled:opacity-50">
+            {{ form.processing ? 'Salvando...' : (culto ? 'Salvar Alterações' : 'Criar Culto') }}
+          </button>
+
+          <Link href="/admin/cultos"
+                class="text-sm text-gray-500 hover:text-gray-900 transition">
+            Cancelar
+          </Link>
+
+        </div>
+
+      </form>
+    </div>
+
   </AdminLayout>
 </template>
 

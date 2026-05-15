@@ -14,14 +14,14 @@
           <line x1="11" y1="13" x2="21" y2="13" stroke="white" stroke-width="1.5"/>
           <circle cx="16" cy="24" r="1.8" fill="var(--blue)"/>
         </svg>
-        <span style="font-family:'Barlow Condensed',sans-serif" class="font-black text-sm tracking-[0.25em] uppercase">
+        <span style="font-family: Arial, Helvetica, sans-serif" class="font-black text-sm tracking-[0.25em] uppercase">
           IGREJA<span class="text-[var(--blue)]">.</span>
         </span>
       </div>
 
       <div>
         <p class="text-[10px] tracking-[0.3em] uppercase text-[var(--blue)] mb-4">Área Restrita</p>
-        <h2 style="font-family:'Cormorant Garamond',serif" class="text-5xl font-bold text-white/80 leading-tight">
+        <h2 style="font-family: Arial, Helvetica, sans-serif" class="text-7xl font-bold text-white/90 leading-tight">
           Painel<br>Administrativo
         </h2>
         <p class="mt-6 text-white/25 text-[13px] leading-relaxed max-w-xs">
@@ -32,14 +32,13 @@
       <p class="text-[10px] tracking-[0.2em] uppercase text-white/15">© {{ new Date().getFullYear() }} Igreja em Charqueadas</p>
     </div>
 
-    <!-- Right panel — form -->
     <div class="flex-1 flex flex-col items-center justify-center px-8">
       <div class="w-full max-w-sm">
         <!-- Mobile logo -->
         <div class="lg:hidden mb-10 text-center">
           <div class="flex items-center justify-center gap-2">
             <LogoIcon :size="32" />
-            <p style="font-family:'Barlow Condensed',sans-serif" class="font-black text-xl tracking-[0.25em] uppercase">
+            <p style="font-family: Arial, Helvetica, sans-serif" class="font-black text-xl tracking-[0.25em] uppercase">
               IGREJA<span class="text-[var(--blue)]">.</span>
             </p>
           </div>
@@ -50,7 +49,7 @@
         <form @submit.prevent="submit" class="flex flex-col gap-4">
           <div>
             <label class="block text-[9px] font-bold tracking-[0.3em] uppercase text-white/30 mb-2">E-mail</label>
-            <input v-model="form.email" type="email" required class="field w-full" placeholder="admin@igreja.com" />
+            <input v-model="form.email" type="email" required class="field w-full" placeholder="Ex: email@gmail.com" />
             <p v-if="form.errors.email" class="text-red-400 text-xs mt-1.5">{{ form.errors.email }}</p>
           </div>
           <div>
