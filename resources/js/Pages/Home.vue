@@ -1,6 +1,6 @@
 <template>
   <MainLayout>
-
+ <div id="app">
     <!-- ══ HERO ══════════════════════════════════════════════════════════ -->
     <section id="hero" class="relative h-screen flex flex-col justify-center px-10 md:px-20 overflow-hidden">
       <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px]
@@ -258,6 +258,8 @@
       <a href="https://maps.google.com" target="_blank" rel="noopener" class="btn-primary reveal">→ Como Chegar</a>
     </section>
 
+    <WhatsAppPopup />
+  </div>
   </MainLayout>
 </template>
 
@@ -267,6 +269,7 @@ import { router, usePage } from '@inertiajs/vue3'
 import MainLayout from '@/Layouts/MainLayout.vue'
 import LogoIcon from '@/Components/LogoIcon.vue'
 import HCaptcha from '@/Components/HCaptcha.vue'
+import WhatsAppPopup from '@/Components/WhatsAppPopup.vue';
 
 const props = defineProps({ cultos: Array, textos: Object })
 const page = usePage()

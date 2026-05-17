@@ -115,7 +115,7 @@ const form = useForm({
   dia_semana: props.culto?.dia_semana ?? 'Domingo',
   horario:    props.culto?.horario    ?? '',
   descricao:  props.culto?.descricao  ?? '',
-  ativo:      props.culto?.ativo      ?? true,
+  ativo:      props.culto?.ativo      ?? false,
 })
 
 function submit() {
@@ -125,4 +125,5 @@ function submit() {
     form.post('/admin/cultos')
   }
 }
+
 </script>
