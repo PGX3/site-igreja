@@ -26,7 +26,19 @@
         </li>
       </ul>
 
-      <a href="#sugestoes" class="btn-primary hidden md:inline-block text-xs">Fale Conosco</a>
+      <div class="hidden md:flex items-center gap-3">
+        <a href="#sugestoes" class="btn-primary text-xs">Fale Conosco</a>
+        <Link v-if="authUser" href="/admin"
+              class="text-[10px] font-bold tracking-[0.2em] uppercase text-white/40
+                     hover:text-[var(--blue)] transition-colors duration-300">
+          Painel →
+        </Link>
+        <Link v-else href="/login"
+              class="text-[10px] font-bold tracking-[0.2em] uppercase text-white/40
+                     hover:text-[var(--blue)] transition-colors duration-300">
+          Entrar →
+        </Link>
+      </div>
 
       <!-- Mobile menu btn -->
       <button class="md:hidden flex flex-col gap-1.5 p-2" @click="mobileOpen = !mobileOpen">
@@ -48,6 +60,16 @@
           {{ link.label }}
         </a>
         <a href="#sugestoes" @click="mobileOpen = false" class="btn-primary mt-4">Fale Conosco</a>
+        <Link v-if="authUser" href="/admin" @click="mobileOpen = false"
+              class="text-sm font-bold tracking-widest uppercase text-white/30
+                     hover:text-[var(--blue)] transition-colors">
+          Painel →
+        </Link>
+        <Link v-else href="/login" @click="mobileOpen = false"
+              class="text-sm font-bold tracking-widest uppercase text-white/30
+                     hover:text-[var(--blue)] transition-colors">
+          Entrar →
+        </Link>
       </div>
     </Transition>
 
@@ -82,12 +104,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-import { Link } from '@inertiajs/vue3'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { Link, usePage } from '@inertiajs/vue3'
 import LogoIcon from '@/Components/LogoIcon.vue'
 
 const scrolled   = ref(false)
 const mobileOpen = ref(false)
+const authUser   = computed(() => usePage().props.auth?.user)
 
 function onScroll() { scrolled.value = window.scrollY > 60 }
 onMounted(() => window.addEventListener('scroll', onScroll))
