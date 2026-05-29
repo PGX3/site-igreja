@@ -3,12 +3,12 @@
 
     <!-- HEADER -->
     <div class="mb-8">
-      <p class="text-xs tracking-widest uppercase text-gray-400 mb-1">
-        <Link href="/admin/usuarios" class="hover:text-blue-600">Usuários</Link>
+      <p class="text-xs tracking-widest uppercase text-gray-400 dark:text-slate-500 mb-1">
+        <Link href="/admin/usuarios" class="hover:text-blue-600 dark:hover:text-blue-400">Usuários</Link>
         <span class="mx-1">›</span>
         {{ editando ? 'Editar' : 'Novo' }}
       </p>
-      <h1 class="text-3xl font-bold text-gray-900">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
         {{ editando ? 'Editar Usuário' : 'Novo Usuário' }}
       </h1>
     </div>
@@ -17,45 +17,59 @@
 
       <!-- Nome -->
       <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nome *</label>
+        <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Nome *</label>
         <input v-model="form.name" type="text" placeholder="Nome completo"
-               class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+               class="w-full border border-gray-200 dark:border-slate-600 rounded-lg px-4 py-2.5 text-sm
+                      bg-white dark:bg-slate-700 text-gray-900 dark:text-white
+                      placeholder-gray-400 dark:placeholder-slate-400
+                      focus:outline-none focus:ring-2 focus:ring-blue-500"
                :class="{ 'border-red-400': form.errors.name }" />
         <p v-if="form.errors.name" class="mt-1 text-xs text-red-500">{{ form.errors.name }}</p>
       </div>
 
       <!-- Email -->
       <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Email *</label>
+        <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Email *</label>
         <input v-model="form.email" type="email" placeholder="email@exemplo.com"
-               class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+               class="w-full border border-gray-200 dark:border-slate-600 rounded-lg px-4 py-2.5 text-sm
+                      bg-white dark:bg-slate-700 text-gray-900 dark:text-white
+                      placeholder-gray-400 dark:placeholder-slate-400
+                      focus:outline-none focus:ring-2 focus:ring-blue-500"
                :class="{ 'border-red-400': form.errors.email }" />
         <p v-if="form.errors.email" class="mt-1 text-xs text-red-500">{{ form.errors.email }}</p>
       </div>
 
       <!-- Senha -->
       <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+        <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">
           Senha {{ editando ? '(deixe em branco para manter)' : '*' }}
         </label>
         <input v-model="form.password" type="password" placeholder="Mínimo 6 caracteres"
-               class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+               class="w-full border border-gray-200 dark:border-slate-600 rounded-lg px-4 py-2.5 text-sm
+                      bg-white dark:bg-slate-700 text-gray-900 dark:text-white
+                      placeholder-gray-400 dark:placeholder-slate-400
+                      focus:outline-none focus:ring-2 focus:ring-blue-500"
                :class="{ 'border-red-400': form.errors.password }" />
         <p v-if="form.errors.password" class="mt-1 text-xs text-red-500">{{ form.errors.password }}</p>
       </div>
 
       <!-- Telefone -->
       <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Telefone</label>
+        <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Telefone</label>
         <input v-model="form.telefone" type="text" placeholder="(51) 99999-9999"
-               class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+               class="w-full border border-gray-200 dark:border-slate-600 rounded-lg px-4 py-2.5 text-sm
+                      bg-white dark:bg-slate-700 text-gray-900 dark:text-white
+                      placeholder-gray-400 dark:placeholder-slate-400
+                      focus:outline-none focus:ring-2 focus:ring-blue-500" />
       </div>
 
       <!-- Papel -->
       <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Papel *</label>
+        <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Papel *</label>
         <select v-model="form.role_id"
-                class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                class="w-full border border-gray-200 dark:border-slate-600 rounded-lg px-4 py-2.5 text-sm
+                       bg-white dark:bg-slate-700 text-gray-900 dark:text-white
+                       focus:outline-none focus:ring-2 focus:ring-blue-500"
                 :class="{ 'border-red-400': form.errors.role_id }">
           <option value="">Selecione...</option>
           <option v-for="r in roles" :key="r.id" :value="r.id">{{ r.display_name }}</option>
@@ -65,9 +79,11 @@
 
       <!-- Grupo -->
       <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Grupo</label>
+        <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Grupo</label>
         <select v-model="form.grupo_id"
-                class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                class="w-full border border-gray-200 dark:border-slate-600 rounded-lg px-4 py-2.5 text-sm
+                       bg-white dark:bg-slate-700 text-gray-900 dark:text-white
+                       focus:outline-none focus:ring-2 focus:ring-blue-500">
           <option :value="null">Sem grupo</option>
           <option v-for="g in grupos" :key="g.id" :value="g.id">{{ g.nome }}</option>
         </select>
@@ -80,7 +96,7 @@
           {{ editando ? 'Salvar alterações' : 'Criar Usuário' }}
         </button>
         <Link href="/admin/usuarios"
-              class="px-6 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-lg transition">
+              class="px-6 py-2.5 text-sm font-semibold text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition">
           Cancelar
         </Link>
       </div>

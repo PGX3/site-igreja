@@ -1,23 +1,23 @@
 <template>
-  <div class="flex h-screen bg-[#f8fafc] overflow-hidden">
+  <div class="flex h-screen bg-[#f8fafc] dark:bg-slate-950 overflow-hidden transition-colors duration-200">
 
     <!-- ─────────────────── SIDEBAR ─────────────────── -->
-    <aside class="w-[260px] bg-white border-r border-gray-100 flex flex-col fixed inset-y-0 left-0 z-20">
+    <aside class="w-[260px] bg-white dark:bg-slate-900 border-r border-gray-100 dark:border-slate-700/50 flex flex-col fixed inset-y-0 left-0 z-20 transition-colors duration-200">
 
       <!-- Logo -->
-      <div class="h-16 px-5 flex items-center gap-3 border-b border-gray-100 flex-shrink-0">
+      <div class="h-16 px-5 flex items-center gap-3 border-b border-gray-100 dark:border-slate-700/50 flex-shrink-0">
         <div class="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center shadow-sm">
           <LogoIcon :size="18" class="text-white" />
         </div>
         <span style="font-family: Inter, Arial, sans-serif"
-              class="font-black text-sm tracking-[0.22em] uppercase text-gray-900 select-none">
+              class="font-black text-sm tracking-[0.22em] uppercase text-gray-900 dark:text-white select-none">
           IGREJA<span class="text-blue-600">.</span>
         </span>
       </div>
 
       <!-- Nav -->
       <nav class="flex-1 px-3 py-4 overflow-y-auto">
-        <p class="px-3 mb-2 text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 select-none">
+        <p class="px-3 mb-2 text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 dark:text-slate-500 select-none">
           Menu
         </p>
 
@@ -28,11 +28,11 @@
           class="flex items-center gap-3 px-3 py-[9px] rounded-xl text-[13px] font-medium
                  transition-all duration-150 mb-0.5"
           :class="isActive(item.href)
-            ? 'bg-blue-50 text-blue-700 font-semibold'
-            : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'"
+            ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-semibold'
+            : 'text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-slate-800'"
         >
           <span class="flex-shrink-0"
-                :class="isActive(item.href) ? 'text-blue-600' : 'text-gray-400'">
+                :class="isActive(item.href) ? 'text-blue-600' : 'text-gray-400 dark:text-slate-500'">
             <AppIcon :name="item.icon" size="sm" />
           </span>
 
@@ -47,7 +47,7 @@
       </nav>
 
       <!-- User + Logout -->
-      <div class="flex-shrink-0 border-t border-gray-100 p-3 space-y-1">
+      <div class="flex-shrink-0 border-t border-gray-100 dark:border-slate-700/50 p-3 space-y-1">
         <div class="flex items-center gap-3 px-2 py-2">
           <div class="w-8 h-8 rounded-full flex items-center justify-center
                       text-xs font-bold text-white flex-shrink-0"
@@ -55,14 +55,14 @@
             {{ initials }}
           </div>
           <div class="flex-1 min-w-0">
-            <p class="text-[13px] font-semibold text-gray-800 truncate leading-tight">{{ user?.name }}</p>
-            <p class="text-[11px] text-gray-400 leading-tight mt-0.5">{{ roleLabel }}</p>
+            <p class="text-[13px] font-semibold text-gray-800 dark:text-slate-100 truncate leading-tight">{{ user?.name }}</p>
+            <p class="text-[11px] text-gray-400 dark:text-slate-500 leading-tight mt-0.5">{{ roleLabel }}</p>
           </div>
         </div>
 
         <Link href="/logout" method="post" as="button"
               class="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-[13px] font-medium
-                     text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
+                     text-gray-400 dark:text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
           <AppIcon name="logout" size="sm" />
           Sair
         </Link>
@@ -73,32 +73,24 @@
     <div class="flex-1 ml-[260px] flex flex-col min-h-0">
 
       <!-- Top bar -->
-      <header class="h-14 bg-white border-b border-gray-100 flex items-center
-                     px-6 gap-4 flex-shrink-0 z-10">
+      <header class="h-14 bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-700/50 flex items-center
+                     px-6 gap-4 flex-shrink-0 z-10 transition-colors duration-200">
 
-        <!-- Search -->
-        <div class="flex-1 max-w-sm">
-          <div class="flex items-center gap-2 bg-gray-50 border border-gray-100
-                      rounded-xl px-3 py-2 text-sm text-gray-400 cursor-default
-                      hover:border-gray-200 transition-colors">
-            <AppIcon name="search" size="xs" class="text-gray-300 flex-shrink-0" />
-            <span class="flex-1 text-[13px] select-none">Buscar membros, cultos, textos...</span>
-            <kbd class="text-[10px] font-mono bg-gray-100 border border-gray-200
-                        text-gray-400 px-1.5 py-0.5 rounded-md select-none">⌘K</kbd>
-          </div>
-        </div>
+      
 
         <!-- Actions -->
         <div class="ml-auto flex items-center gap-1">
           <button class="relative w-9 h-9 rounded-xl flex items-center justify-center
-                         text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
+                         text-gray-400 dark:text-slate-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
             <AppIcon name="bell" size="md" />
             <span v-if="totalBadges > 0"
-                  class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" />
+                  class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-slate-900" />
           </button>
-          <button class="w-9 h-9 rounded-xl flex items-center justify-center
-                         text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
-            <AppIcon name="moon" size="md" />
+          <button @click="toggleTheme"
+                  class="w-9 h-9 rounded-xl flex items-center justify-center
+                         text-gray-400 dark:text-slate-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+                  :title="isDark ? 'Modo claro' : 'Modo escuro'">
+            <AppIcon :name="isDark ? 'sun' : 'moon'" size="md" />
           </button>
         </div>
       </header>
@@ -117,6 +109,9 @@ import { Link, usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import LogoIcon from '@/Components/LogoIcon.vue'
 import AppIcon from '@/Components/AppIcon.vue'
+import { useTheme } from '@/composables/useTheme.js'
+
+const { isDark, toggle: toggleTheme } = useTheme()
 
 const page = usePage()
 

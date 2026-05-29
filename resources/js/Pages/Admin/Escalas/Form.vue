@@ -3,12 +3,12 @@
 
     <!-- HEADER -->
     <div class="mb-8">
-      <p class="text-xs tracking-widest uppercase text-gray-400 mb-1">
-        <Link href="/admin/escalas" class="hover:text-blue-600">Escalas</Link>
+      <p class="text-xs tracking-widest uppercase text-gray-400 dark:text-slate-500 mb-1">
+        <Link href="/admin/escalas" class="hover:text-blue-600 dark:hover:text-blue-400">Escalas</Link>
         <span class="mx-1">›</span>
         {{ editando ? 'Editar' : 'Nova' }}
       </p>
-      <h1 class="text-3xl font-bold text-gray-900">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
         {{ editando ? 'Editar Escala' : 'Nova Escala' }}
       </h1>
     </div>
@@ -17,25 +17,33 @@
 
       <!-- Título -->
       <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Título *</label>
+        <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Título *</label>
         <input v-model="form.titulo" type="text" placeholder="Ex: Culto de Domingo - Louvor"
-               class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+               class="w-full border border-gray-200 dark:border-slate-600 rounded-lg px-4 py-2.5 text-sm
+                      bg-white dark:bg-slate-700 text-gray-900 dark:text-white
+                      placeholder-gray-400 dark:placeholder-slate-400
+                      focus:outline-none focus:ring-2 focus:ring-blue-500"
                :class="{ 'border-red-400': form.errors.titulo }" />
         <p v-if="form.errors.titulo" class="mt-1 text-xs text-red-500">{{ form.errors.titulo }}</p>
       </div>
 
       <!-- Descrição -->
       <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Descrição</label>
+        <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Descrição</label>
         <textarea v-model="form.descricao" rows="2" placeholder="Informações adicionais..."
-                  class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" />
+                  class="w-full border border-gray-200 dark:border-slate-600 rounded-lg px-4 py-2.5 text-sm
+                         bg-white dark:bg-slate-700 text-gray-900 dark:text-white
+                         placeholder-gray-400 dark:placeholder-slate-400
+                         focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" />
       </div>
 
       <!-- Grupo -->
       <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Grupo *</label>
+        <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Grupo *</label>
         <select v-model="form.grupo_id"
-                class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                class="w-full border border-gray-200 dark:border-slate-600 rounded-lg px-4 py-2.5 text-sm
+                       bg-white dark:bg-slate-700 text-gray-900 dark:text-white
+                       focus:outline-none focus:ring-2 focus:ring-blue-500"
                 :class="{ 'border-red-400': form.errors.grupo_id }">
           <option value="">Selecione o grupo...</option>
           <option v-for="g in grupos" :key="g.id" :value="g.id">{{ g.nome }}</option>
@@ -46,28 +54,36 @@
       <!-- Data e Horários -->
       <div class="grid grid-cols-3 gap-4">
         <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-1.5">Data *</label>
+          <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Data *</label>
           <input v-model="form.data" type="date"
-                 class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                 class="w-full border border-gray-200 dark:border-slate-600 rounded-lg px-4 py-2.5 text-sm
+                        bg-white dark:bg-slate-700 text-gray-900 dark:text-white
+                        focus:outline-none focus:ring-2 focus:ring-blue-500"
                  :class="{ 'border-red-400': form.errors.data }" />
         </div>
         <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-1.5">Início *</label>
+          <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Início *</label>
           <input v-model="form.hora_inicio" type="time"
-                 class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                 class="w-full border border-gray-200 dark:border-slate-600 rounded-lg px-4 py-2.5 text-sm
+                        bg-white dark:bg-slate-700 text-gray-900 dark:text-white
+                        focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
         <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-1.5">Fim *</label>
+          <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Fim *</label>
           <input v-model="form.hora_fim" type="time"
-                 class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                 class="w-full border border-gray-200 dark:border-slate-600 rounded-lg px-4 py-2.5 text-sm
+                        bg-white dark:bg-slate-700 text-gray-900 dark:text-white
+                        focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
       </div>
 
       <!-- Status (apenas ao editar) -->
       <div v-if="editando">
-        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Status</label>
+        <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Status</label>
         <select v-model="form.status"
-                class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                class="w-full border border-gray-200 dark:border-slate-600 rounded-lg px-4 py-2.5 text-sm
+                       bg-white dark:bg-slate-700 text-gray-900 dark:text-white
+                       focus:outline-none focus:ring-2 focus:ring-blue-500">
           <option value="pendente">Pendente</option>
           <option value="confirmada">Confirmada</option>
           <option value="em_andamento">Em andamento</option>
@@ -77,30 +93,33 @@
       </div>
 
       <!-- MEMBROS -->
-      <div v-if="form.grupo_id" class="border border-gray-200 rounded-xl overflow-hidden">
-        <div class="bg-gray-50 px-5 py-3 border-b border-gray-200 flex items-center justify-between">
-          <p class="text-sm font-semibold text-gray-700">Membros do Grupo</p>
-          <p class="text-xs text-gray-400">{{ membrosDoGrupo.length }} disponíveis</p>
+      <div v-if="form.grupo_id" class="border border-gray-200 dark:border-slate-600 rounded-xl overflow-hidden">
+        <div class="bg-gray-50 dark:bg-slate-700 px-5 py-3 border-b border-gray-200 dark:border-slate-600 flex items-center justify-between">
+          <p class="text-sm font-semibold text-gray-700 dark:text-slate-300">Membros do Grupo</p>
+          <p class="text-xs text-gray-400 dark:text-slate-500">{{ membrosDoGrupo.length }} disponíveis</p>
         </div>
 
-        <div v-if="membrosDoGrupo.length" class="divide-y divide-gray-50">
+        <div v-if="membrosDoGrupo.length" class="divide-y divide-gray-50 dark:divide-slate-700">
           <div v-for="membro in membrosDoGrupo" :key="membro.id"
-               class="flex items-center gap-4 px-5 py-3 hover:bg-gray-50 transition">
+               class="flex items-center gap-4 px-5 py-3 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition">
             <input :id="`m-${membro.id}`" type="checkbox"
                    :checked="isEscalado(membro.id)"
                    @change="toggleMembro(membro.id)"
-                   class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer" />
+                   class="w-4 h-4 rounded border-gray-300 dark:border-slate-500 text-blue-600 focus:ring-blue-500 cursor-pointer" />
             <label :for="`m-${membro.id}`" class="flex-1 cursor-pointer">
-              <span class="text-sm font-medium text-gray-800">{{ membro.name }}</span>
+              <span class="text-sm font-medium text-gray-800 dark:text-slate-200">{{ membro.name }}</span>
             </label>
             <input v-if="isEscalado(membro.id)"
                    v-model="funcaoDoMembro(membro.id).funcao"
                    type="text" placeholder="Função (ex: vocal, guitarra...)"
-                   class="border border-gray-200 rounded px-3 py-1.5 text-xs w-48 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                   class="border border-gray-200 dark:border-slate-600 rounded px-3 py-1.5 text-xs w-48
+                          bg-white dark:bg-slate-700 text-gray-900 dark:text-white
+                          placeholder-gray-400 dark:placeholder-slate-400
+                          focus:outline-none focus:ring-1 focus:ring-blue-500" />
           </div>
         </div>
 
-        <div v-else class="px-5 py-6 text-sm text-gray-400 text-center">
+        <div v-else class="px-5 py-6 text-sm text-gray-400 dark:text-slate-500 text-center">
           Nenhum membro associado a este grupo ainda.
         </div>
       </div>
@@ -112,7 +131,7 @@
           {{ editando ? 'Salvar alterações' : 'Criar Escala' }}
         </button>
         <Link href="/admin/escalas"
-              class="px-6 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-lg transition">
+              class="px-6 py-2.5 text-sm font-semibold text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition">
           Cancelar
         </Link>
       </div>
@@ -144,7 +163,6 @@ const form = useForm({
   membros:     props.escala?.membros     ?? [],
 })
 
-// membros como array de {user_id, funcao}
 const membrosLocal = reactive(
   (props.escala?.membros ?? []).map(m => ({ user_id: m.user_id, funcao: m.funcao ?? '' }))
 )
@@ -173,7 +191,6 @@ function toggleMembro(userId) {
 
 function submit() {
   form.membros = membrosLocal.map(m => ({ user_id: m.user_id, funcao: m.funcao || null }))
-
   if (editando.value) {
     form.put(`/admin/escalas/${props.escala.id}`)
   } else {

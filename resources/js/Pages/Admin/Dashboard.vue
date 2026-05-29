@@ -3,14 +3,14 @@
 
     <!-- ── HEADER ── -->
     <div class="mb-8">
-      <p class="text-[11px] font-bold tracking-[0.3em] uppercase text-gray-400 mb-1">Visão Geral</p>
+      <p class="text-[11px] font-bold tracking-[0.3em] uppercase text-gray-400 dark:text-slate-500 mb-1">Visão Geral</p>
       <div class="flex items-center gap-3">
-        <h1 class="text-3xl font-black text-gray-900">{{ greeting }}, {{ firstName }}</h1>
+        <h1 class="text-3xl font-black text-gray-900 dark:text-white">{{ greeting }}, {{ firstName }}</h1>
       </div>
       <div class="flex items-center gap-2 mt-1.5">
-        <span class="text-sm text-gray-500">Igreja em Charqueadas</span>
-        <span class="text-gray-300">·</span>
-        <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">
+        <span class="text-sm text-gray-500 dark:text-slate-400">Igreja em Charqueadas</span>
+        <span class="text-gray-300 dark:text-slate-600">·</span>
+        <span class="text-xs font-semibold text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 px-2.5 py-1 rounded-full">
           Painel de Controle
         </span>
       </div>
@@ -19,11 +19,11 @@
     <!-- ── STAT CARDS ── -->
     <div class="grid grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
       <div v-for="card in statCards" :key="card.label"
-           class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm
+           class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700/50 p-5 shadow-sm
                   hover:shadow-md transition-shadow overflow-hidden relative">
         <!-- top row -->
         <div class="flex items-start justify-between mb-4">
-          <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400">{{ card.label }}</p>
+          <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500">{{ card.label }}</p>
           <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
                :style="{ background: card.iconBg }">
             <AppIcon :name="card.icon" size="sm" :style="{ color: card.iconColor }" />
@@ -31,17 +31,17 @@
         </div>
 
         <!-- value -->
-        <p class="text-4xl font-black text-gray-900 mb-1 leading-none">{{ card.value }}</p>
+        <p class="text-4xl font-black text-gray-900 dark:text-white mb-1 leading-none">{{ card.value }}</p>
 
         <!-- sub -->
         <div class="flex items-center gap-1.5 mb-4">
           <span v-if="card.trend > 0"
                 class="flex items-center gap-0.5 text-[11px] font-bold text-emerald-600
-                       bg-emerald-50 px-1.5 py-0.5 rounded-full">
+                       bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded-full">
             <AppIcon name="trending-up" size="xs" />
             +{{ card.trend }}
           </span>
-          <span class="text-xs text-gray-400">{{ card.sub }}</span>
+          <span class="text-xs text-gray-400 dark:text-slate-500">{{ card.sub }}</span>
         </div>
 
         <!-- sparkline -->
@@ -64,7 +64,7 @@
 
       <!-- Próximo Culto -->
       <div class="xl:col-span-3">
-        <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-3">
+        <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-3">
           Próximo Culto
         </p>
 
@@ -125,11 +125,11 @@
 
         <!-- Empty culto state -->
         <div v-else
-             class="rounded-2xl bg-white border border-gray-100 shadow-sm p-10 text-center">
+             class="rounded-2xl bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700/50 shadow-sm p-10 text-center">
           <p class="text-3xl mb-2">🎵</p>
-          <p class="font-semibold text-gray-600">Nenhum culto cadastrado ainda.</p>
+          <p class="font-semibold text-gray-600 dark:text-slate-300">Nenhum culto cadastrado ainda.</p>
           <Link href="/admin/cultos/create"
-                class="mt-3 inline-block text-sm text-blue-600 hover:underline">
+                class="mt-3 inline-block text-sm text-blue-600 dark:text-blue-400 hover:underline">
             Cadastrar primeiro culto
           </Link>
         </div>
@@ -138,34 +138,34 @@
       <!-- Escala da Semana -->
       <div class="xl:col-span-2">
         <div class="flex items-center justify-between mb-3">
-          <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400">
+          <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500">
             Escala da Semana
           </p>
           <Link v-if="role === 'pastor' || role === 'lider'"
                 href="/admin/escalas"
-                class="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-0.5">
+                class="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 flex items-center gap-0.5">
             Ver tudo <AppIcon name="chevron-right" size="xs" />
           </Link>
         </div>
 
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <div v-if="escalasProximas?.length" class="divide-y divide-gray-50">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700/50 shadow-sm overflow-hidden">
+          <div v-if="escalasProximas?.length" class="divide-y divide-gray-50 dark:divide-slate-700/50">
             <Link v-for="e in escalasProximas" :key="e.id"
                   :href="`/admin/escalas/${e.id}`"
-                  class="flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors">
+                  class="flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
 
               <!-- Date block -->
               <div class="text-center min-w-[40px]">
-                <p class="text-[10px] font-bold uppercase text-gray-400 leading-none">
+                <p class="text-[10px] font-bold uppercase text-gray-400 dark:text-slate-500 leading-none">
                   {{ e.dia_semana }}
                 </p>
-                <p class="text-xl font-black text-gray-900 leading-none mt-0.5">{{ e.dia }}</p>
+                <p class="text-xl font-black text-gray-900 dark:text-white leading-none mt-0.5">{{ e.dia }}</p>
               </div>
 
               <!-- Info -->
               <div class="flex-1 min-w-0">
-                <p class="text-[13px] font-semibold text-gray-900 truncate">{{ e.titulo }}</p>
-                <p class="text-[11px] text-gray-400 mt-0.5">{{ e.hora_inicio }}</p>
+                <p class="text-[13px] font-semibold text-gray-900 dark:text-white truncate">{{ e.titulo }}</p>
+                <p class="text-[11px] text-gray-400 dark:text-slate-500 mt-0.5">{{ e.hora_inicio }}</p>
               </div>
 
               <!-- Avatars + tag -->
@@ -173,17 +173,17 @@
                 <div class="flex -space-x-2">
                   <div v-for="m in e.membros.slice(0, 4)" :key="m.id"
                        class="w-6 h-6 rounded-full text-white text-[9px] font-bold
-                              flex items-center justify-center ring-2 ring-white"
+                              flex items-center justify-center ring-2 ring-white dark:ring-slate-800"
                        :style="{ background: m.color }">
                     {{ m.initials }}
                   </div>
                   <div v-if="e.total_membros > 4"
-                       class="w-6 h-6 rounded-full bg-gray-200 text-gray-500 text-[9px]
-                              font-bold flex items-center justify-center ring-2 ring-white">
+                       class="w-6 h-6 rounded-full bg-gray-200 dark:bg-slate-600 text-gray-500 dark:text-slate-300 text-[9px]
+                              font-bold flex items-center justify-center ring-2 ring-white dark:ring-slate-800">
                     +{{ e.total_membros - 4 }}
                   </div>
                 </div>
-                <span class="text-[10px] font-semibold text-gray-500 bg-gray-100
+                <span class="text-[10px] font-semibold text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-700
                              px-2 py-0.5 rounded-full truncate max-w-[80px]">
                   {{ e.grupo?.nome }}
                 </span>
@@ -194,10 +194,10 @@
           <!-- Empty state -->
           <div v-else class="py-12 text-center px-4">
             <p class="text-3xl mb-2">📅</p>
-            <p class="text-sm font-medium text-gray-500">Nenhuma escala nos próximos dias.</p>
+            <p class="text-sm font-medium text-gray-500 dark:text-slate-400">Nenhuma escala nos próximos dias.</p>
             <Link v-if="role === 'pastor' || role === 'lider'"
                   href="/admin/escalas/create"
-                  class="mt-2 inline-block text-xs text-blue-600 hover:underline">
+                  class="mt-2 inline-block text-xs text-blue-600 dark:text-blue-400 hover:underline">
               Criar escala
             </Link>
           </div>
@@ -207,8 +207,8 @@
     </div>
 
     <!-- ── AÇÕES RÁPIDAS (pastor) ── -->
-    <div v-if="role === 'pastor'" class="mt-8 bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-      <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-4">Ações Rápidas</p>
+    <div v-if="role === 'pastor'" class="mt-8 bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700/50 shadow-sm p-5">
+      <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-4">Ações Rápidas</p>
       <div class="flex flex-wrap gap-3">
         <Link href="/admin/cultos/create"
               class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl
@@ -217,21 +217,21 @@
           Novo Culto
         </Link>
         <Link href="/admin/escalas/create"
-              class="border border-gray-200 hover:bg-gray-50 text-gray-700
+              class="border border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200
                      px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors
                      flex items-center gap-2">
           <AppIcon name="calendar" size="xs" />
           Nova Escala
         </Link>
         <Link href="/admin/grupos/create"
-              class="border border-gray-200 hover:bg-gray-50 text-gray-700
+              class="border border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200
                      px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors
                      flex items-center gap-2">
           <AppIcon name="users" size="xs" />
           Novo Grupo
         </Link>
         <Link href="/admin/usuarios/create"
-              class="border border-gray-200 hover:bg-gray-50 text-gray-700
+              class="border border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200
                      px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors
                      flex items-center gap-2">
           <AppIcon name="user" size="xs" />
@@ -272,7 +272,6 @@ const greeting = computed(() => {
   return 'Boa noite'
 })
 
-// Sparkline helper (returns SVG polyline points string)
 function spark(values) {
   const w = 100, h = 28
   const max = Math.max(...values), min = Math.min(...values)
