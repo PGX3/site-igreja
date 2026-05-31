@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\EscalaMembroController;
 use App\Http\Controllers\Admin\UserController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/cultos/{culto}', [HomeController::class, 'showCulto'])->name('cultos.show');
 
 Route::post('/sugestao', [ContatoController::class, 'sugestao'])->name('sugestao.store');
 Route::post('/pedido-oracao', [ContatoController::class, 'pedidoOracao'])->name('pedido-oracao.store');

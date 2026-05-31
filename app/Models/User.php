@@ -11,7 +11,7 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name', 'email', 'password',
-        'role_id', 'grupo_id', 'telefone', 'disponibilidade',
+        'role_id', 'grupo_id', 'telefone', 'disponibilidade', 'callmebot_apikey',
     ];
 
     protected $hidden = ['password', 'remember_token'];

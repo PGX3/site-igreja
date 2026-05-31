@@ -40,12 +40,13 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name'     => 'required|string|max:100',
-            'email'    => 'required|email|unique:users',
-            'password' => 'required|string|min:6',
-            'role_id'  => 'required|exists:roles,id',
-            'grupo_id' => 'nullable|exists:grupos,id',
-            'telefone' => 'nullable|string|max:20',
+            'name'             => 'required|string|max:100',
+            'email'            => 'required|email|unique:users',
+            'password'         => 'required|string|min:6',
+            'role_id'          => 'required|exists:roles,id',
+            'grupo_id'         => 'nullable|exists:grupos,id',
+            'telefone'         => 'nullable|string|max:20',
+            'callmebot_apikey' => 'nullable|string|max:20',
         ]);
 
         $data['password'] = Hash::make($data['password']);
@@ -58,7 +59,7 @@ class UserController extends Controller
     public function edit(User $usuario)
     {
         return Inertia::render('Admin/Usuarios/Form', [
-            'usuario' => $usuario->only('id', 'name', 'email', 'role_id', 'grupo_id', 'telefone'),
+            'usuario' => $usuario->only('id', 'name', 'email', 'role_id', 'grupo_id', 'telefone', 'callmebot_apikey'),
             'roles'   => Role::all(['id', 'name', 'display_name']),
             'grupos'  => Grupo::orderBy('nome')->get(['id', 'nome']),
         ]);
@@ -67,12 +68,13 @@ class UserController extends Controller
     public function update(Request $request, User $usuario)
     {
         $data = $request->validate([
-            'name'     => 'required|string|max:100',
-            'email'    => 'required|email|unique:users,email,' . $usuario->id,
-            'password' => 'nullable|string|min:6',
-            'role_id'  => 'required|exists:roles,id',
-            'grupo_id' => 'nullable|exists:grupos,id',
-            'telefone' => 'nullable|string|max:20',
+            'name'             => 'required|string|max:100',
+            'email'            => 'required|email|unique:users,email,' . $usuario->id,
+            'password'         => 'nullable|string|min:6',
+            'role_id'          => 'required|exists:roles,id',
+            'grupo_id'         => 'nullable|exists:grupos,id',
+            'telefone'         => 'nullable|string|max:20',
+            'callmebot_apikey' => 'nullable|string|max:20',
         ]);
 
         if (!empty($data['password'])) {

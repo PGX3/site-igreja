@@ -7,7 +7,9 @@ use App\Models\Escala;
 use App\Models\EscalaMembro;
 use App\Models\Grupo;
 use App\Models\User;
+use App\Notifications\EscalaConvite;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class EscalaController extends Controller
@@ -64,6 +66,12 @@ class EscalaController extends Controller
             'membros'     => 'nullable|array',
             'membros.*.user_id' => 'exists:users,id',
             'membros.*.funcao'  => 'nullable|string|max:100',
+        ], [], [
+            'titulo'      => 'título',
+            'data'        => 'data',
+            'hora_inicio' => 'horário de início',
+            'hora_fim'    => 'horário de fim',
+            'grupo_id'    => 'grupo',
         ]);
 
         // Líder só pode criar para seu grupo
@@ -76,12 +84,27 @@ class EscalaController extends Controller
             'status'     => 'pendente',
         ]));
 
-        foreach ($request->membros ?? [] as $membro) {
+        $membrosRequest = $request->membros ?? [];
+
+        foreach ($membrosRequest as $membro) {
             EscalaMembro::create([
                 'escala_id' => $escala->id,
                 'user_id'   => $membro['user_id'],
                 'funcao'    => $membro['funcao'] ?? null,
             ]);
+        }
+
+        // Enviar notificações
+        $escala->load('grupo');
+        foreach ($membrosRequest as $membro) {
+            $notificado = User::find($membro['user_id']);
+            if ($notificado) {
+                try {
+                    $notificado->notify(new EscalaConvite($escala, $membro['funcao'] ?? null));
+                } catch (\Throwable $e) {
+                    Log::warning("Notificação falhou [user {$notificado->id}]: {$e->getMessage()}");
+                }
+            }
         }
 
         return redirect()->route('admin.escalas.show', $escala)
@@ -144,8 +167,8 @@ class EscalaController extends Controller
                 'titulo'      => $escala->titulo,
                 'descricao'   => $escala->descricao,
                 'data'        => $escala->data?->format('Y-m-d'),
-                'hora_inicio' => $escala->hora_inicio,
-                'hora_fim'    => $escala->hora_fim,
+                'hora_inicio' => $escala->hora_inicio ? substr($escala->hora_inicio, 0, 5) : '',
+                'hora_fim'    => $escala->hora_fim ? substr($escala->hora_fim, 0, 5) : '',
                 'status'      => $escala->status,
                 'grupo_id'    => $escala->grupo_id,
                 'membros'     => $escala->escalaMembros->map(fn($em) => [
@@ -174,6 +197,13 @@ class EscalaController extends Controller
             'membros'     => 'nullable|array',
             'membros.*.user_id' => 'exists:users,id',
             'membros.*.funcao'  => 'nullable|string|max:100',
+        ], [], [
+            'titulo'      => 'título',
+            'data'        => 'data',
+            'hora_inicio' => 'horário de início',
+            'hora_fim'    => 'horário de fim',
+            'grupo_id'    => 'grupo',
+            'status'      => 'status',
         ]);
 
         if ($user->isLider() && (int) $data['grupo_id'] !== (int) $user->grupo_id) {
@@ -181,6 +211,9 @@ class EscalaController extends Controller
         }
 
         $escala->update(array_merge($data, ['updated_by' => $user->id]));
+
+        // IDs existentes antes do sync (para detectar novos)
+        $existingIds = $escala->escalaMembros()->pluck('user_id')->map(fn($id) => (int) $id)->toArray();
 
         // Sync membros preservando status dos já confirmados
         $newIds = collect($request->membros ?? [])->pluck('user_id')->map(fn($id) => (int) $id)->toArray();
@@ -191,6 +224,24 @@ class EscalaController extends Controller
                 ['escala_id' => $escala->id, 'user_id' => $membro['user_id']],
                 ['funcao' => $membro['funcao'] ?? null]
             );
+        }
+
+        // Notificar apenas os membros recem-adicionados
+        $addedIds = array_diff($newIds, $existingIds);
+        if (count($addedIds)) {
+            $escala->load('grupo');
+            $membrosMap = collect($request->membros ?? [])->keyBy('user_id');
+            foreach ($addedIds as $userId) {
+                $notificado = User::find($userId);
+                if ($notificado) {
+                    try {
+                        $funcao = $membrosMap[$userId]['funcao'] ?? null;
+                        $notificado->notify(new EscalaConvite($escala, $funcao));
+                    } catch (\Throwable $e) {
+                        Log::warning("Notificação falhou [user {$userId}]: {$e->getMessage()}");
+                    }
+                }
+            }
         }
 
         return redirect()->route('admin.escalas.show', $escala)

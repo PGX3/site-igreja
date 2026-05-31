@@ -24,20 +24,25 @@
             <span class="absolute -bottom-0.5 left-0 w-0 h-px bg-[var(--blue)] group-hover:w-full transition-all duration-300"></span>
           </a>
         </li>
+        <li class="w-px h-4 bg-white/10"></li>
+        <li>
+          <Link v-if="authUser" href="/admin"
+                class="text-[10px] font-semibold tracking-[0.25em] uppercase text-white/40
+                       hover:text-[var(--blue)] transition-colors duration-300 relative group">
+            Painel
+            <span class="absolute -bottom-0.5 left-0 w-0 h-px bg-[var(--blue)] group-hover:w-full transition-all duration-300"></span>
+          </Link>
+          <Link v-else href="/login"
+                class="text-[10px] font-semibold tracking-[0.25em] uppercase text-white/40
+                       hover:text-[var(--blue)] transition-colors duration-300 relative group">
+            Entrar
+            <span class="absolute -bottom-0.5 left-0 w-0 h-px bg-[var(--blue)] group-hover:w-full transition-all duration-300"></span>
+          </Link>
+        </li>
       </ul>
 
-      <div class="hidden md:flex items-center gap-3">
+      <div class="hidden md:flex items-center">
         <a href="#sugestoes" class="btn-primary text-xs">Fale Conosco</a>
-        <Link v-if="authUser" href="/admin"
-              class="text-[10px] font-bold tracking-[0.2em] uppercase text-white/40
-                     hover:text-[var(--blue)] transition-colors duration-300">
-          Painel →
-        </Link>
-        <Link v-else href="/login"
-              class="text-[10px] font-bold tracking-[0.2em] uppercase text-white/40
-                     hover:text-[var(--blue)] transition-colors duration-300">
-          Entrar →
-        </Link>
       </div>
 
       <!-- Mobile menu btn -->

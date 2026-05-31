@@ -63,6 +63,25 @@
                       focus:outline-none focus:ring-2 focus:ring-blue-500" />
       </div>
 
+      <!-- CallMeBot API Key (WhatsApp) -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">
+          API Key WhatsApp (CallMeBot)
+        </label>
+        <input v-model="form.callmebot_apikey" type="text" placeholder="Ex: 123456"
+               class="w-full border border-gray-200 dark:border-slate-600 rounded-lg px-4 py-2.5 text-sm
+                      bg-white dark:bg-slate-700 text-gray-900 dark:text-white
+                      placeholder-gray-400 dark:placeholder-slate-400
+                      focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <p class="mt-1.5 text-xs text-gray-400 dark:text-slate-500 leading-relaxed">
+          Para ativar: adicione o número
+          <strong class="text-gray-600 dark:text-slate-300">+34 644 94 58 67</strong>
+          nos contatos e envie a mensagem
+          <strong class="text-gray-600 dark:text-slate-300">«I allow callmebot to send me messages»</strong>
+          via WhatsApp. O bot responderá com a API Key.
+        </p>
+      </div>
+
       <!-- Papel -->
       <div>
         <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Papel *</label>
@@ -119,12 +138,13 @@ const props = defineProps({
 const editando = computed(() => !!props.usuario)
 
 const form = useForm({
-  name:     props.usuario?.name     ?? '',
-  email:    props.usuario?.email    ?? '',
-  password: '',
-  telefone: props.usuario?.telefone ?? '',
-  role_id:  props.usuario?.role_id  ?? '',
-  grupo_id: props.usuario?.grupo_id ?? null,
+  name:             props.usuario?.name             ?? '',
+  email:            props.usuario?.email            ?? '',
+  password:         '',
+  telefone:         props.usuario?.telefone         ?? '',
+  role_id:          props.usuario?.role_id          ?? '',
+  grupo_id:         props.usuario?.grupo_id         ?? null,
+  callmebot_apikey: props.usuario?.callmebot_apikey ?? '',
 })
 
 function submit() {

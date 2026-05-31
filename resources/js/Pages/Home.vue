@@ -95,15 +95,16 @@
         </h2>
       </div>
       <div>
-        <div v-for="culto in cultos" :key="culto.id"
-             class="reveal flex items-center gap-8 md:gap-14 py-7 border-b border-[var(--blue)]/10
-                    transition-all duration-300 hover:pl-3 group cursor-default">
+        <Link v-for="culto in cultos" :key="culto.id"
+              :href="`/cultos/${culto.id}`"
+              class="reveal flex items-center gap-8 md:gap-14 py-7 border-b border-[var(--blue)]/10
+                     transition-all duration-300 hover:pl-3 group cursor-pointer">
           <span class="text-[10px] font-bold tracking-[0.25em] uppercase text-[var(--blue)] w-20 shrink-0"
                 style="font-family:'Barlow Condensed',sans-serif">{{ culto.dia_semana }}</span>
           <span class="text-lg font-bold flex-1 text-white/85 group-hover:text-white transition-colors">{{ culto.nome }}</span>
           <span class="text-[13px] text-white/30 tracking-wider hidden md:block font-mono">{{ culto.horario }}</span>
           <span class="text-[var(--blue)]/0 group-hover:text-[var(--blue)] transition-colors text-sm">→</span>
-        </div>
+        </Link>
         <div v-if="!cultos || cultos.length === 0" class="py-12 text-white/25 text-sm tracking-wide text-center">
           Agenda em breve.
         </div>
@@ -265,7 +266,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { router, usePage } from '@inertiajs/vue3'
+import { Link, router, usePage } from '@inertiajs/vue3'
 import MainLayout from '@/Layouts/MainLayout.vue'
 import LogoIcon from '@/Components/LogoIcon.vue'
 import HCaptcha from '@/Components/HCaptcha.vue'

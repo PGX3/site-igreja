@@ -135,14 +135,13 @@
         </div>
       </div>
 
-      <!-- Escala da Semana -->
-      <div class="xl:col-span-2">
+      <!-- Escala da Semana (pastor/líder) -->
+      <div v-if="role !== 'membro'" class="xl:col-span-2">
         <div class="flex items-center justify-between mb-3">
           <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500">
             Escala da Semana
           </p>
-          <Link v-if="role === 'pastor' || role === 'lider'"
-                href="/admin/escalas"
+          <Link href="/admin/escalas"
                 class="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 flex items-center gap-0.5">
             Ver tudo <AppIcon name="chevron-right" size="xs" />
           </Link>
@@ -153,53 +152,77 @@
             <Link v-for="e in escalasProximas" :key="e.id"
                   :href="`/admin/escalas/${e.id}`"
                   class="flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
-
-              <!-- Date block -->
               <div class="text-center min-w-[40px]">
-                <p class="text-[10px] font-bold uppercase text-gray-400 dark:text-slate-500 leading-none">
-                  {{ e.dia_semana }}
-                </p>
+                <p class="text-[10px] font-bold uppercase text-gray-400 dark:text-slate-500 leading-none">{{ e.dia_semana }}</p>
                 <p class="text-xl font-black text-gray-900 dark:text-white leading-none mt-0.5">{{ e.dia }}</p>
               </div>
-
-              <!-- Info -->
               <div class="flex-1 min-w-0">
                 <p class="text-[13px] font-semibold text-gray-900 dark:text-white truncate">{{ e.titulo }}</p>
                 <p class="text-[11px] text-gray-400 dark:text-slate-500 mt-0.5">{{ e.hora_inicio }}</p>
               </div>
-
-              <!-- Avatars + tag -->
               <div class="flex flex-col items-end gap-1.5">
                 <div class="flex -space-x-2">
                   <div v-for="m in e.membros.slice(0, 4)" :key="m.id"
                        class="w-6 h-6 rounded-full text-white text-[9px] font-bold
                               flex items-center justify-center ring-2 ring-white dark:ring-slate-800"
-                       :style="{ background: m.color }">
-                    {{ m.initials }}
-                  </div>
+                       :style="{ background: m.color }">{{ m.initials }}</div>
                   <div v-if="e.total_membros > 4"
                        class="w-6 h-6 rounded-full bg-gray-200 dark:bg-slate-600 text-gray-500 dark:text-slate-300 text-[9px]
                               font-bold flex items-center justify-center ring-2 ring-white dark:ring-slate-800">
                     +{{ e.total_membros - 4 }}
                   </div>
                 </div>
-                <span class="text-[10px] font-semibold text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-700
-                             px-2 py-0.5 rounded-full truncate max-w-[80px]">
+                <span class="text-[10px] font-semibold text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-700 px-2 py-0.5 rounded-full truncate max-w-[80px]">
                   {{ e.grupo?.nome }}
                 </span>
               </div>
             </Link>
           </div>
-
-          <!-- Empty state -->
           <div v-else class="py-12 text-center px-4">
             <p class="text-3xl mb-2">📅</p>
             <p class="text-sm font-medium text-gray-500 dark:text-slate-400">Nenhuma escala nos próximos dias.</p>
-            <Link v-if="role === 'pastor' || role === 'lider'"
-                  href="/admin/escalas/create"
+            <Link href="/admin/escalas/create"
                   class="mt-2 inline-block text-xs text-blue-600 dark:text-blue-400 hover:underline">
               Criar escala
             </Link>
+          </div>
+        </div>
+      </div>
+
+      <!-- Minhas Próximas Escalas (membro) -->
+      <div v-if="role === 'membro'" class="xl:col-span-2">
+        <div class="flex items-center justify-between mb-3">
+          <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500">
+            Minhas Próximas Escalas
+          </p>
+          <Link href="/admin/minhas-escalas"
+                class="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 flex items-center gap-0.5">
+            Ver tudo <AppIcon name="chevron-right" size="xs" />
+          </Link>
+        </div>
+
+        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700/50 shadow-sm overflow-hidden">
+          <div v-if="minhasProximas?.length" class="divide-y divide-gray-50 dark:divide-slate-700/50">
+            <Link v-for="e in minhasProximas" :key="e.id"
+                  :href="`/admin/minhas-escalas`"
+                  class="flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
+              <div class="text-center min-w-[40px]">
+                <p class="text-[10px] font-bold uppercase text-gray-400 dark:text-slate-500 leading-none">{{ e.dia_semana }}</p>
+                <p class="text-xl font-black text-gray-900 dark:text-white leading-none mt-0.5">{{ e.dia }}</p>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-[13px] font-semibold text-gray-900 dark:text-white truncate">{{ e.titulo }}</p>
+                <p class="text-[11px] text-gray-400 dark:text-slate-500 mt-0.5">{{ e.hora_inicio }} · {{ e.grupo?.nome }}</p>
+              </div>
+              <span :class="statusBadge(e.status)"
+                    class="text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0">
+                {{ statusLabel(e.status) }}
+              </span>
+            </Link>
+          </div>
+          <div v-else class="py-12 text-center px-4">
+            <p class="text-3xl mb-2">🎉</p>
+            <p class="text-sm font-medium text-gray-500 dark:text-slate-400">Nenhuma escala nos próximos dias.</p>
           </div>
         </div>
       </div>
@@ -258,7 +281,21 @@ const props = defineProps({
   totalPedidos:    Number,
   proximoCulto:    Object,
   escalasProximas: Array,
+  minhasProximas:  Array,
 })
+
+function statusLabel(s) {
+  return { pendente: 'Pendente', confirmado: 'Confirmado', recusado: 'Recusado', trocado: 'Trocado' }[s] ?? s
+}
+
+function statusBadge(s) {
+  return {
+    pendente:   'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400',
+    confirmado: 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400',
+    recusado:   'bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400',
+    trocado:    'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
+  }[s] ?? ''
+}
 
 const page      = usePage()
 const user      = computed(() => page.props.auth?.user)

@@ -52,35 +52,57 @@ class DashboardController extends Controller
             ];
         }
 
-        // ── Escalas próximas (próximas 2 semanas)
-        $escalasQuery = Escala::with(['grupo', 'membros:id,name'])
-            ->where('data', '>=', Carbon::today())
-            ->orderBy('data')
-            ->take(6);
+        // ── Escalas: pastor/líder veem todas do grupo; membro vê só as suas
+        if ($user->isMembro()) {
+            $escalasProximas = collect([]);
+            $minhasProximas  = $user->escalas()
+                ->where('data', '>=', Carbon::today())
+                ->orderBy('data')
+                ->take(5)
+                ->with('grupo')
+                ->get()
+                ->map(fn ($e) => [
+                    'id'          => $e->id,
+                    'titulo'      => $e->titulo,
+                    'data'        => $e->data->format('Y-m-d'),
+                    'dia'         => $e->data->day,
+                    'dia_semana'  => mb_strtoupper(mb_substr($e->data->translatedFormat('D'), 0, 3)),
+                    'hora_inicio' => substr($e->hora_inicio, 0, 5),
+                    'grupo'       => $e->grupo?->only('id', 'nome'),
+                    'status'      => $e->pivot->status,
+                ]);
+        } else {
+            $minhasProximas  = collect([]);
+            $escalasQuery    = Escala::with(['grupo', 'membros:id,name'])
+                ->where('data', '>=', Carbon::today())
+                ->orderBy('data')
+                ->take(6);
 
-        if ($user->isLider()) {
-            $escalasQuery->where('grupo_id', $user->grupo_id);
+            if ($user->isLider()) {
+                $escalasQuery->where('grupo_id', $user->grupo_id);
+            }
+
+            $escalasProximas = $escalasQuery->get()->map(fn ($e) => [
+                'id'          => $e->id,
+                'titulo'      => $e->titulo,
+                'data'        => $e->data->format('Y-m-d'),
+                'dia'         => $e->data->day,
+                'dia_semana'  => mb_strtoupper(mb_substr($e->data->translatedFormat('D'), 0, 3)),
+                'hora_inicio' => substr($e->hora_inicio, 0, 5),
+                'grupo'       => $e->grupo?->only('id', 'nome'),
+                'membros'     => $e->membros->take(5)->map(fn ($m) => [
+                    'id'       => $m->id,
+                    'initials' => self::initials($m->name),
+                    'color'    => self::avatarColor($m->name),
+                ])->values(),
+                'total_membros' => $e->membros->count(),
+            ]);
         }
 
-        $escalasProximas = $escalasQuery->get()->map(fn ($e) => [
-            'id'          => $e->id,
-            'titulo'      => $e->titulo,
-            'data'        => $e->data->format('Y-m-d'),
-            'dia'         => $e->data->day,
-            'dia_semana'  => mb_strtoupper(mb_substr($e->data->translatedFormat('D'), 0, 3)),
-            'hora_inicio' => substr($e->hora_inicio, 0, 5),
-            'grupo'       => $e->grupo?->only('id', 'nome'),
-            'membros'     => $e->membros->take(5)->map(fn ($m) => [
-                'id'       => $m->id,
-                'initials' => self::initials($m->name),
-                'color'    => self::avatarColor($m->name),
-            ])->values(),
-            'total_membros' => $e->membros->count(),
-        ]);
-
         return Inertia::render('Admin/Dashboard', array_merge($stats, [
-            'proximoCulto'   => $proximoCulto,
+            'proximoCulto'    => $proximoCulto,
             'escalasProximas' => $escalasProximas,
+            'minhasProximas'  => $minhasProximas,
         ]));
     }
 

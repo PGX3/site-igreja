@@ -55,25 +55,30 @@
       <div class="grid grid-cols-3 gap-4">
         <div>
           <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Data *</label>
-          <input v-model="form.data" type="date"
+          <input v-model="form.escala_data" type="date"
                  class="w-full border border-gray-200 dark:border-slate-600 rounded-lg px-4 py-2.5 text-sm
                         bg-white dark:bg-slate-700 text-gray-900 dark:text-white
                         focus:outline-none focus:ring-2 focus:ring-blue-500"
                  :class="{ 'border-red-400': form.errors.data }" />
+          <p v-if="form.errors.data" class="mt-1 text-xs text-red-500">{{ form.errors.data }}</p>
         </div>
         <div>
           <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Início *</label>
           <input v-model="form.hora_inicio" type="time"
                  class="w-full border border-gray-200 dark:border-slate-600 rounded-lg px-4 py-2.5 text-sm
                         bg-white dark:bg-slate-700 text-gray-900 dark:text-white
-                        focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        focus:outline-none focus:ring-2 focus:ring-blue-500"
+                 :class="{ 'border-red-400': form.errors.hora_inicio }" />
+          <p v-if="form.errors.hora_inicio" class="mt-1 text-xs text-red-500">{{ form.errors.hora_inicio }}</p>
         </div>
         <div>
           <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Fim *</label>
           <input v-model="form.hora_fim" type="time"
                  class="w-full border border-gray-200 dark:border-slate-600 rounded-lg px-4 py-2.5 text-sm
                         bg-white dark:bg-slate-700 text-gray-900 dark:text-white
-                        focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        focus:outline-none focus:ring-2 focus:ring-blue-500"
+                 :class="{ 'border-red-400': form.errors.hora_fim }" />
+          <p v-if="form.errors.hora_fim" class="mt-1 text-xs text-red-500">{{ form.errors.hora_fim }}</p>
         </div>
       </div>
 
@@ -143,7 +148,7 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import { Link, useForm } from '@inertiajs/vue3'
-import { computed, reactive } from 'vue'
+import { computed, reactive, onMounted } from 'vue'
 
 const props = defineProps({
   grupos: Array,
@@ -153,19 +158,26 @@ const props = defineProps({
 const editando = computed(() => !!props.escala)
 
 const form = useForm({
-  titulo:      props.escala?.titulo      ?? '',
-  descricao:   props.escala?.descricao   ?? '',
-  data:        props.escala?.data        ?? '',
-  hora_inicio: props.escala?.hora_inicio ?? '',
-  hora_fim:    props.escala?.hora_fim    ?? '',
-  status:      props.escala?.status      ?? 'pendente',
-  grupo_id:    props.escala?.grupo_id    ?? '',
-  membros:     props.escala?.membros     ?? [],
+  titulo:       props.escala?.titulo      ?? '',
+  descricao:    props.escala?.descricao   ?? '',
+  escala_data:  props.escala?.data        ?? '',
+  hora_inicio:  props.escala?.hora_inicio ?? '',
+  hora_fim:     props.escala?.hora_fim    ?? '',
+  status:       props.escala?.status      ?? 'pendente',
+  grupo_id:     props.escala?.grupo_id    ?? '',
+  membros:      props.escala?.membros     ?? [],
 })
 
 const membrosLocal = reactive(
   (props.escala?.membros ?? []).map(m => ({ user_id: m.user_id, funcao: m.funcao ?? '' }))
 )
+
+// Auto-seleciona o grupo quando há apenas uma opção (ex: líder com um único grupo)
+onMounted(() => {
+  if (!editando.value && !form.grupo_id && props.grupos?.length === 1) {
+    form.grupo_id = props.grupos[0].id
+  }
+})
 
 const membrosDoGrupo = computed(() => {
   const g = props.grupos?.find(g => g.id === Number(form.grupo_id))
@@ -191,6 +203,16 @@ function toggleMembro(userId) {
 
 function submit() {
   form.membros = membrosLocal.map(m => ({ user_id: m.user_id, funcao: m.funcao || null }))
+  form.transform(d => ({
+    titulo:      d.titulo,
+    descricao:   d.descricao,
+    data:        d.escala_data,
+    hora_inicio: d.hora_inicio,
+    hora_fim:    d.hora_fim,
+    status:      d.status,
+    grupo_id:    d.grupo_id,
+    membros:     d.membros,
+  }))
   if (editando.value) {
     form.put(`/admin/escalas/${props.escala.id}`)
   } else {

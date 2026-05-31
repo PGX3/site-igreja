@@ -142,7 +142,7 @@ const totalBadges = computed(() =>
 
 const navItems = computed(() => {
   const items = []
-  items.push({ href: '/admin',              label: 'Dashboard',         icon: 'dashboard' })
+  items.push({ href: '/admin',              label: 'Painel',            icon: 'dashboard' })
   items.push({ href: '/admin/minhas-escalas', label: 'Minhas Escalas',  icon: 'clock' })
 
   if (role.value === 'pastor' || role.value === 'lider') {
