@@ -11,7 +11,7 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name', 'email', 'password',
-        'role_id', 'grupo_id', 'telefone', 'disponibilidade', 'callmebot_apikey',
+        'role_id', 'telefone', 'disponibilidade', 'callmebot_apikey', 'is_superadmin',
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -23,9 +23,14 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
-    public function grupo()
+    public function grupos()
     {
-        return $this->belongsTo(Grupo::class);
+        return $this->belongsToMany(Grupo::class);
+    }
+
+    public function grupoIds(): array
+    {
+        return $this->grupos()->pluck('grupos.id')->map(fn($id) => (int) $id)->toArray();
     }
 
     public function escalas()
@@ -55,8 +60,8 @@ class User extends Authenticatable
         return $this->role->name === 'membro';
     }
 
-    public function canManageGrupo($grupoId)
+    public function canManageGrupo(int $grupoId): bool
     {
-        return $this->isPastor() || ($this->isLider() && $this->grupo_id === $grupoId);
+        return $this->isPastor() || ($this->isLider() && in_array($grupoId, $this->grupoIds()));
     }
 };

@@ -23,7 +23,7 @@ class EscalaController extends Controller
             ->latest('data');
 
         if ($user->isLider()) {
-            $query->where('grupo_id', $user->grupo_id);
+            $query->whereIn('grupo_id', $user->grupoIds());
         }
 
         $escalas = $query->get()->map(fn($e) => [
@@ -46,8 +46,8 @@ class EscalaController extends Controller
     {
         $user   = auth()->user();
         $grupos = $user->isPastor()
-            ? Grupo::with(['membros:id,name,grupo_id'])->get(['id', 'nome'])
-            : Grupo::with(['membros:id,name,grupo_id'])->where('id', $user->grupo_id)->get(['id', 'nome']);
+            ? Grupo::with(['membros' => fn($q) => $q->select('users.id', 'users.name')])->get(['id', 'nome'])
+            : Grupo::with(['membros' => fn($q) => $q->select('users.id', 'users.name')])->whereIn('id', $user->grupoIds())->get(['id', 'nome']);
 
         return Inertia::render('Admin/Escalas/Form', compact('grupos'));
     }
@@ -74,8 +74,7 @@ class EscalaController extends Controller
             'grupo_id'    => 'grupo',
         ]);
 
-        // Líder só pode criar para seu grupo
-        if ($user->isLider() && (int) $data['grupo_id'] !== (int) $user->grupo_id) {
+        if ($user->isLider() && !in_array((int) $data['grupo_id'], $user->grupoIds())) {
             abort(403);
         }
 
@@ -114,7 +113,7 @@ class EscalaController extends Controller
     public function show(Escala $escala)
     {
         $user = auth()->user();
-        if ($user->isLider() && $escala->grupo_id !== $user->grupo_id) {
+        if ($user->isLider() && !in_array($escala->grupo_id, $user->grupoIds())) {
             abort(403);
         }
 
@@ -150,13 +149,13 @@ class EscalaController extends Controller
     public function edit(Escala $escala)
     {
         $user = auth()->user();
-        if ($user->isLider() && $escala->grupo_id !== $user->grupo_id) {
+        if ($user->isLider() && !in_array($escala->grupo_id, $user->grupoIds())) {
             abort(403);
         }
 
         $grupos = $user->isPastor()
-            ? Grupo::with(['membros:id,name,grupo_id'])->get(['id', 'nome'])
-            : Grupo::with(['membros:id,name,grupo_id'])->where('id', $user->grupo_id)->get(['id', 'nome']);
+            ? Grupo::with(['membros' => fn($q) => $q->select('users.id', 'users.name')])->get(['id', 'nome'])
+            : Grupo::with(['membros' => fn($q) => $q->select('users.id', 'users.name')])->whereIn('id', $user->grupoIds())->get(['id', 'nome']);
 
         $escala->load('escalaMembros');
 
@@ -206,7 +205,7 @@ class EscalaController extends Controller
             'status'      => 'status',
         ]);
 
-        if ($user->isLider() && (int) $data['grupo_id'] !== (int) $user->grupo_id) {
+        if ($user->isLider() && !in_array((int) $data['grupo_id'], $user->grupoIds())) {
             abort(403);
         }
 
@@ -251,7 +250,7 @@ class EscalaController extends Controller
     public function destroy(Escala $escala)
     {
         $user = auth()->user();
-        if ($user->isLider() && $escala->grupo_id !== $user->grupo_id) {
+        if ($user->isLider() && !in_array($escala->grupo_id, $user->grupoIds())) {
             abort(403);
         }
 

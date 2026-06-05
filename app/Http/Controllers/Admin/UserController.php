@@ -14,15 +14,16 @@ class UserController extends Controller
 {
     public function index()
     {
-        $usuarios = User::with(['role', 'grupo'])
+        $usuarios = User::with(['role', 'grupos'])
+            ->where('is_superadmin', false)
             ->orderBy('name')
             ->get()
             ->map(fn($u) => [
-                'id'     => $u->id,
-                'name'   => $u->name,
-                'email'  => $u->email,
-                'role'   => $u->role?->only('name', 'display_name'),
-                'grupo'  => $u->grupo?->only('id', 'nome'),
+                'id'       => $u->id,
+                'name'     => $u->name,
+                'email'    => $u->email,
+                'role'     => $u->role?->only('name', 'display_name'),
+                'grupos'   => $u->grupos->map->only('id', 'nome')->values(),
                 'telefone' => $u->telefone,
             ]);
 
@@ -44,13 +45,18 @@ class UserController extends Controller
             'email'            => 'required|email|unique:users',
             'password'         => 'required|string|min:6',
             'role_id'          => 'required|exists:roles,id',
-            'grupo_id'         => 'nullable|exists:grupos,id',
+            'grupo_ids'        => 'nullable|array',
+            'grupo_ids.*'      => 'exists:grupos,id',
             'telefone'         => 'nullable|string|max:20',
             'callmebot_apikey' => 'nullable|string|max:20',
         ]);
 
+        $grupoIds = $data['grupo_ids'] ?? [];
+        unset($data['grupo_ids']);
         $data['password'] = Hash::make($data['password']);
-        User::create($data);
+
+        $user = User::create($data);
+        $user->grupos()->sync($grupoIds);
 
         return redirect()->route('admin.usuarios.index')
             ->with('success', 'Usuário criado!');
@@ -58,10 +64,15 @@ class UserController extends Controller
 
     public function edit(User $usuario)
     {
+        if ($usuario->is_superadmin) abort(403);
+
         return Inertia::render('Admin/Usuarios/Form', [
-            'usuario' => $usuario->only('id', 'name', 'email', 'role_id', 'grupo_id', 'telefone', 'callmebot_apikey'),
-            'roles'   => Role::all(['id', 'name', 'display_name']),
-            'grupos'  => Grupo::orderBy('nome')->get(['id', 'nome']),
+            'usuario' => array_merge(
+                $usuario->only('id', 'name', 'email', 'role_id', 'telefone', 'callmebot_apikey'),
+                ['grupo_ids' => $usuario->grupos()->pluck('grupos.id')->map(fn($id) => (int) $id)->toArray()]
+            ),
+            'roles'  => Role::all(['id', 'name', 'display_name']),
+            'grupos' => Grupo::orderBy('nome')->get(['id', 'nome']),
         ]);
     }
 
@@ -72,10 +83,14 @@ class UserController extends Controller
             'email'            => 'required|email|unique:users,email,' . $usuario->id,
             'password'         => 'nullable|string|min:6',
             'role_id'          => 'required|exists:roles,id',
-            'grupo_id'         => 'nullable|exists:grupos,id',
+            'grupo_ids'        => 'nullable|array',
+            'grupo_ids.*'      => 'exists:grupos,id',
             'telefone'         => 'nullable|string|max:20',
             'callmebot_apikey' => 'nullable|string|max:20',
         ]);
+
+        $grupoIds = $data['grupo_ids'] ?? [];
+        unset($data['grupo_ids']);
 
         if (!empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
@@ -84,6 +99,7 @@ class UserController extends Controller
         }
 
         $usuario->update($data);
+        $usuario->grupos()->sync($grupoIds);
 
         return redirect()->route('admin.usuarios.index')
             ->with('success', 'Usuário atualizado!');
@@ -91,6 +107,8 @@ class UserController extends Controller
 
     public function destroy(User $usuario)
     {
+        if ($usuario->is_superadmin) abort(403);
+
         if ($usuario->id === auth()->id()) {
             return back()->with('error', 'Você não pode excluir seu próprio usuário.');
         }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Grupo;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -17,10 +18,10 @@ class GrupoController extends Controller
             ->latest()
             ->get()
             ->map(fn($g) => [
-                'id'           => $g->id,
-                'nome'         => $g->nome,
-                'descricao'    => $g->descricao,
-                'lider'        => $g->lider?->only('id', 'name'),
+                'id'            => $g->id,
+                'nome'          => $g->nome,
+                'descricao'     => $g->descricao,
+                'lider'         => $g->lider?->only('id', 'name'),
                 'total_membros' => $g->membros->count(),
                 'total_escalas' => $g->escalas_count,
             ]);
@@ -48,10 +49,8 @@ class GrupoController extends Controller
         if ($grupo->lider_id) {
             $lider = User::find($grupo->lider_id);
             if ($lider && !$lider->isPastor()) {
-                $lider->update([
-                    'grupo_id' => $grupo->id,
-                    'role_id'  => \App\Models\Role::where('name', 'lider')->value('id'),
-                ]);
+                $lider->update(['role_id' => Role::where('name', 'lider')->value('id')]);
+                $grupo->membros()->syncWithoutDetaching([$lider->id]);
             }
         }
 
@@ -79,25 +78,21 @@ class GrupoController extends Controller
         $oldLiderId = $grupo->lider_id;
         $grupo->update($data);
 
-        $liderRoleId  = \App\Models\Role::where('name', 'lider')->value('id');
-        $membroRoleId = \App\Models\Role::where('name', 'membro')->value('id');
+        $liderRoleId  = Role::where('name', 'lider')->value('id');
+        $membroRoleId = Role::where('name', 'membro')->value('id');
 
-        // Rebaixa o líder anterior se mudou (nunca rebaixa pastor)
         if ($oldLiderId && $oldLiderId !== $grupo->lider_id) {
             $oldLider = User::find($oldLiderId);
             if ($oldLider && !$oldLider->isPastor()) {
-                $oldLider->update(['role_id' => $membroRoleId, 'grupo_id' => null]);
+                $oldLider->update(['role_id' => $membroRoleId]);
             }
         }
 
-        // Promove o novo líder (nunca altera pastor)
         if ($grupo->lider_id) {
             $novoLider = User::find($grupo->lider_id);
             if ($novoLider && !$novoLider->isPastor()) {
-                $novoLider->update([
-                    'grupo_id' => $grupo->id,
-                    'role_id'  => $liderRoleId,
-                ]);
+                $novoLider->update(['role_id' => $liderRoleId]);
+                $grupo->membros()->syncWithoutDetaching([$novoLider->id]);
             }
         }
 

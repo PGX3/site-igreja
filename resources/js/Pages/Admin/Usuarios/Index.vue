@@ -50,7 +50,13 @@
               </span>
             </td>
             <td class="px-6 py-4">
-              <span v-if="u.grupo" class="text-gray-700 dark:text-slate-300 text-sm">{{ u.grupo.nome }}</span>
+              <div v-if="u.grupos?.length" class="flex flex-wrap gap-1">
+                <span v-for="g in u.grupos" :key="g.id"
+                      class="text-[10px] font-semibold px-2 py-0.5 rounded-full
+                             bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
+                  {{ g.nome }}
+                </span>
+              </div>
               <span v-else class="text-gray-300 dark:text-slate-600 italic text-xs">—</span>
             </td>
             <td class="px-6 py-4 text-sm text-gray-500 dark:text-slate-400">

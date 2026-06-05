@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Culto;
 use App\Models\Escala;
-use App\Models\Texto;
 use App\Models\Sugestao;
 use App\Models\PedidoOracao;
 use Carbon\Carbon;
@@ -20,7 +19,6 @@ class DashboardController extends Controller
         // ── Stats
         $stats = [
             'totalCultos'    => Culto::count(),
-            'totalTextos'    => Texto::count(),
             'novasSugestoes' => Sugestao::where('lida', false)->count(),
             'novosPedidos'   => PedidoOracao::where('lido', false)->count(),
             'totalSugestoes' => Sugestao::count(),
@@ -79,7 +77,7 @@ class DashboardController extends Controller
                 ->take(6);
 
             if ($user->isLider()) {
-                $escalasQuery->where('grupo_id', $user->grupo_id);
+                $escalasQuery->whereIn('grupo_id', $user->grupoIds());
             }
 
             $escalasProximas = $escalasQuery->get()->map(fn ($e) => [

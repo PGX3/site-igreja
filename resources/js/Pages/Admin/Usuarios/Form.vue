@@ -63,25 +63,6 @@
                       focus:outline-none focus:ring-2 focus:ring-blue-500" />
       </div>
 
-      <!-- CallMeBot API Key (WhatsApp) -->
-      <div>
-        <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">
-          API Key WhatsApp (CallMeBot)
-        </label>
-        <input v-model="form.callmebot_apikey" type="text" placeholder="Ex: 123456"
-               class="w-full border border-gray-200 dark:border-slate-600 rounded-lg px-4 py-2.5 text-sm
-                      bg-white dark:bg-slate-700 text-gray-900 dark:text-white
-                      placeholder-gray-400 dark:placeholder-slate-400
-                      focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        <p class="mt-1.5 text-xs text-gray-400 dark:text-slate-500 leading-relaxed">
-          Para ativar: adicione o número
-          <strong class="text-gray-600 dark:text-slate-300">+34 644 94 58 67</strong>
-          nos contatos e envie a mensagem
-          <strong class="text-gray-600 dark:text-slate-300">«I allow callmebot to send me messages»</strong>
-          via WhatsApp. O bot responderá com a API Key.
-        </p>
-      </div>
-
       <!-- Papel -->
       <div>
         <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Papel *</label>
@@ -96,16 +77,24 @@
         <p v-if="form.errors.role_id" class="mt-1 text-xs text-red-500">{{ form.errors.role_id }}</p>
       </div>
 
-      <!-- Grupo -->
+      <!-- Grupos (múltiplos) -->
       <div>
-        <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Grupo</label>
-        <select v-model="form.grupo_id"
-                class="w-full border border-gray-200 dark:border-slate-600 rounded-lg px-4 py-2.5 text-sm
-                       bg-white dark:bg-slate-700 text-gray-900 dark:text-white
-                       focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <option :value="null">Sem grupo</option>
-          <option v-for="g in grupos" :key="g.id" :value="g.id">{{ g.nome }}</option>
-        </select>
+        <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Grupos</label>
+        <div class="border border-gray-200 dark:border-slate-600 rounded-lg overflow-hidden">
+          <label v-for="g in grupos" :key="g.id"
+                 class="flex items-center gap-3 px-4 py-2.5 cursor-pointer
+                        hover:bg-gray-50 dark:hover:bg-slate-700/50 transition
+                        border-b border-gray-100 dark:border-slate-700 last:border-b-0">
+            <input type="checkbox" :value="g.id" v-model="form.grupo_ids"
+                   class="w-4 h-4 rounded border-gray-300 dark:border-slate-500
+                          text-blue-600 focus:ring-blue-500 cursor-pointer" />
+            <span class="text-sm text-gray-800 dark:text-slate-200">{{ g.nome }}</span>
+          </label>
+          <div v-if="!grupos?.length"
+               class="px-4 py-3 text-sm text-gray-400 dark:text-slate-500 italic">
+            Nenhum grupo cadastrado.
+          </div>
+        </div>
       </div>
 
       <!-- AÇÕES -->
@@ -143,8 +132,7 @@ const form = useForm({
   password:         '',
   telefone:         props.usuario?.telefone         ?? '',
   role_id:          props.usuario?.role_id          ?? '',
-  grupo_id:         props.usuario?.grupo_id         ?? null,
-  callmebot_apikey: props.usuario?.callmebot_apikey ?? '',
+  grupo_ids: props.usuario?.grupo_ids ?? [],
 })
 
 function submit() {

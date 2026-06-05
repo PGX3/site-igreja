@@ -274,7 +274,6 @@ import { computed } from 'vue'
 
 const props = defineProps({
   totalCultos:     Number,
-  totalTextos:     Number,
   novasSugestoes:  Number,
   novosPedidos:    Number,
   totalSugestoes:  Number,
@@ -330,16 +329,6 @@ const statCards = computed(() => [
     iconBg:    '#eff6ff',
     iconColor: '#3b82f6',
     spark:     spark([5, 6, 5, 7, 8, 9, props.totalCultos ?? 0]),
-  },
-  {
-    label:     'Textos Editáveis',
-    value:     props.totalTextos   ?? 0,
-    trend:     0,
-    sub:       'publicados',
-    icon:      'file-text',
-    iconBg:    '#f0fdf4',
-    iconColor: '#22c55e',
-    spark:     spark([10, 14, 16, 18, 20, 24, props.totalTextos ?? 0]),
   },
   {
     label:     'Sugestões',

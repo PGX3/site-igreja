@@ -20,7 +20,7 @@ class Grupo extends Model
     
     public function membros()
     {
-        return $this->hasMany(User::class);
+        return $this->belongsToMany(User::class);
     }
     
     public function escalas()
