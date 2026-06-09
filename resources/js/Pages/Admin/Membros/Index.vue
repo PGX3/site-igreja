@@ -39,8 +39,10 @@
         <thead class="border-b border-gray-100 dark:border-slate-700">
           <tr>
             <th class="text-left px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500">Nome</th>
+            <th class="text-left px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500">Grupos</th>
             <th class="text-left px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500">Telefone</th>
             <th class="text-left px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500">Cidade</th>
+            <th class="text-center px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500">Batizado</th>
             <th class="px-6 py-4"></th>
           </tr>
         </thead>
@@ -51,8 +53,24 @@
               <p class="font-semibold text-gray-900 dark:text-white">{{ m.name }}</p>
               <p v-if="m.email" class="text-xs text-gray-400 dark:text-slate-500">{{ m.email }}</p>
             </td>
+            <td class="px-6 py-4">
+              <div v-if="m.grupos?.length" class="flex flex-wrap gap-1">
+                <span v-for="g in m.grupos" :key="g.id"
+                      class="text-[10px] font-semibold px-2 py-0.5 rounded-full
+                             bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
+                  {{ g.nome }}
+                </span>
+              </div>
+              <span v-else class="text-xs text-gray-300 dark:text-slate-600 italic">—</span>
+            </td>
             <td class="px-6 py-4 text-sm text-gray-500 dark:text-slate-400">{{ m.telefone || '—' }}</td>
             <td class="px-6 py-4 text-sm text-gray-500 dark:text-slate-400">{{ m.cidade || '—' }}</td>
+            <td class="px-6 py-4 text-center">
+              <span v-if="m.batizado_aguas"
+                    class="inline-block w-2 h-2 rounded-full bg-emerald-500"
+                    title="Batizado nas águas" />
+              <span v-else class="text-xs text-gray-300 dark:text-slate-600">—</span>
+            </td>
             <td class="px-6 py-4 text-right">
               <div class="flex justify-end gap-2">
                 <Link :href="`/admin/membros/${m.id}/edit`"

@@ -2,67 +2,188 @@
   <AdminLayout>
 
     <!-- ── HEADER ── -->
-    <div class="mb-8">
-      <p class="text-[11px] font-bold tracking-[0.3em] uppercase text-gray-400 dark:text-slate-500 mb-1">Visão Geral</p>
-      <div class="flex items-center gap-3">
+    <div class="mb-8 flex items-start justify-between gap-4">
+      <div>
+        <p class="text-[11px] font-bold tracking-[0.3em] uppercase text-gray-400 dark:text-slate-500 mb-1">Visão Geral</p>
         <h1 class="text-3xl font-black text-gray-900 dark:text-white">{{ greeting }}, {{ firstName }}</h1>
+        <div class="flex items-center gap-2 mt-1.5">
+          <span class="text-sm text-gray-500 dark:text-slate-400">Igreja em Charqueadas</span>
+          <span class="text-gray-300 dark:text-slate-600">·</span>
+          <span class="text-xs font-semibold text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 px-2.5 py-1 rounded-full">
+            Painel de Controle
+          </span>
+        </div>
       </div>
-      <div class="flex items-center gap-2 mt-1.5">
-        <span class="text-sm text-gray-500 dark:text-slate-400">Igreja em Charqueadas</span>
-        <span class="text-gray-300 dark:text-slate-600">·</span>
-        <span class="text-xs font-semibold text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 px-2.5 py-1 rounded-full">
-          Painel de Controle
-        </span>
+
+      <!-- Ações Rápidas (pastor) — movidas para o topo -->
+      <div v-if="role === 'pastor'" class="flex flex-wrap gap-2 flex-shrink-0">
+        <Link href="/admin/membros/create"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl
+                     text-sm font-semibold shadow-sm transition-colors flex items-center gap-1.5">
+          <AppIcon name="user" size="xs" />
+          + Membro
+        </Link>
+        <Link href="/admin/cultos/create"
+              class="border border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700
+                     text-gray-700 dark:text-slate-200 px-4 py-2 rounded-xl text-sm font-semibold
+                     transition-colors flex items-center gap-1.5">
+          <AppIcon name="mic" size="xs" />
+          + Culto
+        </Link>
+        <Link href="/admin/escalas/create"
+              class="border border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700
+                     text-gray-700 dark:text-slate-200 px-4 py-2 rounded-xl text-sm font-semibold
+                     transition-colors flex items-center gap-1.5">
+          <AppIcon name="calendar" size="xs" />
+          + Escala
+        </Link>
+      </div>
+      <div v-else-if="role === 'lider'" class="flex-shrink-0">
+        <Link href="/admin/escalas/create"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl
+                     text-sm font-semibold shadow-sm transition-colors flex items-center gap-1.5">
+          <AppIcon name="calendar" size="xs" />
+          + Escala
+        </Link>
       </div>
     </div>
 
-    <!-- ── STAT CARDS ── -->
-    <div class="grid grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
-      <component
-        :is="card.href ? Link : 'div'"
-        v-for="card in statCards"
-        :key="card.label"
-        :href="card.href ?? undefined"
-        class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700/50 p-5 shadow-sm
-               hover:shadow-md transition-shadow overflow-hidden relative block"
-        :class="card.href ? 'cursor-pointer' : ''">
-
-        <!-- top row -->
-        <div class="flex items-start justify-between mb-4">
-          <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500">{{ card.label }}</p>
-          <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-               :style="{ background: card.iconBg }">
-            <AppIcon :name="card.icon" size="sm" :style="{ color: card.iconColor }" />
-          </div>
+    <!-- ── STATS PESSOAS (pastor/líder) ── -->
+    <div v-if="role !== 'membro'" class="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-5">
+      <Link href="/admin/membros"
+            class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700/50 p-5
+                   shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 cursor-pointer">
+        <div class="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+          <AppIcon name="users" size="sm" class="text-blue-600 dark:text-blue-400" />
         </div>
-
-        <!-- value -->
-        <p class="text-4xl font-black text-gray-900 dark:text-white mb-1 leading-none">{{ card.value }}</p>
-
-        <!-- sub -->
-        <div class="flex items-center gap-1.5 mb-4">
-          <span v-if="card.trend > 0"
-                class="flex items-center gap-0.5 text-[11px] font-bold text-emerald-600
-                       bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded-full">
-            <AppIcon name="trending-up" size="xs" />
-            +{{ card.trend }}
+        <div>
+          <p class="text-2xl font-black text-gray-900 dark:text-white leading-none">{{ totalMembros }}</p>
+          <p class="text-xs text-gray-400 dark:text-slate-500 mt-0.5">Membros</p>
+        </div>
+        <div v-if="novosMembrosMes > 0" class="ml-auto">
+          <span class="text-[11px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full">
+            +{{ novosMembrosMes }} este mês
           </span>
-          <span class="text-xs text-gray-400 dark:text-slate-500">{{ card.sub }}</span>
         </div>
+      </Link>
 
-        <!-- sparkline -->
-        <svg class="w-full h-8" viewBox="0 0 100 30" preserveAspectRatio="none">
-          <polyline
-            :points="card.spark"
-            fill="none"
-            :stroke="card.iconColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            opacity="0.6"
-          />
-        </svg>
-      </component>
+      <Link href="/admin/visitantes"
+            class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700/50 p-5
+                   shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 cursor-pointer">
+        <div class="w-11 h-11 rounded-xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center flex-shrink-0">
+          <AppIcon name="user" size="sm" class="text-amber-500 dark:text-amber-400" />
+        </div>
+        <div>
+          <p class="text-2xl font-black text-gray-900 dark:text-white leading-none">{{ totalVisitantes }}</p>
+          <p class="text-xs text-gray-400 dark:text-slate-500 mt-0.5">Visitantes</p>
+        </div>
+        <div v-if="novosVisitantesMes > 0" class="ml-auto">
+          <span class="text-[11px] font-bold text-amber-600 bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 rounded-full">
+            +{{ novosVisitantesMes }} este mês
+          </span>
+        </div>
+      </Link>
+
+      <Link href="/admin/aniversarios"
+            class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700/50 p-5
+                   shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 cursor-pointer">
+        <div class="w-11 h-11 rounded-xl bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center flex-shrink-0">
+          <AppIcon name="gift" size="sm" class="text-purple-500 dark:text-purple-400" />
+        </div>
+        <div>
+          <p class="text-2xl font-black text-gray-900 dark:text-white leading-none">{{ anivCount }}</p>
+          <p class="text-xs text-gray-400 dark:text-slate-500 mt-0.5">Aniversários</p>
+        </div>
+        <div v-if="anivCount > 0" class="ml-auto">
+          <span class="text-[11px] font-bold text-purple-600 bg-purple-50 dark:bg-purple-900/20 px-2 py-0.5 rounded-full">
+            30 dias
+          </span>
+        </div>
+      </Link>
+
+      <Link v-if="role === 'pastor'" href="/admin/cultos"
+            class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700/50 p-5
+                   shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 cursor-pointer">
+        <div class="w-11 h-11 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center flex-shrink-0">
+          <AppIcon name="mic" size="sm" class="text-indigo-500 dark:text-indigo-400" />
+        </div>
+        <div>
+          <p class="text-2xl font-black text-gray-900 dark:text-white leading-none">{{ totalCultos ?? 0 }}</p>
+          <p class="text-xs text-gray-400 dark:text-slate-500 mt-0.5">Cultos</p>
+        </div>
+      </Link>
+
+      <!-- Para líder: 4° card é Escalas -->
+      <Link v-if="role === 'lider'" href="/admin/escalas"
+            class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700/50 p-5
+                   shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 cursor-pointer">
+        <div class="w-11 h-11 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center flex-shrink-0">
+          <AppIcon name="calendar" size="sm" class="text-indigo-500 dark:text-indigo-400" />
+        </div>
+        <div>
+          <p class="text-2xl font-black text-gray-900 dark:text-white leading-none">{{ escalasProximas?.length ?? 0 }}</p>
+          <p class="text-xs text-gray-400 dark:text-slate-500 mt-0.5">Escalas próximas</p>
+        </div>
+      </Link>
+    </div>
+
+    <!-- ── STAT CARDS PASTOR: Sugestões + Pedidos ── -->
+    <div v-if="role === 'pastor'" class="grid grid-cols-2 gap-4 mb-8">
+      <Link href="/admin/sugestoes"
+            class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700/50 p-5
+                   shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 cursor-pointer"
+            :class="novasSugestoes > 0 ? 'border-yellow-200 dark:border-yellow-800/50' : ''">
+        <div class="w-11 h-11 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 flex items-center justify-center flex-shrink-0">
+          <AppIcon name="lightbulb" size="sm" class="text-yellow-500 dark:text-yellow-400" />
+        </div>
+        <div class="flex-1">
+          <p class="text-2xl font-black text-gray-900 dark:text-white leading-none">{{ novasSugestoes ?? 0 }}</p>
+          <p class="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
+            {{ (novasSugestoes ?? 0) > 0 ? 'Sugestões aguardando' : 'Sugestões — tudo em dia' }}
+          </p>
+        </div>
+        <span v-if="novasSugestoes > 0"
+              class="flex-shrink-0 text-[11px] font-bold text-yellow-700 bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-400 px-2.5 py-1 rounded-full">
+          Ver
+        </span>
+      </Link>
+
+      <Link href="/admin/pedidos-oracao"
+            class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700/50 p-5
+                   shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 cursor-pointer"
+            :class="novosPedidos > 0 ? 'border-pink-200 dark:border-pink-800/50' : ''">
+        <div class="w-11 h-11 rounded-xl bg-pink-50 dark:bg-pink-900/20 flex items-center justify-center flex-shrink-0">
+          <AppIcon name="heart" size="sm" class="text-pink-500 dark:text-pink-400" />
+        </div>
+        <div class="flex-1">
+          <p class="text-2xl font-black text-gray-900 dark:text-white leading-none">{{ novosPedidos ?? 0 }}</p>
+          <p class="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
+            {{ (novosPedidos ?? 0) > 0 ? 'Pedidos de oração' : 'Pedidos de oração — em dia' }}
+          </p>
+        </div>
+        <span v-if="novosPedidos > 0"
+              class="flex-shrink-0 text-[11px] font-bold text-pink-700 bg-pink-100 dark:bg-pink-900/30 dark:text-pink-400 px-2.5 py-1 rounded-full">
+          Ver
+        </span>
+      </Link>
+    </div>
+
+    <!-- ── STAT CARDS MEMBRO ── -->
+    <div v-if="role === 'membro'" class="grid grid-cols-2 gap-4 mb-8">
+      <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700/50 p-5 shadow-sm">
+        <div class="w-11 h-11 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center mb-3">
+          <AppIcon name="calendar" size="sm" class="text-indigo-500 dark:text-indigo-400" />
+        </div>
+        <p class="text-2xl font-black text-gray-900 dark:text-white leading-none">{{ minhasProximas?.length ?? 0 }}</p>
+        <p class="text-xs text-gray-400 dark:text-slate-500 mt-0.5">Escalas próximas</p>
+      </div>
+      <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700/50 p-5 shadow-sm">
+        <div class="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center mb-3">
+          <AppIcon name="mic" size="sm" class="text-blue-500 dark:text-blue-400" />
+        </div>
+        <p class="text-2xl font-black text-gray-900 dark:text-white leading-none">{{ totalCultos ?? 0 }}</p>
+        <p class="text-xs text-gray-400 dark:text-slate-500 mt-0.5">Cultos cadastrados</p>
+      </div>
     </div>
 
     <!-- ── BOTTOM ROW ── -->
@@ -103,7 +224,7 @@
                 </div>
 
                 <div class="mt-4 flex items-center gap-3 flex-wrap">
-                  <Link href="/admin/cultos"
+                  <Link v-if="role === 'pastor'" href="/admin/cultos"
                         class="text-xs font-semibold text-white/70 hover:text-white
                                border border-white/20 hover:border-white/40 rounded-lg px-3 py-1.5
                                transition-colors">
@@ -134,7 +255,7 @@
              class="rounded-2xl bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700/50 shadow-sm p-10 text-center">
           <p class="text-3xl mb-2">🎵</p>
           <p class="font-semibold text-gray-600 dark:text-slate-300">Nenhum culto cadastrado ainda.</p>
-          <Link href="/admin/cultos/create"
+          <Link v-if="role === 'pastor'" href="/admin/cultos/create"
                 class="mt-3 inline-block text-sm text-blue-600 dark:text-blue-400 hover:underline">
             Cadastrar primeiro culto
           </Link>
@@ -210,7 +331,7 @@
         <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700/50 shadow-sm overflow-hidden">
           <div v-if="minhasProximas?.length" class="divide-y divide-gray-50 dark:divide-slate-700/50">
             <Link v-for="e in minhasProximas" :key="e.id"
-                  :href="`/admin/minhas-escalas`"
+                  href="/admin/minhas-escalas"
                   class="flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
               <div class="text-center min-w-[40px]">
                 <p class="text-[10px] font-bold uppercase text-gray-400 dark:text-slate-500 leading-none">{{ e.dia_semana }}</p>
@@ -235,40 +356,6 @@
 
     </div>
 
-    <!-- ── AÇÕES RÁPIDAS (pastor) ── -->
-    <div v-if="role === 'pastor'" class="mt-8 bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700/50 shadow-sm p-5">
-      <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-4">Ações Rápidas</p>
-      <div class="flex flex-wrap gap-3">
-        <Link href="/admin/cultos/create"
-              class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl
-                     text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
-          <AppIcon name="mic" size="xs" />
-          Novo Culto
-        </Link>
-        <Link href="/admin/escalas/create"
-              class="border border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200
-                     px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors
-                     flex items-center gap-2">
-          <AppIcon name="calendar" size="xs" />
-          Nova Escala
-        </Link>
-        <Link href="/admin/grupos/create"
-              class="border border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200
-                     px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors
-                     flex items-center gap-2">
-          <AppIcon name="users" size="xs" />
-          Novo Grupo
-        </Link>
-        <Link href="/admin/usuarios/create"
-              class="border border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200
-                     px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors
-                     flex items-center gap-2">
-          <AppIcon name="user" size="xs" />
-          Novo Usuário
-        </Link>
-      </div>
-    </div>
-
   </AdminLayout>
 </template>
 
@@ -279,15 +366,19 @@ import { Link, usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
 
 const props = defineProps({
-  totalCultos:      Number,
-  novasSugestoes:   Number,
-  novosPedidos:    Number,
-  totalSugestoes:  Number,
-  totalPedidos:    Number,
-  proximoCulto:    Object,
-  escalasProximas:  Array,
-  minhasProximas:   Array,
-  aniversariantes:  Array,
+  totalCultos:         Number,
+  novasSugestoes:      Number,
+  novosPedidos:        Number,
+  totalSugestoes:      Number,
+  totalPedidos:        Number,
+  totalMembros:        Number,
+  totalVisitantes:     Number,
+  novosMembrosMes:     Number,
+  novosVisitantesMes:  Number,
+  proximoCulto:        Object,
+  escalasProximas:     Array,
+  minhasProximas:      Array,
+  aniversariantes:     Array,
 })
 
 function statusLabel(s) {
@@ -315,73 +406,17 @@ const greeting = computed(() => {
   return 'Boa noite'
 })
 
-function spark(values) {
-  const w = 100, h = 28
-  const max = Math.max(...values), min = Math.min(...values)
-  const range = (max - min) || 1
-  return values.map((v, i) => {
-    const x = (i / (values.length - 1)) * w
-    const y = h - 2 - ((v - min) / range) * (h - 4)
-    return `${x.toFixed(1)},${y.toFixed(1)}`
-  }).join(' ')
-}
-
-const anivCount = computed(() => props.aniversariantes?.length ?? 0)
-
-const statCards = computed(() => {
-  const cards = [
-    {
-      label:     'Cultos',
-      value:     props.totalCultos   ?? 0,
-      trend:     0,
-      sub:       'cadastrados',
-      icon:      'mic',
-      iconBg:    '#eff6ff',
-      iconColor: '#3b82f6',
-      spark:     spark([5, 6, 5, 7, 8, 9, props.totalCultos ?? 0]),
-    },
-    {
-      label:     'Sugestões',
-      value:     props.novasSugestoes ?? 0,
-      trend:     props.novasSugestoes ?? 0,
-      sub:       (props.novasSugestoes ?? 0) > 0 ? 'aguardando' : 'tudo em dia',
-      icon:      'lightbulb',
-      iconBg:    '#fefce8',
-      iconColor: '#eab308',
-      spark:     spark([1, 2, 1, 3, 2, 3, props.novasSugestoes ?? 0]),
-    },
-    {
-      label:     'Pedidos de Oração',
-      value:     props.novosPedidos  ?? 0,
-      trend:     props.novosPedidos  ?? 0,
-      sub:       (props.novosPedidos ?? 0) > 0 ? 'esta semana' : 'tudo em dia',
-      icon:      'heart',
-      iconBg:    '#fdf2f8',
-      iconColor: '#ec4899',
-      spark:     spark([2, 3, 2, 4, 3, 4, props.novosPedidos ?? 0]),
-    },
-  ]
-
-  if (role.value !== 'membro') {
-    cards.push({
-      label:     'Aniversários',
-      value:     anivCount.value,
-      trend:     0,
-      sub:       anivCount.value > 0 ? 'nos próximos 30 dias' : 'nenhum em breve',
-      icon:      'gift',
-      iconBg:    '#fdf4ff',
-      iconColor: '#a855f7',
-      spark:     spark([0, 1, 0, 1, 2, 1, anivCount.value]),
-      href:      '/admin/aniversarios',
-    })
-  }
-
-  return cards
-})
+const anivCount      = computed(() => props.aniversariantes?.length ?? 0)
+const totalMembros   = computed(() => props.totalMembros ?? 0)
+const totalVisitantes = computed(() => props.totalVisitantes ?? 0)
+const novosMembrosMes = computed(() => props.novosMembrosMes ?? 0)
+const novosVisitantesMes = computed(() => props.novosVisitantesMes ?? 0)
+const novasSugestoes = computed(() => props.novasSugestoes ?? 0)
+const novosPedidos   = computed(() => props.novosPedidos ?? 0)
 
 const cultoStats = computed(() => [
-  { label: 'Cultos',  value: props.totalCultos   ?? 0 },
-  { label: 'Escalas', value: props.escalasProximas?.length ?? 0 },
-  { label: 'Grupos',  value: '—' },
+  { label: 'Cultos',   value: props.totalCultos ?? 0 },
+  { label: 'Membros',  value: totalMembros.value },
+  { label: 'Escalas',  value: props.escalasProximas?.length ?? 0 },
 ])
 </script>

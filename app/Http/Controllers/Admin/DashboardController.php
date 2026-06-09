@@ -18,12 +18,19 @@ class DashboardController extends Controller
         $user = auth()->user();
 
         // ── Stats
+        $inicioMes = Carbon::today()->startOfMonth();
         $stats = [
-            'totalCultos'    => Culto::count(),
-            'novasSugestoes' => Sugestao::where('lida', false)->count(),
-            'novosPedidos'   => PedidoOracao::where('lido', false)->count(),
-            'totalSugestoes' => Sugestao::count(),
-            'totalPedidos'   => PedidoOracao::count(),
+            'totalCultos'      => Culto::count(),
+            'novasSugestoes'   => Sugestao::where('lida', false)->count(),
+            'novosPedidos'     => PedidoOracao::where('lido', false)->count(),
+            'totalSugestoes'   => Sugestao::count(),
+            'totalPedidos'     => PedidoOracao::count(),
+            'totalMembros'     => User::where('tipo', 'membro')->where('is_superadmin', false)->count(),
+            'totalVisitantes'  => User::where('tipo', 'visitante')->where('is_superadmin', false)->count(),
+            'novosMembrosMes'  => User::where('tipo', 'membro')->where('is_superadmin', false)
+                                      ->where('created_at', '>=', $inicioMes)->count(),
+            'novosVisitantesMes' => User::where('tipo', 'visitante')->where('is_superadmin', false)
+                                        ->where('created_at', '>=', $inicioMes)->count(),
         ];
 
         // ── Próximo culto (calcula próxima data pelo dia_semana)

@@ -20,6 +20,7 @@ class MembroController extends Controller
                     ->where('name', 'like', "%{$busca}%")
                     ->orWhere('telefone', 'like', "%{$busca}%")
                     ->orWhere('email', 'like', "%{$busca}%")))
+            ->with('grupos:id,nome')
             ->orderBy('name')
             ->get()
             ->map(fn($u) => [
@@ -28,7 +29,9 @@ class MembroController extends Controller
                 'email'           => $u->email,
                 'telefone'        => $u->telefone,
                 'cidade'          => $u->cidade,
+                'batizado_aguas'  => $u->batizado_aguas,
                 'data_nascimento' => optional($u->data_nascimento)->format('Y-m-d'),
+                'grupos'          => $u->grupos->map(fn($g) => ['id' => $g->id, 'nome' => $g->nome])->values(),
             ]);
 
         return Inertia::render('Admin/Membros/Index', [

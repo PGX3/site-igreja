@@ -44,8 +44,8 @@
             <span class="flex-1 leading-none">{{ item.label }}</span>
 
             <span v-if="item.badge && item.badge > 0"
-                  class="text-[10px] font-bold px-1.5 py-0.5 rounded-full
-                         bg-blue-600 text-white min-w-[18px] text-center leading-tight">
+                  class="text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight"
+                  :class="item.badgeColor ?? 'bg-blue-600 text-white'">
               {{ item.badge }}
             </span>
           </Link>
@@ -80,18 +80,22 @@
 
       <!-- Top bar -->
       <header class="h-14 bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-700/50 flex items-center
-                     px-6 gap-4 flex-shrink-0 z-10 transition-colors duration-200">
+                     px-6 gap-3 flex-shrink-0 z-10 transition-colors duration-200">
 
-      
+        <!-- Breadcrumb -->
+        <div class="flex items-center gap-2 text-sm min-w-0">
+          <Link href="/admin"
+                class="text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300 transition-colors flex-shrink-0">
+            Painel
+          </Link>
+          <template v-if="pageTitle">
+            <span class="text-gray-200 dark:text-slate-700 flex-shrink-0">/</span>
+            <span class="font-semibold text-gray-700 dark:text-slate-200 truncate">{{ pageTitle }}</span>
+          </template>
+        </div>
 
         <!-- Actions -->
         <div class="ml-auto flex items-center gap-1">
-          <button class="relative w-9 h-9 rounded-xl flex items-center justify-center
-                         text-gray-400 dark:text-slate-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
-            <AppIcon name="bell" size="md" />
-            <span v-if="totalBadges > 0"
-                  class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-slate-900" />
-          </button>
           <button @click="toggleTheme"
                   class="w-9 h-9 rounded-xl flex items-center justify-center
                          text-gray-400 dark:text-slate-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
@@ -142,9 +146,32 @@ const avatarColor = computed(() => {
   return colors[code % colors.length]
 })
 
-const totalBadges = computed(() =>
-  (page.props.novasSugestoes || 0) + (page.props.novosPedidos || 0)
-)
+// Mapa de rota → título para o breadcrumb
+const routeTitles = {
+  '/admin':               null,
+  '/admin/membros':       'Membros',
+  '/admin/visitantes':    'Visitantes',
+  '/admin/aniversarios':  'Aniversários',
+  '/admin/escalas':       'Escalas',
+  '/admin/grupos':        'Grupos',
+  '/admin/cultos':        'Cultos',
+  '/admin/usuarios':      'Usuários do Sistema',
+  '/admin/sugestoes':     'Sugestões',
+  '/admin/pedidos-oracao':'Pedidos de Oração',
+  '/admin/minhas-escalas':'Minhas Escalas',
+}
+
+const pageTitle = computed(() => {
+  const url = page.url.split('?')[0].replace(/\/$/, '')
+  if (url === '/admin' || url === '/admin/') return null
+  // exact match first
+  if (routeTitles[url] !== undefined) return routeTitles[url]
+  // prefix match (e.g. /admin/escalas/3/edit → Escalas)
+  const match = Object.keys(routeTitles)
+    .filter(k => k !== '/admin' && url.startsWith(k))
+    .sort((a, b) => b.length - a.length)[0]
+  return match ? routeTitles[match] : null
+})
 
 const navGroups = computed(() => {
   const isPastor = role.value === 'pastor'
@@ -155,18 +182,31 @@ const navGroups = computed(() => {
   groups.push({
     label: 'Início',
     items: [
-      { href: '/admin',              label: 'Painel',         icon: 'dashboard' },
+      { href: '/admin',               label: 'Painel',          icon: 'dashboard' },
       { href: '/admin/minhas-escalas', label: 'Minhas Escalas', icon: 'clock' },
     ],
   })
 
   if (isPastor || isLider) {
+    const anivBadge = page.props.aniversariantesHoje || 0
     groups.push({
       label: 'Pastoral',
       items: [
-        { href: '/admin/membros',       label: 'Membros',      icon: 'users' },
-        { href: '/admin/visitantes',    label: 'Visitantes',   icon: 'user' },
-        { href: '/admin/aniversarios',  label: 'Aniversários', icon: 'heart' },
+        { href: '/admin/membros',      label: 'Membros',      icon: 'users' },
+        {
+          href: '/admin/visitantes',
+          label: 'Visitantes',
+          icon: 'user',
+          badge: page.props.novosVisitantesMes || 0,
+          badgeColor: 'bg-amber-500 text-white',
+        },
+        {
+          href: '/admin/aniversarios',
+          label: 'Aniversários',
+          icon: 'gift',
+          badge: anivBadge > 0 ? anivBadge : 0,
+          badgeColor: 'bg-purple-500 text-white',
+        },
       ],
     })
 
@@ -174,8 +214,8 @@ const navGroups = computed(() => {
       { href: '/admin/escalas', label: 'Escalas', icon: 'calendar' },
     ]
     if (isPastor) {
-      gestao.push({ href: '/admin/grupos', label: 'Grupos', icon: 'users' })
-      gestao.push({ href: '/admin/cultos', label: 'Cultos', icon: 'mic' })
+      gestao.push({ href: '/admin/grupos', label: 'Grupos',  icon: 'users' })
+      gestao.push({ href: '/admin/cultos', label: 'Cultos',  icon: 'mic'   })
     }
     groups.push({ label: 'Gestão', items: gestao })
   }
@@ -184,10 +224,10 @@ const navGroups = computed(() => {
     groups.push({
       label: 'Administração',
       items: [
-        { href: '/admin/usuarios',       label: 'Equipe',           icon: 'user' },
-        { href: '/admin/sugestoes',      label: 'Sugestões',        icon: 'lightbulb',
+        { href: '/admin/usuarios',       label: 'Usuários do Sistema', icon: 'user' },
+        { href: '/admin/sugestoes',      label: 'Sugestões',           icon: 'lightbulb',
           badge: page.props.novasSugestoes || 0 },
-        { href: '/admin/pedidos-oracao', label: 'Pedidos de Oração', icon: 'heart',
+        { href: '/admin/pedidos-oracao', label: 'Pedidos de Oração',   icon: 'heart',
           badge: page.props.novosPedidos || 0 },
       ],
     })
