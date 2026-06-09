@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ContatoController;
+use App\Http\Controllers\CadastroController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\CultoController;
 use App\Http\Controllers\Admin\TextoController;
@@ -13,12 +14,20 @@ use App\Http\Controllers\Admin\EscalaController;
 use App\Http\Controllers\Admin\EscalaMembroController;
 use App\Http\Controllers\Admin\AniversarioController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\MembroController;
+use App\Http\Controllers\Admin\VisitanteController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/cultos/{culto}', [HomeController::class, 'showCulto'])->name('cultos.show');
 
 Route::post('/sugestao', [ContatoController::class, 'sugestao'])->name('sugestao.store');
 Route::post('/pedido-oracao', [ContatoController::class, 'pedidoOracao'])->name('pedido-oracao.store');
+
+Route::get('/cadastro', [CadastroController::class, 'create'])->name('cadastro.create');
+Route::post('/cadastro', [CadastroController::class, 'store'])
+    ->middleware('throttle:6,1')
+    ->name('cadastro.store');
+Route::get('/cadastro/obrigado', [CadastroController::class, 'obrigado'])->name('cadastro.obrigado');
 
 Route::get('/login', fn() => inertia('Auth/Login'))->name('login');
 Route::post('/login', [App\Http\Controllers\Auth\AuthController::class, 'login'])->name('login.post');
@@ -40,6 +49,11 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     // Pastor + Líder: gerenciar escalas (líder restrito ao seu grupo via controller)
     Route::middleware('role:pastor,lider')->group(function () {
         Route::resource('escalas', EscalaController::class);
+
+        Route::resource('membros', MembroController::class);
+        Route::resource('visitantes', VisitanteController::class);
+        Route::post('visitantes/{visitante}/promover', [VisitanteController::class, 'promoverParaMembro'])
+            ->name('visitantes.promover');
     });
 
     // Apenas Pastor: grupos, cultos, textos, sugestões, pedidos, usuários

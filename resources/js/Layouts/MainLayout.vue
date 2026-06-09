@@ -41,7 +41,12 @@
         </li>
       </ul>
 
-      <div class="hidden md:flex items-center">
+      <div class="hidden md:flex items-center gap-4">
+        <Link href="/cadastro"
+              class="text-[10px] font-semibold tracking-[0.25em] uppercase text-[var(--blue)]
+                     hover:text-white transition-colors duration-300">
+          Quero me cadastrar
+        </Link>
         <a href="#sugestoes" class="btn-primary text-xs">Fale Conosco</a>
       </div>
 
@@ -64,6 +69,11 @@
            style="font-family:'Barlow Condensed',sans-serif">
           {{ link.label }}
         </a>
+        <Link href="/cadastro" @click="mobileOpen = false"
+              class="text-lg font-bold tracking-widest uppercase text-[var(--blue)]
+                     hover:text-white transition-colors">
+          Quero me cadastrar
+        </Link>
         <a href="#sugestoes" @click="mobileOpen = false" class="btn-primary mt-4">Fale Conosco</a>
         <Link v-if="authUser" href="/admin" @click="mobileOpen = false"
               class="text-sm font-bold tracking-widest uppercase text-white/30

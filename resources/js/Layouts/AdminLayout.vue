@@ -17,33 +17,39 @@
 
       <!-- Nav -->
       <nav class="flex-1 px-3 py-4 overflow-y-auto">
-        <p class="px-3 mb-2 text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 dark:text-slate-500 select-none">
-          Menu
-        </p>
+        <template v-for="(grupo, gIdx) in navGroups" :key="grupo.label || `g-${gIdx}`">
+          <p v-if="grupo.label"
+             class="px-3 mb-2 text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 dark:text-slate-500 select-none"
+             :class="gIdx > 0 ? 'mt-5' : ''">
+            {{ grupo.label }}
+          </p>
+          <div v-else-if="gIdx > 0"
+               class="my-3 mx-3 border-t border-gray-100 dark:border-slate-700/50"></div>
 
-        <Link
-          v-for="item in navItems"
-          :key="item.href"
-          :href="item.href"
-          class="flex items-center gap-3 px-3 py-[9px] rounded-xl text-[13px] font-medium
-                 transition-all duration-150 mb-0.5"
-          :class="isActive(item.href)
-            ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-semibold'
-            : 'text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-slate-800'"
-        >
-          <span class="flex-shrink-0"
-                :class="isActive(item.href) ? 'text-blue-600' : 'text-gray-400 dark:text-slate-500'">
-            <AppIcon :name="item.icon" size="sm" />
-          </span>
+          <Link
+            v-for="item in grupo.items"
+            :key="item.href"
+            :href="item.href"
+            class="flex items-center gap-3 px-3 py-[9px] rounded-xl text-[13px] font-medium
+                   transition-all duration-150 mb-0.5"
+            :class="isActive(item.href)
+              ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-semibold'
+              : 'text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-slate-800'"
+          >
+            <span class="flex-shrink-0"
+                  :class="isActive(item.href) ? 'text-blue-600' : 'text-gray-400 dark:text-slate-500'">
+              <AppIcon :name="item.icon" size="sm" />
+            </span>
 
-          <span class="flex-1 leading-none">{{ item.label }}</span>
+            <span class="flex-1 leading-none">{{ item.label }}</span>
 
-          <span v-if="item.badge && item.badge > 0"
-                class="text-[10px] font-bold px-1.5 py-0.5 rounded-full
-                       bg-blue-600 text-white min-w-[18px] text-center leading-tight">
-            {{ item.badge }}
-          </span>
-        </Link>
+            <span v-if="item.badge && item.badge > 0"
+                  class="text-[10px] font-bold px-1.5 py-0.5 rounded-full
+                         bg-blue-600 text-white min-w-[18px] text-center leading-tight">
+              {{ item.badge }}
+            </span>
+          </Link>
+        </template>
       </nav>
 
       <!-- User + Logout -->
@@ -140,27 +146,59 @@ const totalBadges = computed(() =>
   (page.props.novasSugestoes || 0) + (page.props.novosPedidos || 0)
 )
 
-const navItems = computed(() => {
-  const items = []
-  items.push({ href: '/admin',              label: 'Painel',            icon: 'dashboard' })
-  items.push({ href: '/admin/minhas-escalas', label: 'Minhas Escalas',  icon: 'clock' })
+const navGroups = computed(() => {
+  const isPastor = role.value === 'pastor'
+  const isLider  = role.value === 'lider'
 
-  if (role.value === 'pastor' || role.value === 'lider') {
-    items.push({ href: '/admin/escalas', label: 'Escalas', icon: 'calendar' })
+  const groups = []
+
+  groups.push({
+    label: 'Início',
+    items: [
+      { href: '/admin',              label: 'Painel',         icon: 'dashboard' },
+      { href: '/admin/minhas-escalas', label: 'Minhas Escalas', icon: 'clock' },
+    ],
+  })
+
+  if (isPastor || isLider) {
+    groups.push({
+      label: 'Pastoral',
+      items: [
+        { href: '/admin/membros',       label: 'Membros',      icon: 'users' },
+        { href: '/admin/visitantes',    label: 'Visitantes',   icon: 'user' },
+        { href: '/admin/aniversarios',  label: 'Aniversários', icon: 'heart' },
+      ],
+    })
+
+    const gestao = [
+      { href: '/admin/escalas', label: 'Escalas', icon: 'calendar' },
+    ]
+    if (isPastor) {
+      gestao.push({ href: '/admin/grupos', label: 'Grupos', icon: 'users' })
+      gestao.push({ href: '/admin/cultos', label: 'Cultos', icon: 'mic' })
+    }
+    groups.push({ label: 'Gestão', items: gestao })
   }
 
-  if (role.value === 'pastor') {
-    items.push({ href: '/admin/grupos',         label: 'Grupos',            icon: 'users' })
-    items.push({ href: '/admin/usuarios',       label: 'Usuários',          icon: 'user' })
-    items.push({ href: '/admin/cultos',         label: 'Cultos',            icon: 'mic' })
-    items.push({ href: '/admin/sugestoes',      label: 'Sugestões',         icon: 'lightbulb',
-                 badge: page.props.novasSugestoes || 0 })
-    items.push({ href: '/admin/pedidos-oracao', label: 'Pedidos de Oração', icon: 'heart',
-                 badge: page.props.novosPedidos || 0 })
+  if (isPastor) {
+    groups.push({
+      label: 'Administração',
+      items: [
+        { href: '/admin/usuarios',       label: 'Equipe',           icon: 'user' },
+        { href: '/admin/sugestoes',      label: 'Sugestões',        icon: 'lightbulb',
+          badge: page.props.novasSugestoes || 0 },
+        { href: '/admin/pedidos-oracao', label: 'Pedidos de Oração', icon: 'heart',
+          badge: page.props.novosPedidos || 0 },
+      ],
+    })
   }
 
-  items.push({ href: '/', label: 'Ver Site', icon: 'external-link' })
-  return items
+  groups.push({
+    label: null,
+    items: [{ href: '/', label: 'Ver Site', icon: 'external-link' }],
+  })
+
+  return groups
 })
 
 function isActive(href) {
