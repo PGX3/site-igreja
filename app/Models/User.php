@@ -11,12 +11,16 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name', 'email', 'password',
-        'role_id', 'telefone', 'disponibilidade', 'callmebot_apikey', 'is_superadmin',
+        'role_id', 'telefone', 'data_nascimento', 'disponibilidade', 'callmebot_apikey', 'is_superadmin',
     ];
 
     protected $hidden = ['password', 'remember_token'];
 
-    protected $casts = ['email_verified_at' => 'datetime', 'password' => 'hashed'];
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'data_nascimento'   => 'date',
+        'password'          => 'hashed',
+    ];
 
     public function role()
     {

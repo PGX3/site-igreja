@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\PedidoOracaoController;
 use App\Http\Controllers\Admin\GrupoController;
 use App\Http\Controllers\Admin\EscalaController;
 use App\Http\Controllers\Admin\EscalaMembroController;
+use App\Http\Controllers\Admin\AniversarioController;
 use App\Http\Controllers\Admin\UserController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -25,6 +26,11 @@ Route::post('/logout', [App\Http\Controllers\Auth\AuthController::class, 'logout
 
 Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Aniversários (pastor + líder)
+    Route::middleware('role:pastor,lider')->group(function () {
+        Route::get('aniversarios', [AniversarioController::class, 'index'])->name('aniversarios.index');
+    });
 
     // Todas as roles: ver suas próprias escalas e confirmar/recusar
     Route::get('minhas-escalas', [EscalaMembroController::class, 'index'])->name('minhas-escalas.index');

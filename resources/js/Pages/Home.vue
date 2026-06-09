@@ -256,7 +256,7 @@
       <p class="mt-8 mb-14 text-[11px] tracking-[0.3em] uppercase text-white/25">
         {{ t('endereco', 'Charqueadas · Rio Grande do Sul') }}
       </p>
-      <a href="https://maps.google.com" target="_blank" rel="noopener" class="btn-primary reveal">→ Como Chegar</a>
+      <a href="https://www.google.com/maps/place/R.+Rui+Barbosa,+1433+-+Centro,+Charqueadas+-+RS,+96745-000" target="_blank" rel="noopener" class="btn-primary reveal">→ Como Chegar</a>
     </section>
 
     <WhatsAppPopup />

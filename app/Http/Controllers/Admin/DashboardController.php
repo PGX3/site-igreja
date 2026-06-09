@@ -7,6 +7,7 @@ use App\Models\Culto;
 use App\Models\Escala;
 use App\Models\Sugestao;
 use App\Models\PedidoOracao;
+use App\Models\User;
 use Carbon\Carbon;
 use Inertia\Inertia;
 
@@ -97,10 +98,57 @@ class DashboardController extends Controller
             ]);
         }
 
+        // ── Aniversariantes (só para pastor/líder)
+        $aniversariantes = collect([]);
+        if (!$user->isMembro()) {
+            $hoje   = Carbon::today();
+            $limite = $hoje->copy()->addDays(30);
+
+            $aniversariantes = User::whereNotNull('data_nascimento')
+                ->where('is_superadmin', false)
+                ->get()
+                ->filter(function ($u) use ($hoje, $limite) {
+                    $nasc = $u->data_nascimento;
+                    // Próxima ocorrência do aniversário neste ano (ou próximo, se já passou)
+                    $proxAniv = Carbon::create($hoje->year, $nasc->month, $nasc->day);
+                    if ($proxAniv->lt($hoje)) {
+                        $proxAniv->addYear();
+                    }
+                    return $proxAniv->between($hoje, $limite);
+                })
+                ->map(function ($u) use ($hoje) {
+                    $nasc     = $u->data_nascimento;
+                    $proxAniv = Carbon::create($hoje->year, $nasc->month, $nasc->day);
+                    if ($proxAniv->lt($hoje)) $proxAniv->addYear();
+
+                    $diasRestantes = (int) $hoje->diffInDays($proxAniv);
+                    $idade = $proxAniv->year - $nasc->year;
+
+                    $meses = [
+                        1=>'jan',2=>'fev',3=>'mar',4=>'abr',5=>'mai',6=>'jun',
+                        7=>'jul',8=>'ago',9=>'set',10=>'out',11=>'nov',12=>'dez',
+                    ];
+
+                    return [
+                        'id'             => $u->id,
+                        'name'           => $u->name,
+                        'initials'       => self::initials($u->name),
+                        'color'          => self::avatarColor($u->name),
+                        'data_fmt'       => $nasc->day . ' de ' . $meses[$nasc->month],
+                        'dias_restantes' => $diasRestantes,
+                        'idade'          => $idade,
+                        'hoje'           => $diasRestantes === 0,
+                    ];
+                })
+                ->sortBy('dias_restantes')
+                ->values();
+        }
+
         return Inertia::render('Admin/Dashboard', array_merge($stats, [
             'proximoCulto'    => $proximoCulto,
             'escalasProximas' => $escalasProximas,
             'minhasProximas'  => $minhasProximas,
+            'aniversariantes' => $aniversariantes,
         ]));
     }
 

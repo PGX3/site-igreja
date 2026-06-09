@@ -18,9 +18,15 @@
 
     <!-- ── STAT CARDS ── -->
     <div class="grid grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
-      <div v-for="card in statCards" :key="card.label"
-           class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700/50 p-5 shadow-sm
-                  hover:shadow-md transition-shadow overflow-hidden relative">
+      <component
+        :is="card.href ? Link : 'div'"
+        v-for="card in statCards"
+        :key="card.label"
+        :href="card.href ?? undefined"
+        class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700/50 p-5 shadow-sm
+               hover:shadow-md transition-shadow overflow-hidden relative block"
+        :class="card.href ? 'cursor-pointer' : ''">
+
         <!-- top row -->
         <div class="flex items-start justify-between mb-4">
           <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500">{{ card.label }}</p>
@@ -56,7 +62,7 @@
             opacity="0.6"
           />
         </svg>
-      </div>
+      </component>
     </div>
 
     <!-- ── BOTTOM ROW ── -->
@@ -273,14 +279,15 @@ import { Link, usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
 
 const props = defineProps({
-  totalCultos:     Number,
-  novasSugestoes:  Number,
+  totalCultos:      Number,
+  novasSugestoes:   Number,
   novosPedidos:    Number,
   totalSugestoes:  Number,
   totalPedidos:    Number,
   proximoCulto:    Object,
-  escalasProximas: Array,
-  minhasProximas:  Array,
+  escalasProximas:  Array,
+  minhasProximas:   Array,
+  aniversariantes:  Array,
 })
 
 function statusLabel(s) {
@@ -319,38 +326,58 @@ function spark(values) {
   }).join(' ')
 }
 
-const statCards = computed(() => [
-  {
-    label:     'Cultos',
-    value:     props.totalCultos   ?? 0,
-    trend:     0,
-    sub:       'cadastrados',
-    icon:      'mic',
-    iconBg:    '#eff6ff',
-    iconColor: '#3b82f6',
-    spark:     spark([5, 6, 5, 7, 8, 9, props.totalCultos ?? 0]),
-  },
-  {
-    label:     'Sugestões',
-    value:     props.novasSugestoes ?? 0,
-    trend:     props.novasSugestoes ?? 0,
-    sub:       props.novasSugestoes > 0 ? 'aguardando' : 'tudo em dia',
-    icon:      'lightbulb',
-    iconBg:    '#fefce8',
-    iconColor: '#eab308',
-    spark:     spark([1, 2, 1, 3, 2, 3, props.novasSugestoes ?? 0]),
-  },
-  {
-    label:     'Pedidos de Oração',
-    value:     props.novosPedidos  ?? 0,
-    trend:     props.novosPedidos  ?? 0,
-    sub:       props.novosPedidos > 0 ? 'esta semana' : 'tudo em dia',
-    icon:      'heart',
-    iconBg:    '#fdf2f8',
-    iconColor: '#ec4899',
-    spark:     spark([2, 3, 2, 4, 3, 4, props.novosPedidos ?? 0]),
-  },
-])
+const anivCount = computed(() => props.aniversariantes?.length ?? 0)
+
+const statCards = computed(() => {
+  const cards = [
+    {
+      label:     'Cultos',
+      value:     props.totalCultos   ?? 0,
+      trend:     0,
+      sub:       'cadastrados',
+      icon:      'mic',
+      iconBg:    '#eff6ff',
+      iconColor: '#3b82f6',
+      spark:     spark([5, 6, 5, 7, 8, 9, props.totalCultos ?? 0]),
+    },
+    {
+      label:     'Sugestões',
+      value:     props.novasSugestoes ?? 0,
+      trend:     props.novasSugestoes ?? 0,
+      sub:       (props.novasSugestoes ?? 0) > 0 ? 'aguardando' : 'tudo em dia',
+      icon:      'lightbulb',
+      iconBg:    '#fefce8',
+      iconColor: '#eab308',
+      spark:     spark([1, 2, 1, 3, 2, 3, props.novasSugestoes ?? 0]),
+    },
+    {
+      label:     'Pedidos de Oração',
+      value:     props.novosPedidos  ?? 0,
+      trend:     props.novosPedidos  ?? 0,
+      sub:       (props.novosPedidos ?? 0) > 0 ? 'esta semana' : 'tudo em dia',
+      icon:      'heart',
+      iconBg:    '#fdf2f8',
+      iconColor: '#ec4899',
+      spark:     spark([2, 3, 2, 4, 3, 4, props.novosPedidos ?? 0]),
+    },
+  ]
+
+  if (role.value !== 'membro') {
+    cards.push({
+      label:     'Aniversários',
+      value:     anivCount.value,
+      trend:     0,
+      sub:       anivCount.value > 0 ? 'nos próximos 30 dias' : 'nenhum em breve',
+      icon:      'gift',
+      iconBg:    '#fdf4ff',
+      iconColor: '#a855f7',
+      spark:     spark([0, 1, 0, 1, 2, 1, anivCount.value]),
+      href:      '/admin/aniversarios',
+    })
+  }
+
+  return cards
+})
 
 const cultoStats = computed(() => [
   { label: 'Cultos',  value: props.totalCultos   ?? 0 },

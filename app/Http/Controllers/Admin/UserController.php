@@ -48,7 +48,7 @@ class UserController extends Controller
             'grupo_ids'        => 'nullable|array',
             'grupo_ids.*'      => 'exists:grupos,id',
             'telefone'         => 'nullable|string|max:20',
-            'callmebot_apikey' => 'nullable|string|max:20',
+            'data_nascimento'  => 'nullable|date|before:today',
         ]);
 
         $grupoIds = $data['grupo_ids'] ?? [];
@@ -68,7 +68,7 @@ class UserController extends Controller
 
         return Inertia::render('Admin/Usuarios/Form', [
             'usuario' => array_merge(
-                $usuario->only('id', 'name', 'email', 'role_id', 'telefone', 'callmebot_apikey'),
+                $usuario->only('id', 'name', 'email', 'role_id', 'telefone', 'data_nascimento'),
                 ['grupo_ids' => $usuario->grupos()->pluck('grupos.id')->map(fn($id) => (int) $id)->toArray()]
             ),
             'roles'  => Role::all(['id', 'name', 'display_name']),
@@ -86,7 +86,7 @@ class UserController extends Controller
             'grupo_ids'        => 'nullable|array',
             'grupo_ids.*'      => 'exists:grupos,id',
             'telefone'         => 'nullable|string|max:20',
-            'callmebot_apikey' => 'nullable|string|max:20',
+            'data_nascimento'  => 'nullable|date|before:today',
         ]);
 
         $grupoIds = $data['grupo_ids'] ?? [];

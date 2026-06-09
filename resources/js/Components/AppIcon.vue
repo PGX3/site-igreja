@@ -99,6 +99,13 @@ const paths = {
   'chevron-right':
     `<polyline points="9 18 15 12 9 6"/>`,
 
+  gift:
+    `<polyline points="20 12 20 22 4 22 4 12"/>
+     <rect x="2" y="7" width="20" height="5"/>
+     <line x1="12" y1="22" x2="12" y2="7"/>
+     <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
+     <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>`,
+
   sun:
     `<circle cx="12" cy="12" r="4"/>
      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>`,
