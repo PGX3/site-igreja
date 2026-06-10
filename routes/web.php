@@ -6,6 +6,7 @@ use App\Http\Controllers\ContatoController;
 use App\Http\Controllers\CadastroController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\CultoController;
+use App\Http\Controllers\Admin\EventoController;
 use App\Http\Controllers\Admin\TextoController;
 use App\Http\Controllers\Admin\SugestaoController;
 use App\Http\Controllers\Admin\PedidoOracaoController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\Admin\FamiliaController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/cultos/{culto}', [HomeController::class, 'showCulto'])->name('cultos.show');
+Route::get('/eventos/{evento}', [HomeController::class, 'showEvento'])->name('eventos.show');
 
 Route::post('/sugestao', [ContatoController::class, 'sugestao'])->name('sugestao.store');
 Route::post('/pedido-oracao', [ContatoController::class, 'pedidoOracao'])->name('pedido-oracao.store');
@@ -63,6 +65,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
         Route::resource('grupos', GrupoController::class);
         Route::resource('usuarios', UserController::class);
         Route::resource('cultos', CultoController::class);
+        Route::resource('eventos', EventoController::class);
         Route::resource('textos', TextoController::class);
 
         Route::get('sugestoes', [SugestaoController::class, 'index'])->name('sugestoes.index');

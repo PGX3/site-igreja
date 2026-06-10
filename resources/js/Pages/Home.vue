@@ -111,6 +111,52 @@
       </div>
     </section>
 
+    <!-- ══ EVENTOS ═══════════════════════════════════════════════════════ -->
+    <section id="eventos" class="px-10 md:px-20 py-32 border-t border-[var(--blue)]/10">
+      <div class="reveal mb-16">
+        <p class="section-label">Eventos</p>
+        <h2 class="section-title text-[clamp(38px,5vw,72px)] text-white">
+          O que vem aí<span class="text-[var(--blue)]">.</span>
+        </h2>
+      </div>
+
+      <div v-if="eventos && eventos.length > 0" class="grid md:grid-cols-2 gap-px bg-[var(--blue)]/10">
+        <Link v-for="evento in eventos" :key="evento.id"
+              :href="`/eventos/${evento.id}`"
+              class="reveal bg-[#0a0a0a] hover:bg-[#0d0d0d] transition-colors p-10 group flex items-start gap-6 cursor-pointer">
+          <!-- Bloco de data -->
+          <div class="flex-shrink-0 text-center border border-[var(--blue)]/20 rounded-xl px-4 py-3 min-w-[72px]
+                      group-hover:border-[var(--blue)]/60 transition-colors">
+            <p class="text-[9px] font-bold tracking-[0.25em] uppercase text-[var(--blue)]/70">
+              {{ evento.mes_curto }}
+            </p>
+            <p class="text-3xl font-black text-white leading-none mt-1">{{ evento.dia }}</p>
+          </div>
+          <!-- Texto -->
+          <div class="flex-1 min-w-0">
+            <h3 class="text-lg font-bold text-white/85 group-hover:text-white transition-colors truncate">
+              {{ evento.nome }}
+            </h3>
+            <p v-if="evento.horario || evento.local"
+               class="text-[12px] text-white/30 tracking-wide mt-1 font-mono truncate">
+              <span v-if="evento.horario">{{ evento.horario }}</span>
+              <span v-if="evento.horario && evento.local" class="mx-2">·</span>
+              <span v-if="evento.local">{{ evento.local }}</span>
+            </p>
+            <p v-if="evento.descricao"
+               class="text-[13px] text-white/40 leading-relaxed mt-3 line-clamp-2">
+              {{ evento.descricao }}
+            </p>
+          </div>
+          <span class="text-[var(--blue)]/0 group-hover:text-[var(--blue)] transition-colors text-sm self-center">→</span>
+        </Link>
+      </div>
+
+      <div v-else class="py-12 text-white/25 text-sm tracking-wide text-center">
+        Nenhum evento agendado no momento.
+      </div>
+    </section>
+
     <!-- ══ SUGESTÕES ═════════════════════════════════════════════════════ -->
     <section id="sugestoes" class="px-10 md:px-20 py-32 border-t border-[var(--blue)]/10">
       <div class="grid md:grid-cols-2 gap-20 items-start">
@@ -272,7 +318,7 @@ import LogoIcon from '@/Components/LogoIcon.vue'
 import HCaptcha from '@/Components/HCaptcha.vue'
 import WhatsAppPopup from '@/Components/WhatsAppPopup.vue';
 
-const props = defineProps({ cultos: Array, textos: Object })
+const props = defineProps({ cultos: Array, eventos: Array, textos: Object })
 const page = usePage()
 
 // hCaptcha sitekey — vem do backend via shared props ou usa a chave de teste

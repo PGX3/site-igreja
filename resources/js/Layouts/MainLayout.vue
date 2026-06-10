@@ -135,6 +135,7 @@ const links = [
   { href: '#sobre',      label: 'A Igreja' },
   { href: '#identidade', label: 'Identidade' },
   { href: '#agenda',     label: 'Agenda' },
+  { href: '#eventos',    label: 'Eventos' },
   { href: '#sugestoes',  label: 'Contato' },
   { href: '#oracao',     label: 'Oração' },
 ]

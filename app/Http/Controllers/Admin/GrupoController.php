@@ -31,28 +31,24 @@ class GrupoController extends Controller
 
     public function create()
     {
-        $usuarios = User::orderBy('name')->get(['id', 'name', 'email']);
-        return Inertia::render('Admin/Grupos/Form', compact('usuarios'));
+        return Inertia::render('Admin/Grupos/Form', [
+            'usuarios' => $this->usuariosDisponiveis(),
+        ]);
     }
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'nome'      => 'required|string|max:100',
-            'descricao' => 'nullable|string',
-            'lider_id'  => 'nullable|exists:users,id',
+        $data = $this->validateData($request);
+
+        $grupo = Grupo::create([
+            'nome'       => $data['nome'],
+            'descricao'  => $data['descricao'] ?? null,
+            'lider_id'   => $data['lider_id'] ?? null,
+            'created_by' => auth()->id(),
         ]);
 
-        $data['created_by'] = auth()->id();
-        $grupo = Grupo::create($data);
-
-        if ($grupo->lider_id) {
-            $lider = User::find($grupo->lider_id);
-            if ($lider && !$lider->isPastor()) {
-                $lider->update(['role_id' => Role::where('name', 'lider')->value('id')]);
-                $grupo->membros()->syncWithoutDetaching([$lider->id]);
-            }
-        }
+        $this->sincronizarMembros($grupo, $data['membros_ids'] ?? []);
+        $this->aplicarRoleLider($grupo, null);
 
         return redirect()->route('admin.grupos.index')
             ->with('success', 'Grupo criado com sucesso!');
@@ -60,24 +56,69 @@ class GrupoController extends Controller
 
     public function edit(Grupo $grupo)
     {
-        $usuarios = User::orderBy('name')->get(['id', 'name', 'email']);
+        $grupo->load(['lider', 'membros:id']);
+
         return Inertia::render('Admin/Grupos/Form', [
-            'grupo'    => $grupo->load('lider'),
-            'usuarios' => $usuarios,
+            'grupo' => [
+                'id'          => $grupo->id,
+                'nome'        => $grupo->nome,
+                'descricao'   => $grupo->descricao,
+                'lider'       => $grupo->lider?->only('id', 'name'),
+                'membros_ids' => $grupo->membros->pluck('id')->all(),
+            ],
+            'usuarios' => $this->usuariosDisponiveis(),
         ]);
     }
 
     public function update(Request $request, Grupo $grupo)
     {
-        $data = $request->validate([
-            'nome'      => 'required|string|max:100',
-            'descricao' => 'nullable|string',
-            'lider_id'  => 'nullable|exists:users,id',
-        ]);
+        $data = $this->validateData($request);
 
         $oldLiderId = $grupo->lider_id;
-        $grupo->update($data);
+        $grupo->update([
+            'nome'      => $data['nome'],
+            'descricao' => $data['descricao'] ?? null,
+            'lider_id'  => $data['lider_id'] ?? null,
+        ]);
 
+        $this->sincronizarMembros($grupo, $data['membros_ids'] ?? []);
+        $this->aplicarRoleLider($grupo, $oldLiderId);
+
+        return redirect()->route('admin.grupos.index')
+            ->with('success', 'Grupo atualizado!');
+    }
+
+    public function destroy(Grupo $grupo)
+    {
+        $grupo->delete();
+        return redirect()->route('admin.grupos.index')
+            ->with('success', 'Grupo excluído!');
+    }
+
+    private function validateData(Request $request): array
+    {
+        return $request->validate([
+            'nome'          => 'required|string|max:100',
+            'descricao'     => 'nullable|string',
+            'lider_id'      => 'nullable|exists:users,id',
+            'membros_ids'   => 'nullable|array',
+            'membros_ids.*' => 'integer|exists:users,id',
+        ]);
+    }
+
+    private function sincronizarMembros(Grupo $grupo, array $membrosIds): void
+    {
+        $ids = collect($membrosIds)->map(fn($id) => (int) $id);
+
+        if ($grupo->lider_id) {
+            $ids = $ids->push($grupo->lider_id);
+        }
+
+        $grupo->membros()->sync($ids->unique()->values()->all());
+    }
+
+    private function aplicarRoleLider(Grupo $grupo, ?int $oldLiderId): void
+    {
         $liderRoleId  = Role::where('name', 'lider')->value('id');
         $membroRoleId = Role::where('name', 'membro')->value('id');
 
@@ -92,18 +133,14 @@ class GrupoController extends Controller
             $novoLider = User::find($grupo->lider_id);
             if ($novoLider && !$novoLider->isPastor()) {
                 $novoLider->update(['role_id' => $liderRoleId]);
-                $grupo->membros()->syncWithoutDetaching([$novoLider->id]);
             }
         }
-
-        return redirect()->route('admin.grupos.index')
-            ->with('success', 'Grupo atualizado!');
     }
 
-    public function destroy(Grupo $grupo)
+    private function usuariosDisponiveis()
     {
-        $grupo->delete();
-        return redirect()->route('admin.grupos.index')
-            ->with('success', 'Grupo excluído!');
+        return User::where('is_superadmin', false)
+            ->orderBy('name')
+            ->get(['id', 'name', 'email']);
     }
 }

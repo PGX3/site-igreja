@@ -290,6 +290,11 @@ const navGroups = computed(() => {
                 label: "Cultos",
                 icon: "mic",
             });
+            gestao.push({
+                href: "/admin/eventos",
+                label: "Eventos",
+                icon: "calendar",
+            });
         }
         groups.push({ label: "Gestão", items: gestao });
     }
