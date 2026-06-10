@@ -70,6 +70,18 @@
             <option :value="false">Não</option>
           </select>
         </div>
+
+        <div>
+          <label :class="labelClass">Família</label>
+          <select v-model="form.familia_id" :class="inputClass">
+            <option :value="null">Sem família vinculada</option>
+            <option v-for="f in familias" :key="f.id" :value="f.id">{{ f.nome }}</option>
+          </select>
+          <p class="mt-1 text-xs text-gray-400 dark:text-slate-500">
+            Para criar uma nova família, use a tela
+            <Link href="/admin/familias/create" class="text-blue-600 dark:text-blue-400 hover:underline">Nova Família</Link>.
+          </p>
+        </div>
       </div>
 
       <div class="flex gap-3 pt-5">
@@ -95,6 +107,7 @@ import { computed } from 'vue'
 const props = defineProps({
   visitante: Object,
   convidadores: { type: Array, default: () => [] },
+  familias: { type: Array, default: () => [] },
 })
 
 const editando = computed(() => !!props.visitante)
@@ -107,6 +120,7 @@ const form = useForm({
   primeira_visita:       props.visitante?.primeira_visita       ?? '',
   observacoes_pastorais: props.visitante?.observacoes_pastorais ?? '',
   batizado_aguas:        props.visitante?.batizado_aguas        ?? null,
+  familia_id:            props.visitante?.familia_id            ?? null,
 })
 
 const labelClass = 'block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5'

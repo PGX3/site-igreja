@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Familia;
 use App\Models\User;
+use App\Support\Cpf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class CadastroController extends Controller
@@ -19,13 +22,15 @@ class CadastroController extends Controller
             return redirect()->route('cadastro.obrigado');
         }
 
+        $request->merge(['cpf' => Cpf::normalize($request->input('cpf'))]);
+
         $data = $request->validate([
             'name'            => 'required|string|max:100',
             'telefone'        => 'required|string|max:20',
             'data_nascimento' => 'nullable|date|before:today',
             'sexo'            => 'nullable|in:M,F',
             'estado_civil'    => 'nullable|string|max:30',
-            'cpf'             => 'nullable|string|max:14',
+            'cpf'             => 'nullable|string|max:14|unique:users,cpf',
             'endereco'        => 'nullable|string|max:255',
             'cidade'          => 'nullable|string|max:80',
             'uf'              => 'nullable|string|size:2',
@@ -36,7 +41,38 @@ class CadastroController extends Controller
             'batizado_aguas'  => 'nullable|boolean',
         ]);
 
-        User::create($data);
+        DB::transaction(function () use ($data) {
+            $familiaId = null;
+
+            if (!empty($data['endereco']) || !empty($data['cidade']) || !empty($data['cep'])) {
+                $familia = Familia::create([
+                    'endereco'           => $data['endereco'] ?? '',
+                    'cidade'             => $data['cidade'] ?? '',
+                    'uf'                 => strtoupper($data['uf'] ?? ''),
+                    'cep'                => $data['cep'] ?? '',
+                    'telefone_principal' => $data['telefone'] ?? null,
+                ]);
+                $familiaId = $familia->id;
+            }
+
+            $user = User::create([
+                'name'            => $data['name'],
+                'telefone'        => $data['telefone'],
+                'data_nascimento' => $data['data_nascimento'] ?? null,
+                'sexo'            => $data['sexo'] ?? null,
+                'estado_civil'    => $data['estado_civil'] ?? null,
+                'cpf'             => $data['cpf'] ?? null,
+                'como_conheceu'   => $data['como_conheceu'] ?? null,
+                'primeira_visita' => $data['primeira_visita'] ?? null,
+                'tipo'            => $data['tipo'],
+                'batizado_aguas'  => $data['batizado_aguas'] ?? null,
+                'familia_id'      => $familiaId,
+            ]);
+
+            if ($familiaId) {
+                Familia::where('id', $familiaId)->update(['responsavel_id' => $user->id]);
+            }
+        });
 
         return redirect()->route('cadastro.obrigado');
     }

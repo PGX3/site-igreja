@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\AniversarioController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\MembroController;
 use App\Http\Controllers\Admin\VisitanteController;
+use App\Http\Controllers\Admin\FamiliaController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/cultos/{culto}', [HomeController::class, 'showCulto'])->name('cultos.show');
@@ -54,6 +55,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
         Route::resource('visitantes', VisitanteController::class);
         Route::post('visitantes/{visitante}/promover', [VisitanteController::class, 'promoverParaMembro'])
             ->name('visitantes.promover');
+        Route::resource('familias', FamiliaController::class);
     });
 
     // Apenas Pastor: grupos, cultos, textos, sugestões, pedidos, usuários

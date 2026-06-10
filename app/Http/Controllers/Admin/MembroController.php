@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Familia;
 use App\Models\User;
+use App\Support\Cpf;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -15,6 +17,7 @@ class MembroController extends Controller
 
         $membros = User::membros()
             ->where('is_superadmin', false)
+            ->with(['familia:id,cidade,responsavel_id', 'familia.responsavel:id,name'])
             ->when($busca !== '', fn($q) =>
                 $q->where(fn($w) => $w
                     ->where('name', 'like', "%{$busca}%")
@@ -28,8 +31,9 @@ class MembroController extends Controller
                 'name'            => $u->name,
                 'email'           => $u->email,
                 'telefone'        => $u->telefone,
-                'cidade'          => $u->cidade,
                 'batizado_aguas'  => $u->batizado_aguas,
+                'cidade'          => $u->familia?->cidade,
+                'familia'         => $u->familia?->nome,
                 'data_nascimento' => optional($u->data_nascimento)->format('Y-m-d'),
                 'grupos'          => $u->grupos->map(fn($g) => ['id' => $g->id, 'nome' => $g->nome])->values(),
             ]);
@@ -42,7 +46,9 @@ class MembroController extends Controller
 
     public function create()
     {
-        return Inertia::render('Admin/Membros/Form');
+        return Inertia::render('Admin/Membros/Form', [
+            'familias' => $this->familiasOptions(),
+        ]);
     }
 
     public function store(Request $request)
@@ -65,9 +71,9 @@ class MembroController extends Controller
             'membro' => $membro->only(
                 'id', 'name', 'email', 'telefone', 'data_nascimento',
                 'sexo', 'estado_civil', 'cpf',
-                'endereco', 'cidade', 'uf', 'cep',
-                'batizado_aguas',
+                'batizado_aguas', 'familia_id',
             ),
+            'familias' => $this->familiasOptions(),
         ]);
     }
 
@@ -96,8 +102,13 @@ class MembroController extends Controller
 
     private function validateData(Request $request, ?int $ignoreId = null): array
     {
+        $request->merge(['cpf' => Cpf::normalize($request->input('cpf'))]);
+
         $emailRule = 'nullable|email';
         $emailRule .= $ignoreId ? '|unique:users,email,' . $ignoreId : '|unique:users,email';
+
+        $cpfRule = 'nullable|string|max:14';
+        $cpfRule .= $ignoreId ? '|unique:users,cpf,' . $ignoreId : '|unique:users,cpf';
 
         return $request->validate([
             'name'            => 'required|string|max:100',
@@ -106,12 +117,19 @@ class MembroController extends Controller
             'data_nascimento' => 'nullable|date|before:today',
             'sexo'            => 'nullable|in:M,F',
             'estado_civil'    => 'nullable|string|max:30',
-            'cpf'             => 'nullable|string|max:14',
-            'endereco'        => 'nullable|string|max:255',
-            'cidade'          => 'nullable|string|max:80',
-            'uf'              => 'nullable|string|size:2',
-            'cep'             => 'nullable|string|max:10',
+            'cpf'             => $cpfRule,
             'batizado_aguas'  => 'nullable|boolean',
+            'familia_id'      => 'nullable|exists:familias,id',
         ]);
+    }
+
+    private function familiasOptions(): array
+    {
+        return Familia::with('responsavel:id,name')
+            ->get(['id', 'responsavel_id'])
+            ->map(fn($f) => ['id' => $f->id, 'nome' => $f->nome])
+            ->sortBy('nome')
+            ->values()
+            ->all();
     }
 }

@@ -59,30 +59,6 @@
              :class="[inputClass, form.errors.cpf && 'border-red-400']" />
       <p v-if="form.errors.cpf" class="mt-1 text-xs text-red-500">{{ form.errors.cpf }}</p>
     </div>
-
-    <div>
-      <label :class="labelClass">Endereço</label>
-      <input v-model="form.endereco" type="text" placeholder="Rua, número, complemento" :class="inputClass" />
-    </div>
-
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-      <div class="sm:col-span-2">
-        <label :class="labelClass">Cidade</label>
-        <input v-model="form.cidade" type="text" :class="inputClass" />
-      </div>
-
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label :class="labelClass">UF</label>
-          <input v-model="form.uf" type="text" maxlength="2"
-                 :class="[inputClass, 'uppercase']" />
-        </div>
-        <div>
-          <label :class="labelClass">CEP</label>
-          <input v-model="form.cep" type="text" placeholder="00000-000" :class="inputClass" />
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -91,7 +67,6 @@ defineProps({
   form: { type: Object, required: true },
   showEmail: { type: Boolean, default: true },
   showDataNascimento: { type: Boolean, default: true },
-  dark: { type: Boolean, default: false },
 })
 
 const labelClass = 'block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5'

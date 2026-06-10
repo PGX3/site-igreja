@@ -19,10 +19,23 @@
       <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6 shadow-sm space-y-6">
         <DadosPessoaisFields :form="form" />
 
-        <div class="pt-5 border-t border-gray-200 dark:border-slate-700">
-          <h2 class="text-sm font-bold tracking-widest uppercase text-gray-500 dark:text-slate-400 mb-4">
+        <div class="pt-5 border-t border-gray-200 dark:border-slate-700 space-y-5">
+          <h2 class="text-sm font-bold tracking-widest uppercase text-gray-500 dark:text-slate-400 mb-2">
             Dados pastorais
           </h2>
+
+          <div>
+            <label :class="labelClass">Família</label>
+            <select v-model="form.familia_id" :class="inputClass">
+              <option :value="null">Sem família vinculada</option>
+              <option v-for="f in familias" :key="f.id" :value="f.id">{{ f.nome }}</option>
+            </select>
+            <p class="mt-1 text-xs text-gray-400 dark:text-slate-500">
+              Para criar uma nova família, use a tela
+              <Link href="/admin/familias/create" class="text-blue-600 dark:text-blue-400 hover:underline">Nova Família</Link>.
+            </p>
+          </div>
+
           <div>
             <label :class="labelClass">Batizado nas águas?</label>
             <select v-model="form.batizado_aguas" :class="inputClass">
@@ -57,6 +70,7 @@ import { computed } from 'vue'
 
 const props = defineProps({
   membro: Object,
+  familias: { type: Array, default: () => [] },
 })
 
 const editando = computed(() => !!props.membro)
@@ -69,11 +83,8 @@ const form = useForm({
   sexo:            props.membro?.sexo            ?? '',
   estado_civil:    props.membro?.estado_civil    ?? '',
   cpf:             props.membro?.cpf             ?? '',
-  endereco:        props.membro?.endereco        ?? '',
-  cidade:          props.membro?.cidade          ?? '',
-  uf:              props.membro?.uf              ?? '',
-  cep:             props.membro?.cep             ?? '',
   batizado_aguas:  props.membro?.batizado_aguas  ?? null,
+  familia_id:      props.membro?.familia_id      ?? null,
 })
 
 const labelClass = 'block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5'

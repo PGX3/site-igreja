@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Familia;
 use App\Models\User;
+use App\Support\Cpf;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -42,6 +44,7 @@ class VisitanteController extends Controller
     {
         return Inertia::render('Admin/Visitantes/Form', [
             'convidadores' => $this->convidadoresOptions(),
+            'familias'     => $this->familiasOptions(),
         ]);
     }
 
@@ -65,9 +68,10 @@ class VisitanteController extends Controller
                 'id', 'name', 'telefone',
                 'como_conheceu', 'convidado_por_id',
                 'primeira_visita', 'observacoes_pastorais',
-                'batizado_aguas',
+                'batizado_aguas', 'familia_id',
             ),
             'convidadores' => $this->convidadoresOptions($visitante->id),
+            'familias'     => $this->familiasOptions(),
         ]);
     }
 
@@ -104,14 +108,18 @@ class VisitanteController extends Controller
 
     private function validateData(Request $request): array
     {
+        $request->merge(['cpf' => Cpf::normalize($request->input('cpf'))]);
+
         return $request->validate([
             'name'                  => 'required|string|max:100',
             'telefone'              => 'required|string|max:20',
+            'cpf'                   => 'nullable|string|max:14|unique:users,cpf',
             'como_conheceu'         => 'nullable|string|max:255',
             'convidado_por_id'      => 'nullable|exists:users,id',
             'primeira_visita'       => 'nullable|date|before_or_equal:today',
             'observacoes_pastorais' => 'nullable|string|max:2000',
             'batizado_aguas'        => 'nullable|boolean',
+            'familia_id'            => 'nullable|exists:familias,id',
         ]);
     }
 
@@ -123,6 +131,16 @@ class VisitanteController extends Controller
             ->orderBy('name')
             ->get(['id', 'name'])
             ->map(fn($u) => ['id' => $u->id, 'name' => $u->name])
+            ->all();
+    }
+
+    private function familiasOptions(): array
+    {
+        return Familia::with('responsavel:id,name')
+            ->get(['id', 'responsavel_id'])
+            ->map(fn($f) => ['id' => $f->id, 'nome' => $f->nome])
+            ->sortBy('nome')
+            ->values()
             ->all();
     }
 }
