@@ -31,7 +31,7 @@
             <Campo label="Telefone" required :error="form.errors.telefone">
               <input v-model="form.telefone" type="text" placeholder="(51) 99999-9999" :class="inputClass" />
             </Campo>
-            <Campo label="Data de nascimento" :error="form.errors.data_nascimento">
+            <Campo label="Data de nascimento" required :error="form.errors.data_nascimento">
               <input v-model="form.data_nascimento" type="date" :class="inputClass" />
             </Campo>
           </div>
@@ -100,9 +100,9 @@
               </select>
             </Campo>
 
-            <Campo label="Você é batizado nas águas?" :error="form.errors.batizado_aguas">
+            <Campo label="Você é batizado nas águas?" required :error="form.errors.batizado_aguas">
               <select v-model="form.batizado_aguas" :class="inputClass">
-                <option :value="null">Prefiro não informar</option>
+                <option :value="null" disabled>Selecione...</option>
                 <option :value="true">Sim</option>
                 <option :value="false">Não</option>
               </select>

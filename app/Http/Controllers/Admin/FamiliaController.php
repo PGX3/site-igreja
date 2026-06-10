@@ -256,11 +256,11 @@ class FamiliaController extends Controller
             'pessoas.*.telefone'        => 'required|string|max:20',
             'pessoas.*.email'           => 'nullable|email|distinct',
             'pessoas.*.cpf'             => 'nullable|string|max:14|distinct',
-            'pessoas.*.data_nascimento' => 'nullable|date|before:today',
+            'pessoas.*.data_nascimento' => 'required|date|before:today',
             'pessoas.*.sexo'            => 'nullable|in:M,F',
             'pessoas.*.estado_civil'    => 'nullable|string|max:30',
             'pessoas.*.tipo'            => 'required|in:membro,visitante',
-            'pessoas.*.batizado_aguas'  => 'nullable|boolean',
+            'pessoas.*.batizado_aguas'  => 'required|boolean',
             'pessoas.*.is_responsavel'  => 'nullable|boolean',
         ]);
 

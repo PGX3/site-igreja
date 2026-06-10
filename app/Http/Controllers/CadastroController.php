@@ -27,7 +27,7 @@ class CadastroController extends Controller
         $data = $request->validate([
             'name'            => 'required|string|max:100',
             'telefone'        => 'required|string|max:20',
-            'data_nascimento' => 'nullable|date|before:today',
+            'data_nascimento' => 'required|date|before:today',
             'sexo'            => 'nullable|in:M,F',
             'estado_civil'    => 'nullable|string|max:30',
             'cpf'             => 'nullable|string|max:14|unique:users,cpf',
@@ -38,7 +38,7 @@ class CadastroController extends Controller
             'como_conheceu'   => 'nullable|string|max:255',
             'primeira_visita' => 'nullable|date|before_or_equal:today',
             'tipo'            => 'required|in:membro,visitante',
-            'batizado_aguas'  => 'nullable|boolean',
+            'batizado_aguas'  => 'required|boolean',
         ]);
 
         DB::transaction(function () use ($data) {

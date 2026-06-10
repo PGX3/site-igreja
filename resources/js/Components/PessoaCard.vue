@@ -68,7 +68,7 @@
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
-          <label :class="labelClass">Data de nascimento</label>
+          <label :class="labelClass">Data de nascimento *</label>
           <input v-model="pessoa.data_nascimento" type="date"
                  :class="[inputClass, errors.data_nascimento && 'border-red-400']" />
           <p v-if="errors.data_nascimento" class="mt-1 text-xs text-red-500">{{ errors.data_nascimento }}</p>
@@ -122,12 +122,14 @@
           </div>
         </div>
         <div>
-          <label :class="labelClass">Batizado nas águas?</label>
-          <select v-model="pessoa.batizado_aguas" :class="inputClass">
-            <option :value="null">Não informado</option>
+          <label :class="labelClass">Batizado nas águas? *</label>
+          <select v-model="pessoa.batizado_aguas"
+                  :class="[inputClass, errors.batizado_aguas && 'border-red-400']">
+            <option :value="null" disabled>Selecione...</option>
             <option :value="true">Sim</option>
             <option :value="false">Não</option>
           </select>
+          <p v-if="errors.batizado_aguas" class="mt-1 text-xs text-red-500">{{ errors.batizado_aguas }}</p>
         </div>
       </div>
     </div>

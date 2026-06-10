@@ -114,11 +114,11 @@ class MembroController extends Controller
             'name'            => 'required|string|max:100',
             'email'           => $emailRule,
             'telefone'        => 'required|string|max:20',
-            'data_nascimento' => 'nullable|date|before:today',
+            'data_nascimento' => 'required|date|before:today',
             'sexo'            => 'nullable|in:M,F',
             'estado_civil'    => 'nullable|string|max:30',
             'cpf'             => $cpfRule,
-            'batizado_aguas'  => 'nullable|boolean',
+            'batizado_aguas'  => 'required|boolean',
             'familia_id'      => 'nullable|exists:familias,id',
         ]);
     }

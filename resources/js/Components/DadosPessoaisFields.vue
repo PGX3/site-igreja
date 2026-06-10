@@ -25,7 +25,7 @@
 
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
       <div v-if="showDataNascimento">
-        <label :class="labelClass">Data de Nascimento</label>
+        <label :class="labelClass">Data de Nascimento *</label>
         <input v-model="form.data_nascimento" type="date"
                :class="[inputClass, form.errors.data_nascimento && 'border-red-400']" />
         <p v-if="form.errors.data_nascimento" class="mt-1 text-xs text-red-500">{{ form.errors.data_nascimento }}</p>
