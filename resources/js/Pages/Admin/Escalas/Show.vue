@@ -40,6 +40,32 @@
       {{ escala.descricao }}
     </div>
 
+    <!-- VÍNCULO -->
+    <div v-if="escala.culto || escala.evento"
+         class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-5 shadow-sm mb-6 flex items-center gap-4">
+      <div :class="escala.culto
+            ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400'
+            : 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400'"
+           class="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full">
+        {{ escala.culto ? 'Culto' : 'Evento' }}
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-gray-900 dark:text-white text-sm">
+          {{ escala.culto?.nome || escala.evento?.nome }}
+        </p>
+        <p class="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
+          <template v-if="escala.culto">
+            Toda {{ escala.culto.dia_semana?.toLowerCase() }} · {{ escala.culto.horario }}
+          </template>
+          <template v-else-if="escala.evento">
+            {{ formatarData(escala.evento.data_evento) }}
+            <span v-if="escala.evento.horario"> · {{ escala.evento.horario }}</span>
+            <span v-if="escala.evento.local"> · {{ escala.evento.local }}</span>
+          </template>
+        </p>
+      </div>
+    </div>
+
     <!-- RESUMO MEMBROS -->
     <div class="grid grid-cols-3 gap-4 mb-8">
       <div v-for="stat in membroStats" :key="stat.label"

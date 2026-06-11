@@ -51,6 +51,55 @@
         <p v-if="form.errors.grupo_id" class="mt-1 text-xs text-red-500">{{ form.errors.grupo_id }}</p>
       </div>
 
+      <!-- Vínculo (opcional) -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">
+          Vínculo <span class="text-gray-400 dark:text-slate-500 font-normal">(opcional)</span>
+        </label>
+
+        <div class="inline-flex rounded-lg border border-gray-200 dark:border-slate-600 overflow-hidden mb-2 text-sm">
+          <button type="button" @click="setTipoVinculo('nenhum')"
+                  :class="['px-4 py-2 transition', tipoVinculo === 'nenhum'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white dark:bg-slate-700 text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-600']">
+            Nenhum
+          </button>
+          <button type="button" @click="setTipoVinculo('culto')"
+                  :class="['px-4 py-2 border-l border-gray-200 dark:border-slate-600 transition', tipoVinculo === 'culto'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white dark:bg-slate-700 text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-600']">
+            Culto
+          </button>
+          <button type="button" @click="setTipoVinculo('evento')"
+                  :class="['px-4 py-2 border-l border-gray-200 dark:border-slate-600 transition', tipoVinculo === 'evento'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white dark:bg-slate-700 text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-600']">
+            Evento
+          </button>
+        </div>
+
+        <select v-if="tipoVinculo === 'culto'" v-model="form.culto_id"
+                class="w-full border border-gray-200 dark:border-slate-600 rounded-lg px-4 py-2.5 text-sm
+                       bg-white dark:bg-slate-700 text-gray-900 dark:text-white
+                       focus:outline-none focus:ring-2 focus:ring-blue-500"
+                :class="{ 'border-red-400': form.errors.culto_id }">
+          <option value="">Selecione o culto...</option>
+          <option v-for="c in cultos" :key="c.id" :value="c.id">{{ c.label }}</option>
+        </select>
+
+        <select v-if="tipoVinculo === 'evento'" v-model="form.evento_id"
+                class="w-full border border-gray-200 dark:border-slate-600 rounded-lg px-4 py-2.5 text-sm
+                       bg-white dark:bg-slate-700 text-gray-900 dark:text-white
+                       focus:outline-none focus:ring-2 focus:ring-blue-500"
+                :class="{ 'border-red-400': form.errors.evento_id }">
+          <option value="">Selecione o evento...</option>
+          <option v-for="e in eventos" :key="e.id" :value="e.id">{{ e.label }}</option>
+        </select>
+
+        <p v-if="form.errors.culto_id" class="mt-1 text-xs text-red-500">{{ form.errors.culto_id }}</p>
+        <p v-if="form.errors.evento_id" class="mt-1 text-xs text-red-500">{{ form.errors.evento_id }}</p>
+      </div>
+
       <!-- Data e Horários -->
       <div class="grid grid-cols-3 gap-4">
         <div>
@@ -148,11 +197,13 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import { Link, useForm } from '@inertiajs/vue3'
-import { computed, reactive, onMounted } from 'vue'
+import { computed, reactive, ref, onMounted } from 'vue'
 
 const props = defineProps({
-  grupos: Array,
-  escala: Object,
+  grupos:  Array,
+  cultos:  { type: Array, default: () => [] },
+  eventos: { type: Array, default: () => [] },
+  escala:  Object,
 })
 
 const editando = computed(() => !!props.escala)
@@ -165,8 +216,22 @@ const form = useForm({
   hora_fim:     props.escala?.hora_fim    ?? '',
   status:       props.escala?.status      ?? 'pendente',
   grupo_id:     props.escala?.grupo_id    ?? '',
+  culto_id:     props.escala?.culto_id    ?? '',
+  evento_id:    props.escala?.evento_id   ?? '',
   membros:      props.escala?.membros     ?? [],
 })
+
+const tipoVinculo = ref(
+  props.escala?.culto_id ? 'culto'
+    : props.escala?.evento_id ? 'evento'
+    : 'nenhum'
+)
+
+function setTipoVinculo(tipo) {
+  tipoVinculo.value = tipo
+  if (tipo !== 'culto')  form.culto_id  = ''
+  if (tipo !== 'evento') form.evento_id = ''
+}
 
 const membrosLocal = reactive(
   (props.escala?.membros ?? []).map(m => ({ user_id: m.user_id, funcao: m.funcao ?? '' }))
@@ -211,6 +276,8 @@ function submit() {
     hora_fim:    d.hora_fim,
     status:      d.status,
     grupo_id:    d.grupo_id,
+    culto_id:    d.culto_id  || null,
+    evento_id:   d.evento_id || null,
     membros:     d.membros,
   }))
   if (editando.value) {

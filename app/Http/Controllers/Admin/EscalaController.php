@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Culto;
 use App\Models\Escala;
 use App\Models\EscalaMembro;
+use App\Models\Evento;
 use App\Models\Grupo;
 use App\Models\User;
+use Carbon\Carbon;
 use App\Notifications\EscalaConvite;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -17,7 +20,7 @@ class EscalaController extends Controller
     public function index()
     {
         $user  = auth()->user();
-        $query = Escala::with(['grupo', 'createdBy'])
+        $query = Escala::with(['grupo', 'createdBy', 'culto', 'evento'])
             ->withCount('escalaMembros')
             ->withCount(['escalaMembros as confirmados_count' => fn($q) => $q->where('status', 'confirmado')])
             ->latest('data');
@@ -37,6 +40,7 @@ class EscalaController extends Controller
             'created_by'       => $e->createdBy?->only('id', 'name'),
             'total_membros'    => $e->escala_membros_count,
             'confirmados'      => $e->confirmados_count,
+            'vinculo'          => $this->vinculoLabel($e),
         ]);
 
         return Inertia::render('Admin/Escalas/Index', compact('escalas'));
@@ -49,7 +53,11 @@ class EscalaController extends Controller
             ? Grupo::with(['membros' => fn($q) => $q->select('users.id', 'users.name')])->get(['id', 'nome'])
             : Grupo::with(['membros' => fn($q) => $q->select('users.id', 'users.name')])->whereIn('id', $user->grupoIds())->get(['id', 'nome']);
 
-        return Inertia::render('Admin/Escalas/Form', compact('grupos'));
+        return Inertia::render('Admin/Escalas/Form', [
+            'grupos'  => $grupos,
+            'cultos'  => $this->cultosOpcoes(),
+            'eventos' => $this->eventosOpcoes(),
+        ]);
     }
 
     public function store(Request $request)
@@ -63,6 +71,8 @@ class EscalaController extends Controller
             'hora_inicio' => 'required',
             'hora_fim'    => 'required',
             'grupo_id'    => 'required|exists:grupos,id',
+            'culto_id'    => 'nullable|exists:cultos,id',
+            'evento_id'   => 'nullable|exists:eventos,id',
             'membros'     => 'nullable|array',
             'membros.*.user_id' => 'exists:users,id',
             'membros.*.funcao'  => 'nullable|string|max:100',
@@ -72,7 +82,13 @@ class EscalaController extends Controller
             'hora_inicio' => 'horário de início',
             'hora_fim'    => 'horário de fim',
             'grupo_id'    => 'grupo',
+            'culto_id'    => 'culto',
+            'evento_id'   => 'evento',
         ]);
+
+        if (!empty($data['culto_id']) && !empty($data['evento_id'])) {
+            return back()->withErrors(['culto_id' => 'Selecione apenas um vínculo: culto OU evento.'])->withInput();
+        }
 
         if ($user->isLider() && !in_array((int) $data['grupo_id'], $user->grupoIds())) {
             abort(403);
@@ -120,6 +136,8 @@ class EscalaController extends Controller
         $escala->load([
             'grupo',
             'createdBy',
+            'culto',
+            'evento',
             'escalaMembros.user',
         ]);
 
@@ -134,6 +152,19 @@ class EscalaController extends Controller
                 'status'      => $escala->status,
                 'grupo'       => $escala->grupo?->only('id', 'nome'),
                 'created_by'  => $escala->createdBy?->only('id', 'name'),
+                'culto'       => $escala->culto ? [
+                    'id'         => $escala->culto->id,
+                    'nome'       => $escala->culto->nome,
+                    'dia_semana' => $escala->culto->dia_semana,
+                    'horario'    => $escala->culto->horario,
+                ] : null,
+                'evento'      => $escala->evento ? [
+                    'id'          => $escala->evento->id,
+                    'nome'        => $escala->evento->nome,
+                    'data_evento' => $escala->evento->data_evento?->format('Y-m-d'),
+                    'horario'     => $escala->evento->horario,
+                    'local'       => $escala->evento->local,
+                ] : null,
                 'membros'     => $escala->escalaMembros->map(fn($em) => [
                     'id'           => $em->id,
                     'user'         => $em->user?->only('id', 'name', 'email'),
@@ -160,8 +191,10 @@ class EscalaController extends Controller
         $escala->load('escalaMembros');
 
         return Inertia::render('Admin/Escalas/Form', [
-            'grupos' => $grupos,
-            'escala' => [
+            'grupos'  => $grupos,
+            'cultos'  => $this->cultosOpcoes(),
+            'eventos' => $this->eventosOpcoes(),
+            'escala'  => [
                 'id'          => $escala->id,
                 'titulo'      => $escala->titulo,
                 'descricao'   => $escala->descricao,
@@ -170,6 +203,8 @@ class EscalaController extends Controller
                 'hora_fim'    => $escala->hora_fim ? substr($escala->hora_fim, 0, 5) : '',
                 'status'      => $escala->status,
                 'grupo_id'    => $escala->grupo_id,
+                'culto_id'    => $escala->culto_id,
+                'evento_id'   => $escala->evento_id,
                 'membros'     => $escala->escalaMembros->map(fn($em) => [
                     'user_id' => $em->user_id,
                     'funcao'  => $em->funcao,
@@ -192,6 +227,8 @@ class EscalaController extends Controller
             'hora_inicio' => 'required',
             'hora_fim'    => 'required',
             'grupo_id'    => 'required|exists:grupos,id',
+            'culto_id'    => 'nullable|exists:cultos,id',
+            'evento_id'   => 'nullable|exists:eventos,id',
             'status'      => 'required|in:pendente,confirmada,em_andamento,concluida,cancelada',
             'membros'     => 'nullable|array',
             'membros.*.user_id' => 'exists:users,id',
@@ -202,8 +239,14 @@ class EscalaController extends Controller
             'hora_inicio' => 'horário de início',
             'hora_fim'    => 'horário de fim',
             'grupo_id'    => 'grupo',
+            'culto_id'    => 'culto',
+            'evento_id'   => 'evento',
             'status'      => 'status',
         ]);
+
+        if (!empty($data['culto_id']) && !empty($data['evento_id'])) {
+            return back()->withErrors(['culto_id' => 'Selecione apenas um vínculo: culto OU evento.'])->withInput();
+        }
 
         if ($user->isLider() && !in_array((int) $data['grupo_id'], $user->grupoIds())) {
             abort(403);
@@ -257,5 +300,42 @@ class EscalaController extends Controller
         $escala->delete();
         return redirect()->route('admin.escalas.index')
             ->with('success', 'Escala excluída!');
+    }
+
+    private function cultosOpcoes()
+    {
+        return Culto::where('ativo', true)
+            ->orderBy('nome')
+            ->get(['id', 'nome', 'dia_semana', 'horario'])
+            ->map(fn ($c) => [
+                'id'    => $c->id,
+                'nome'  => $c->nome,
+                'label' => $c->nome . ' · ' . $c->dia_semana . ' ' . $c->horario,
+            ]);
+    }
+
+    private function eventosOpcoes()
+    {
+        return Evento::where('ativo', true)
+            ->whereDate('data_evento', '>=', Carbon::today())
+            ->orderBy('data_evento')
+            ->get(['id', 'nome', 'data_evento', 'horario'])
+            ->map(fn ($e) => [
+                'id'    => $e->id,
+                'nome'  => $e->nome,
+                'label' => $e->nome . ' · ' . $e->data_evento->format('d/m/Y')
+                    . ($e->horario ? ' ' . $e->horario : ''),
+            ]);
+    }
+
+    private function vinculoLabel(Escala $e): ?array
+    {
+        if ($e->culto) {
+            return ['tipo' => 'culto', 'nome' => $e->culto->nome];
+        }
+        if ($e->evento) {
+            return ['tipo' => 'evento', 'nome' => $e->evento->nome];
+        }
+        return null;
     }
 }

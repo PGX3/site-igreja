@@ -8,7 +8,8 @@ class Escala extends Model
 {
     protected $fillable = [
         'titulo', 'descricao', 'data', 'hora_inicio', 'hora_fim',
-        'status', 'grupo_id', 'created_by', 'updated_by',
+        'status', 'grupo_id', 'culto_id', 'evento_id',
+        'created_by', 'updated_by',
     ];
 
     protected $casts = [
@@ -18,6 +19,16 @@ class Escala extends Model
     public function grupo()
     {
         return $this->belongsTo(Grupo::class);
+    }
+
+    public function culto()
+    {
+        return $this->belongsTo(Culto::class);
+    }
+
+    public function evento()
+    {
+        return $this->belongsTo(Evento::class);
     }
 
     public function createdBy()

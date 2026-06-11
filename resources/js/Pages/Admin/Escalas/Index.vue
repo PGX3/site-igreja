@@ -53,8 +53,15 @@
               {{ statusLabel(e.status) }}
             </span>
           </div>
-          <p class="text-xs text-gray-400 dark:text-slate-500">
-            {{ e.grupo?.nome }} · {{ e.hora_inicio }} – {{ e.hora_fim }}
+          <p class="text-xs text-gray-400 dark:text-slate-500 flex items-center gap-2 flex-wrap">
+            <span>{{ e.grupo?.nome }} · {{ e.hora_inicio }} – {{ e.hora_fim }}</span>
+            <span v-if="e.vinculo"
+                  :class="e.vinculo.tipo === 'culto'
+                    ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800'
+                    : 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-800'"
+                  class="text-[10px] font-semibold px-2 py-0.5 rounded-full border">
+              {{ e.vinculo.tipo === 'culto' ? 'Culto' : 'Evento' }}: {{ e.vinculo.nome }}
+            </span>
           </p>
         </div>
 
