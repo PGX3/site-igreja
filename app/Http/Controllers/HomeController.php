@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Culto;
 use App\Models\Evento;
 use App\Models\Texto;
+use App\Services\CultoProximaDataResolver;
 use Carbon\Carbon;
 use Inertia\Inertia;
 
@@ -38,22 +39,13 @@ class HomeController extends Controller
         ]);
     }
 
-    public function showCulto(Culto $culto)
+    public function showCulto(Culto $culto, CultoProximaDataResolver $resolver)
     {
-        $diasPt = [
-            'Domingo' => 0, 'Segunda' => 1, 'Terça' => 2,
-            'Quarta'  => 3, 'Quinta'  => 4, 'Sexta' => 5, 'Sábado' => 6,
-        ];
-
         $meses     = self::meses();
         $diasNomes = self::diasNomes();
 
-        $diaAlvo  = $diasPt[$culto->dia_semana] ?? 0;
-        $hoje     = Carbon::today();
-        $diff     = ($diaAlvo - (int) $hoje->format('w') + 7) % 7;
-        $proxData = $hoje->copy()->addDays($diff ?: 7);
-
-        $nomeMes = $meses[$proxData->month];
+        $proxData = $resolver->resolve($culto);
+        $nomeMes  = $meses[$proxData->month];
         $nomeDia = $diasNomes[$proxData->dayOfWeek];
 
         return Inertia::render('CultoDetalhe', [

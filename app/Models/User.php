@@ -5,10 +5,11 @@ namespace App\Models;
 use App\Support\Cpf;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use Notifiable;
+    use HasApiTokens, Notifiable;
 
     // role  = nível de acesso administrativo (pastor/lider/membro)
     // tipo  = classificação pastoral (membro/visitante)
@@ -28,6 +29,7 @@ class User extends Authenticatable
         'data_nascimento'   => 'date',
         'primeira_visita'   => 'date',
         'batizado_aguas'    => 'boolean',
+        'disponibilidade'   => 'array',
         'password'          => 'hashed',
     ];
 
@@ -76,6 +78,16 @@ class User extends Authenticatable
     public function familia()
     {
         return $this->belongsTo(Familia::class);
+    }
+
+    public function deviceTokens()
+    {
+        return $this->hasMany(DeviceToken::class);
+    }
+
+    public function routeNotificationForFcm(): array
+    {
+        return $this->deviceTokens()->pluck('token')->all();
     }
 
     public function scopeMembros($q)    { return $q->where('tipo', 'membro'); }

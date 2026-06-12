@@ -57,6 +57,8 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
         Route::resource('escalas', EscalaController::class);
 
         Route::resource('membros', MembroController::class);
+        Route::post('membros/{membro}/gerar-senha', [MembroController::class, 'gerarSenha'])
+            ->name('membros.gerar-senha');
         Route::resource('visitantes', VisitanteController::class);
         Route::post('visitantes/{visitante}/promover', [VisitanteController::class, 'promoverParaMembro'])
             ->name('visitantes.promover');

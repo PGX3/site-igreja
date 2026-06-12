@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Sugestao;
-use App\Models\PedidoOracao;
+use App\Services\ContatoService;
 use App\Services\HCaptchaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 
 class ContatoController extends Controller
 {
-    public function __construct(private HCaptchaService $captcha) {}
+    public function __construct(
+        private HCaptchaService $captcha,
+        private ContatoService $contatos,
+    ) {}
 
     public function sugestao(Request $request)
     {
@@ -43,7 +45,7 @@ class ContatoController extends Controller
             'email.email'       => 'Informe um e-mail válido.',
         ]);
 
-        Sugestao::create($validated);
+        $this->contatos->criarSugestao($validated);
 
         return back()->with('sucesso_sugestao', 'Sua sugestão foi enviada com sucesso. Obrigado!');
     }
@@ -78,11 +80,7 @@ class ContatoController extends Controller
             'pedido.min'      => 'Descreva melhor seu pedido (mínimo 10 caracteres).',
         ]);
 
-        if ($validated['anonimo'] ?? false) {
-            $validated['nome'] = 'Anônimo';
-        }
-
-        PedidoOracao::create($validated);
+        $this->contatos->criarPedidoOracao($validated);
 
         return back()->with('sucesso_oracao', 'Seu pedido foi recebido. Estaremos orando por você. 🙏');
     }

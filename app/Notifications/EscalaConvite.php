@@ -2,7 +2,9 @@
 
 namespace App\Notifications;
 
+use App\Channels\FcmChannel;
 use App\Models\Escala;
+use App\Notifications\Messages\FcmMessage;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -15,7 +17,32 @@ class EscalaConvite extends Notification
 
     public function via(mixed $notifiable): array
     {
-        return ['mail'];
+        $channels = ['mail'];
+
+        if (method_exists($notifiable, 'routeNotificationForFcm')
+            && ! empty($notifiable->routeNotificationForFcm())) {
+            $channels[] = FcmChannel::class;
+        }
+
+        return $channels;
+    }
+
+    public function toFcm(mixed $notifiable): FcmMessage
+    {
+        $escala = $this->escala;
+        $data   = $escala->data?->format('d/m/Y') ?? '';
+        $inicio = substr((string) $escala->hora_inicio, 0, 5);
+
+        $body = "📅 {$data} às {$inicio}";
+        if ($this->funcao) {
+            $body .= " · 🎯 {$this->funcao}";
+        }
+
+        return FcmMessage::make("Nova escala: {$escala->titulo}", $body)
+            ->withData([
+                'type'      => 'escala',
+                'escala_id' => $escala->id,
+            ]);
     }
 
     public function toMail(mixed $notifiable): MailMessage

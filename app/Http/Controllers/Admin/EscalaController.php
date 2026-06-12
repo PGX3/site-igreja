@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Events\MembroAdicionadoEscala;
 use App\Http\Controllers\Controller;
 use App\Models\Culto;
 use App\Models\Escala;
@@ -10,7 +11,6 @@ use App\Models\Evento;
 use App\Models\Grupo;
 use App\Models\User;
 use Carbon\Carbon;
-use App\Notifications\EscalaConvite;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
@@ -109,16 +109,12 @@ class EscalaController extends Controller
             ]);
         }
 
-        // Enviar notificações
+        // Enviar notificações (e-mail + push) via evento
         $escala->load('grupo');
         foreach ($membrosRequest as $membro) {
             $notificado = User::find($membro['user_id']);
             if ($notificado) {
-                try {
-                    $notificado->notify(new EscalaConvite($escala, $membro['funcao'] ?? null));
-                } catch (\Throwable $e) {
-                    Log::warning("Notificação falhou [user {$notificado->id}]: {$e->getMessage()}");
-                }
+                event(new MembroAdicionadoEscala($notificado, $escala, $membro['funcao'] ?? null));
             }
         }
 
@@ -268,7 +264,7 @@ class EscalaController extends Controller
             );
         }
 
-        // Notificar apenas os membros recem-adicionados
+        // Notificar apenas os membros recem-adicionados via evento
         $addedIds = array_diff($newIds, $existingIds);
         if (count($addedIds)) {
             $escala->load('grupo');
@@ -276,12 +272,7 @@ class EscalaController extends Controller
             foreach ($addedIds as $userId) {
                 $notificado = User::find($userId);
                 if ($notificado) {
-                    try {
-                        $funcao = $membrosMap[$userId]['funcao'] ?? null;
-                        $notificado->notify(new EscalaConvite($escala, $funcao));
-                    } catch (\Throwable $e) {
-                        Log::warning("Notificação falhou [user {$userId}]: {$e->getMessage()}");
-                    }
+                    event(new MembroAdicionadoEscala($notificado, $escala, $membrosMap[$userId]['funcao'] ?? null));
                 }
             }
         }

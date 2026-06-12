@@ -7,6 +7,7 @@ use App\Models\Familia;
 use App\Models\User;
 use App\Support\Cpf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 
 class MembroController extends Controller
@@ -101,6 +102,27 @@ class MembroController extends Controller
 
         return redirect()->route('admin.membros.index')
             ->with('success', 'Membro removido!');
+    }
+
+    public function gerarSenha(User $membro)
+    {
+        abort_unless($membro->tipo === 'membro', 404);
+        if ($membro->is_superadmin) abort(403);
+
+        $alfabeto = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        $senha    = '';
+        for ($i = 0; $i < 8; $i++) {
+            $senha .= $alfabeto[random_int(0, strlen($alfabeto) - 1)];
+        }
+
+        $membro->password = Hash::make($senha);
+        $membro->save();
+        $membro->tokens()->delete();
+
+        return back()->with('senhaGerada', [
+            'membro' => $membro->name,
+            'senha'  => $senha,
+        ]);
     }
 
     private function validateData(Request $request, ?int $ignoreId = null): array

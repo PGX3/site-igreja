@@ -52,6 +52,10 @@
                   class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-2.5 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
               Editar
             </Link>
+            <button @click="paraGerarSenha = m"
+                    class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 px-2.5 py-1.5 rounded hover:bg-amber-50 dark:hover:bg-amber-900/20 transition">
+              Senha
+            </button>
             <button @click="paraExcluir = m"
                     class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-red-600 px-2.5 py-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
               Excluir
@@ -162,6 +166,10 @@
                   class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
               Editar
             </Link>
+            <button @click="paraGerarSenha = m"
+                    class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 px-3 py-1.5 rounded hover:bg-amber-50 dark:hover:bg-amber-900/20 transition">
+              Senha
+            </button>
             <button @click="paraExcluir = m"
                     class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-red-600 px-3 py-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
               Excluir
@@ -192,21 +200,92 @@
       </div>
     </div>
 
+    <!-- MODAL CONFIRMAÇÃO GERAR SENHA -->
+    <div v-if="paraGerarSenha"
+         class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div class="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-xl max-w-sm w-full mx-4">
+        <h3 class="font-bold text-gray-900 dark:text-white mb-2">Gerar nova senha?</h3>
+        <p class="text-sm text-gray-500 dark:text-slate-400 mb-6">
+          Uma senha nova de 8 caracteres será gerada para <strong>{{ paraGerarSenha.name }}</strong>. A senha atual (se houver) e qualquer sessão ativa no app serão invalidadas.
+        </p>
+        <div class="flex gap-3 justify-end">
+          <button @click="paraGerarSenha = null"
+                  class="px-4 py-2 text-sm font-semibold text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition">
+            Cancelar
+          </button>
+          <Link :href="`/admin/membros/${paraGerarSenha.id}/gerar-senha`" method="post" as="button"
+                @success="paraGerarSenha = null"
+                preserve-scroll
+                class="px-4 py-2 text-sm font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-lg transition">
+            Gerar senha
+          </Link>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL EXIBIR SENHA GERADA -->
+    <div v-if="senhaGerada"
+         class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div class="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-xl max-w-sm w-full mx-4">
+        <h3 class="font-bold text-gray-900 dark:text-white mb-2">Senha gerada</h3>
+        <p class="text-sm text-gray-500 dark:text-slate-400 mb-4">
+          Senha temporária de <strong>{{ senhaGerada.membro }}</strong>. Copie agora e entregue, ela não será exibida novamente.
+        </p>
+        <div class="flex items-center gap-2 mb-6">
+          <code class="flex-1 font-mono text-lg font-bold text-center py-3 px-4 rounded-lg bg-gray-100 dark:bg-slate-900 text-gray-900 dark:text-white tracking-widest">
+            {{ senhaGerada.senha }}
+          </code>
+          <button @click="copiarSenha"
+                  class="px-3 py-3 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition">
+            {{ copiado ? 'Copiado!' : 'Copiar' }}
+          </button>
+        </div>
+        <div class="flex justify-end">
+          <button @click="fecharSenhaGerada"
+                  class="px-4 py-2 text-sm font-semibold text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition">
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+
   </AdminLayout>
 </template>
 
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue'
-import { Link } from '@inertiajs/vue3'
-import { ref, computed } from 'vue'
+import { Link, usePage } from '@inertiajs/vue3'
+import { ref, computed, watch } from 'vue'
 
 const props = defineProps({
   membros: Array,
   busca: String,
 })
 
+const page = usePage()
 const termo = ref(props.busca ?? '')
 const paraExcluir = ref(null)
+const paraGerarSenha = ref(null)
+const senhaGerada = ref(null)
+const copiado = ref(false)
+
+watch(
+  () => page.props.flash?.senhaGerada,
+  (nova) => { if (nova) senhaGerada.value = nova },
+  { immediate: true },
+)
+
+function copiarSenha() {
+  if (!senhaGerada.value) return
+  navigator.clipboard.writeText(senhaGerada.value.senha)
+  copiado.value = true
+  setTimeout(() => { copiado.value = false }, 2000)
+}
+
+function fecharSenhaGerada() {
+  senhaGerada.value = null
+  copiado.value = false
+}
 
 const membrosFiltrados = computed(() => {
   if (!termo.value) return props.membros
