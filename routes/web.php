@@ -66,7 +66,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     // Apenas Pastor: grupos, cultos, textos, sugestões, pedidos, usuários
     Route::middleware('role:pastor')->group(function () {
         Route::resource('grupos', GrupoController::class);
-        Route::resource('usuarios', UserController::class);
+        Route::resource('usuarios', UserController::class)->except(['show']);
         Route::put('usuarios/{usuario}/senha', [UserController::class, 'alterarSenha'])->name('usuarios.senha');
         Route::resource('cultos', CultoController::class);
         Route::resource('eventos', EventoController::class);

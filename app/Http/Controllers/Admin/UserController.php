@@ -118,7 +118,7 @@ class UserController extends Controller
 
         $usuario->update(['password' => Hash::make($data['password'])]);
 
-        return back()->with('success', "Senha de {$usuario->name} alterada com sucesso!");
+        return redirect()->route('admin.usuarios.index')->with('success', "Senha de {$usuario->name} alterada com sucesso!");
     }
 
     public function destroy(User $usuario)
