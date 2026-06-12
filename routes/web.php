@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\MembroController;
 use App\Http\Controllers\Admin\VisitanteController;
 use App\Http\Controllers\Admin\FamiliaController;
+use App\Http\Controllers\Admin\MinhaSenhaController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/cultos/{culto}', [HomeController::class, 'showCulto'])->name('cultos.show');
@@ -46,6 +47,8 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 
     // Todas as roles: ver suas próprias escalas e confirmar/recusar
     Route::get('minhas-escalas', [EscalaMembroController::class, 'index'])->name('minhas-escalas.index');
+    Route::get('minha-senha', [MinhaSenhaController::class, 'edit'])->name('minha-senha.edit');
+    Route::put('minha-senha', [MinhaSenhaController::class, 'update'])->name('minha-senha.update');
     Route::patch('escala-membros/{escalaMembro}/confirmar', [EscalaMembroController::class, 'confirmar'])->name('escala-membros.confirmar');
     Route::patch('escala-membros/{escalaMembro}/recusar', [EscalaMembroController::class, 'recusar'])->name('escala-membros.recusar');
 
@@ -64,6 +67,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::middleware('role:pastor')->group(function () {
         Route::resource('grupos', GrupoController::class);
         Route::resource('usuarios', UserController::class);
+        Route::put('usuarios/{usuario}/senha', [UserController::class, 'alterarSenha'])->name('usuarios.senha');
         Route::resource('cultos', CultoController::class);
         Route::resource('eventos', EventoController::class);
         Route::resource('textos', TextoController::class);

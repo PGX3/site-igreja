@@ -104,6 +104,18 @@
                 </div>
 
                 <Link
+                    href="/admin/minha-senha"
+                    @click="sidebarOpen = false"
+                    class="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-[13px] font-medium transition-colors"
+                    :class="page.url.startsWith('/admin/minha-senha')
+                        ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-semibold'
+                        : 'text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800'"
+                >
+                    <AppIcon name="lock" size="sm" />
+                    Alterar Senha
+                </Link>
+
+                <Link
                     href="/logout"
                     method="post"
                     as="button"
@@ -220,6 +232,7 @@ const routeTitles = {
     "/admin/sugestoes": "Sugestões",
     "/admin/pedidos-oracao": "Pedidos de Oração",
     "/admin/minhas-escalas": "Minhas Escalas",
+    "/admin/minha-senha": "Alterar Senha",
 };
 
 const pageTitle = computed(() => {

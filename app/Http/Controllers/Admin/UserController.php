@@ -105,6 +105,19 @@ class UserController extends Controller
             ->with('success', 'Usuário atualizado!');
     }
 
+    public function alterarSenha(Request $request, User $usuario)
+    {
+        if ($usuario->is_superadmin) abort(403);
+
+        $data = $request->validate([
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        $usuario->update(['password' => Hash::make($data['password'])]);
+
+        return back()->with('success', "Senha de {$usuario->name} alterada com sucesso!");
+    }
+
     public function destroy(User $usuario)
     {
         if ($usuario->is_superadmin) abort(403);
