@@ -35,38 +35,37 @@
       <!-- CARDS (mobile) -->
       <div class="sm:hidden space-y-3">
         <div v-for="g in grupos" :key="g.id"
-             class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-4 shadow-sm">
-          <!-- Nome + ações -->
-          <div class="flex items-start justify-between gap-2 mb-2">
-            <div class="min-w-0">
-              <p class="font-semibold text-gray-900 dark:text-white truncate">{{ g.nome }}</p>
-              <p v-if="g.descricao" class="text-xs text-gray-400 dark:text-slate-500 mt-0.5 truncate">{{ g.descricao }}</p>
-            </div>
-            <div class="flex gap-1 flex-shrink-0">
-              <Link :href="`/admin/grupos/${g.id}/edit`"
-                    class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-2.5 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
-                Editar
-              </Link>
-              <button @click="confirmarExclusao(g)"
-                      class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-red-600 px-2.5 py-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
-                Excluir
-              </button>
+             class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden">
+          <!-- Info -->
+          <div class="p-4">
+            <p class="font-semibold text-gray-900 dark:text-white">{{ g.nome }}</p>
+            <p v-if="g.descricao" class="text-xs text-gray-400 dark:text-slate-500 mt-0.5">{{ g.descricao }}</p>
+            <!-- Líder + contadores -->
+            <div class="flex items-center justify-between mt-3">
+              <span class="text-xs text-gray-500 dark:text-slate-400">
+                <span v-if="g.lider">{{ g.lider.name }}</span>
+                <span v-else class="italic text-gray-300 dark:text-slate-600">Sem líder</span>
+              </span>
+              <div class="flex gap-2">
+                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300">
+                  {{ g.total_membros }} membro{{ g.total_membros !== 1 ? 's' : '' }}
+                </span>
+                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+                  {{ g.total_escalas }} escala{{ g.total_escalas !== 1 ? 's' : '' }}
+                </span>
+              </div>
             </div>
           </div>
-          <!-- Líder + contadores -->
-          <div class="flex items-center justify-between mt-3">
-            <span class="text-xs text-gray-500 dark:text-slate-400">
-              <span v-if="g.lider">{{ g.lider.name }}</span>
-              <span v-else class="italic text-gray-300 dark:text-slate-600">Sem líder</span>
-            </span>
-            <div class="flex gap-2">
-              <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300">
-                {{ g.total_membros }} membro{{ g.total_membros !== 1 ? 's' : '' }}
-              </span>
-              <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
-                {{ g.total_escalas }} escala{{ g.total_escalas !== 1 ? 's' : '' }}
-              </span>
-            </div>
+          <!-- Ações -->
+          <div class="px-4 py-3 border-t border-gray-100 dark:border-slate-700/50 flex gap-2 justify-end">
+            <Link :href="`/admin/grupos/${g.id}/edit`"
+                  class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
+              Editar
+            </Link>
+            <button @click="confirmarExclusao(g)"
+                    class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-red-600 px-3 py-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+              Excluir
+            </button>
           </div>
         </div>
       </div>

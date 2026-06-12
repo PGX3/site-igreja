@@ -26,8 +26,9 @@
       <!-- CARDS (mobile) -->
       <div class="sm:hidden space-y-3">
         <div v-for="culto in cultos" :key="culto.id"
-             class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-4 shadow-sm">
-          <div class="flex items-start justify-between gap-2 mb-3">
+             class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden">
+          <!-- Info -->
+          <div class="p-4 flex items-start justify-between gap-2">
             <div>
               <p class="font-semibold text-gray-900 dark:text-white">{{ culto.nome }}</p>
               <p class="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{{ culto.dia_semana }} · {{ culto.horario }}</p>
@@ -39,7 +40,8 @@
               {{ culto.ativo ? 'Ativo' : 'Inativo' }}
             </span>
           </div>
-          <div class="flex gap-2 justify-end">
+          <!-- Ações -->
+          <div class="px-4 py-3 border-t border-gray-100 dark:border-slate-700/50 flex gap-2 justify-end">
             <Link :href="`/admin/cultos/${culto.id}/edit`"
                   class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
               Editar
