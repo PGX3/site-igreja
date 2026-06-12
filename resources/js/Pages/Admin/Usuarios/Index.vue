@@ -242,7 +242,7 @@ function fecharSenha() {
 }
 
 function salvarSenha() {
-  formSenha.put(`/admin/usuarios/${usuarioSenha.value.id}/senha`, {
+  formSenha.post(`/admin/usuarios/${usuarioSenha.value.id}/senha`, {
     onSuccess: () => fecharSenha(),
   })
 }
