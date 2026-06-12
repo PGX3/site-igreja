@@ -81,6 +81,10 @@
                 class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
             Editar
           </Link>
+          <button @click="abrirCompartilhar(e)"
+                  class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-green-600 dark:hover:text-green-400 px-3 py-1.5 rounded hover:bg-green-50 dark:hover:bg-green-900/20 transition">
+            Compartilhar
+          </button>
           <button @click="confirmarExclusao(e)"
                   class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-red-600 px-3 py-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
             Excluir
@@ -95,6 +99,42 @@
               class="mt-4 inline-block text-sm text-blue-600 dark:text-blue-400 hover:underline">
           Criar primeira escala
         </Link>
+      </div>
+    </div>
+
+    <!-- MODAL COMPARTILHAR -->
+    <div v-if="escalaCompartilhar"
+         class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
+         @click.self="fecharCompartilhar">
+      <div class="bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] flex flex-col">
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
+          <h3 class="font-bold text-gray-900 dark:text-white">Compartilhar escala</h3>
+          <button @click="fecharCompartilhar"
+                  class="text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 text-xl leading-none">×</button>
+        </div>
+
+        <div class="px-6 py-4 overflow-y-auto">
+          <p class="text-xs text-gray-500 dark:text-slate-400 mb-2">
+            Texto pronto para colar no WhatsApp:
+          </p>
+          <textarea ref="textoRef" :value="textoCompartilhar" readonly
+                    class="w-full h-72 text-sm font-mono bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg p-3 text-gray-700 dark:text-slate-200 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+        </div>
+
+        <div class="px-6 py-4 border-t border-gray-100 dark:border-slate-700 flex flex-wrap gap-3 justify-end">
+          <button @click="fecharCompartilhar"
+                  class="px-4 py-2 text-sm font-semibold text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition">
+            Fechar
+          </button>
+          <button @click="copiarTexto"
+                  class="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition">
+            {{ copiado ? 'Copiado!' : 'Copiar texto' }}
+          </button>
+          <a :href="linkWhatsApp" target="_blank" rel="noopener"
+             class="px-4 py-2 text-sm font-semibold text-white bg-green-600 hover:bg-green-700 rounded-lg transition">
+            Abrir WhatsApp
+          </a>
+        </div>
       </div>
     </div>
 
@@ -131,6 +171,9 @@ const props = defineProps({ escalas: Array })
 
 const filtroStatus = ref(null)
 const escalaParaExcluir = ref(null)
+const escalaCompartilhar = ref(null)
+const copiado = ref(false)
+const textoRef = ref(null)
 
 const statusOptions = [
   { value: 'pendente',     label: 'Pendente',      activeClass: 'border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400' },
@@ -166,4 +209,74 @@ function statusClass(s) {
 }
 
 function confirmarExclusao(e) { escalaParaExcluir.value = e }
+
+function abrirCompartilhar(e) {
+  escalaCompartilhar.value = e
+  copiado.value = false
+}
+function fecharCompartilhar() {
+  escalaCompartilhar.value = null
+  copiado.value = false
+}
+
+function formatarDataExt(data) {
+  if (!data) return ''
+  return new Date(data + 'T12:00:00')
+    .toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+}
+function formatarHora(h) {
+  return h ? String(h).slice(0, 5) : ''
+}
+
+const textoCompartilhar = computed(() => {
+  const e = escalaCompartilhar.value
+  if (!e) return ''
+
+  const linhas = []
+  linhas.push(`*${e.titulo}*`)
+  linhas.push(formatarDataExt(e.data))
+
+  const hi = formatarHora(e.hora_inicio)
+  const hf = formatarHora(e.hora_fim)
+  if (hi || hf) linhas.push(`${hi}${hf ? ' às ' + hf : ''}`)
+
+  if (e.vinculo) {
+    const tipo = e.vinculo.tipo === 'culto' ? 'Culto' : 'Evento'
+    linhas.push(`${tipo}: ${e.vinculo.nome}`)
+  }
+  if (e.grupo?.nome) linhas.push(`Grupo: ${e.grupo.nome}`)
+
+  linhas.push('')
+  linhas.push('*Participantes:*')
+
+  if (e.membros?.length) {
+    e.membros.forEach(m => {
+      const nome = m.nome ?? 'Sem nome'
+      linhas.push(m.funcao ? `- ${nome}: ${m.funcao}` : `- ${nome}`)
+    })
+  } else {
+    linhas.push('Nenhum participante escalado.')
+  }
+
+  return linhas.join('\n')
+})
+
+const linkWhatsApp = computed(() =>
+  `https://wa.me/?text=${encodeURIComponent(textoCompartilhar.value)}`
+)
+
+async function copiarTexto() {
+  const texto = textoCompartilhar.value
+  try {
+    await navigator.clipboard.writeText(texto)
+  } catch {
+    if (textoRef.value) {
+      textoRef.value.focus()
+      textoRef.value.select()
+      document.execCommand('copy')
+    }
+  }
+  copiado.value = true
+  setTimeout(() => { copiado.value = false }, 2000)
+}
 </script>
