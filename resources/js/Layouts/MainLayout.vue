@@ -17,37 +17,26 @@
       <!-- Desktop nav -->
       <ul class="hidden md:flex items-center gap-10 list-none">
         <li v-for="link in links" :key="link.href">
-          <a :href="link.href"
+          <a :href="anchor(link.href)"
              class="text-[10px] font-semibold tracking-[0.25em] uppercase text-white/40
                     hover:text-[var(--blue)] transition-colors duration-300 relative group">
             {{ link.label }}
             <span class="absolute -bottom-0.5 left-0 w-0 h-px bg-[var(--blue)] group-hover:w-full transition-all duration-300"></span>
           </a>
         </li>
-        <li class="w-px h-4 bg-white/10"></li>
-        <li>
-          <Link v-if="authUser" href="/admin"
+        <li v-if="authUser" class="w-px h-4 bg-white/10"></li>
+        <li v-if="authUser">
+          <Link href="/admin"
                 class="text-[10px] font-semibold tracking-[0.25em] uppercase text-white/40
                        hover:text-[var(--blue)] transition-colors duration-300 relative group">
             Painel
-            <span class="absolute -bottom-0.5 left-0 w-0 h-px bg-[var(--blue)] group-hover:w-full transition-all duration-300"></span>
-          </Link>
-          <Link v-else href="/login"
-                class="text-[10px] font-semibold tracking-[0.25em] uppercase text-white/40
-                       hover:text-[var(--blue)] transition-colors duration-300 relative group">
-            Entrar
             <span class="absolute -bottom-0.5 left-0 w-0 h-px bg-[var(--blue)] group-hover:w-full transition-all duration-300"></span>
           </Link>
         </li>
       </ul>
 
       <div class="hidden md:flex items-center gap-4">
-        <Link href="/cadastro"
-              class="text-[10px] font-semibold tracking-[0.25em] uppercase text-[var(--blue)]
-                     hover:text-white transition-colors duration-300">
-          Quero me cadastrar
-        </Link>
-        <a href="#sugestoes" class="btn-primary text-xs">Fale Conosco</a>
+        <a :href="anchor('#sugestoes')" class="btn-primary text-xs">Fale Conosco</a>
       </div>
 
       <!-- Mobile menu btn -->
@@ -63,27 +52,17 @@
       <div v-if="mobileOpen"
            class="fixed inset-0 z-40 bg-[#0a0a0a]/98 flex flex-col items-center justify-center gap-8">
         <LogoIcon :size="52" class="mb-4 opacity-60" />
-        <a v-for="link in links" :key="link.href" :href="link.href"
+        <a v-for="link in links" :key="link.href" :href="anchor(link.href)"
            @click="mobileOpen = false"
            class="text-3xl font-black tracking-widest uppercase text-white/60 hover:text-[var(--blue)] transition-colors"
            style="font-family:'Barlow Condensed',sans-serif">
           {{ link.label }}
         </a>
-        <Link href="/cadastro" @click="mobileOpen = false"
-              class="text-lg font-bold tracking-widest uppercase text-[var(--blue)]
-                     hover:text-white transition-colors">
-          Quero me cadastrar
-        </Link>
-        <a href="#sugestoes" @click="mobileOpen = false" class="btn-primary mt-4">Fale Conosco</a>
+        <a :href="anchor('#sugestoes')" @click="mobileOpen = false" class="btn-primary mt-4">Fale Conosco</a>
         <Link v-if="authUser" href="/admin" @click="mobileOpen = false"
               class="text-sm font-bold tracking-widest uppercase text-white/30
                      hover:text-[var(--blue)] transition-colors">
           Painel →
-        </Link>
-        <Link v-else href="/login" @click="mobileOpen = false"
-              class="text-sm font-bold tracking-widest uppercase text-white/30
-                     hover:text-[var(--blue)] transition-colors">
-          Entrar →
         </Link>
       </div>
     </Transition>
@@ -105,14 +84,25 @@
           </div>
         </div>
         <div class="flex flex-wrap gap-6 md:gap-10">
-          <a v-for="link in links" :key="link.href" :href="link.href"
+          <a v-for="link in links" :key="link.href" :href="anchor(link.href)"
              class="text-[10px] tracking-[0.2em] uppercase text-white/25 hover:text-[var(--blue)] transition-colors">
             {{ link.label }}
           </a>
         </div>
-        <p class="text-[10px] tracking-[0.15em] uppercase text-white/15">
-          © {{ new Date().getFullYear() }} · Todos os direitos reservados
-        </p>
+        <div class="flex items-center gap-4">
+          <p class="text-[10px] tracking-[0.15em] uppercase text-white/15">
+            © {{ new Date().getFullYear() }} · Todos os direitos reservados
+          </p>
+          <span class="w-px h-3 bg-white/10"></span>
+          <Link v-if="authUser" href="/admin"
+                class="text-[10px] tracking-[0.2em] uppercase text-white/15 hover:text-[var(--blue)]/70 transition-colors">
+            Painel
+          </Link>
+          <Link v-else href="/login"
+                class="text-[10px] tracking-[0.2em] uppercase text-white/15 hover:text-[var(--blue)]/70 transition-colors">
+            Entrar
+          </Link>
+        </div>
       </div>
     </footer>
   </div>
@@ -125,7 +115,18 @@ import LogoIcon from '@/Components/LogoIcon.vue'
 
 const scrolled   = ref(false)
 const mobileOpen = ref(false)
-const authUser   = computed(() => usePage().props.auth?.user)
+const page       = usePage()
+const authUser   = computed(() => page.props.auth?.user)
+
+const isHome = computed(() => {
+  const u = page.url || '/'
+  return u === '/' || u.startsWith('/#') || u.startsWith('/?')
+})
+
+function anchor(href) {
+  if (!href?.startsWith('#')) return href
+  return isHome.value ? href : `/${href}`
+}
 
 function onScroll() { scrolled.value = window.scrollY > 60 }
 onMounted(() => window.addEventListener('scroll', onScroll))
