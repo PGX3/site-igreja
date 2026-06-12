@@ -2,14 +2,14 @@
   <AdminLayout>
 
     <!-- HEADER -->
-    <div class="mb-8 flex items-end justify-between">
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
       <div>
         <p class="text-xs tracking-widest uppercase text-gray-400 dark:text-slate-500 mb-1">Gestão</p>
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Grupos</h1>
         <p class="text-gray-500 dark:text-slate-400 text-sm mt-1">{{ grupos.length }} grupo(s) cadastrado(s)</p>
       </div>
       <Link href="/admin/grupos/create"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition">
+            class="self-start sm:self-auto bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition">
         + Novo Grupo
       </Link>
     </div>
@@ -20,64 +20,106 @@
       {{ $page.props.flash.success }}
     </div>
 
-    <!-- TABELA -->
-    <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden">
-      <table v-if="grupos.length" class="w-full text-sm">
-        <thead class="border-b border-gray-100 dark:border-slate-700">
-          <tr>
-            <th class="text-left px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500">Nome</th>
-            <th class="text-left px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500">Líder</th>
-            <th class="text-center px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500">Membros</th>
-            <th class="text-center px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500">Escalas</th>
-            <th class="px-6 py-4"></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="g in grupos" :key="g.id"
-              class="border-b border-gray-50 dark:border-slate-700/50 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition">
-            <td class="px-6 py-4">
-              <p class="font-semibold text-gray-900 dark:text-white">{{ g.nome }}</p>
-              <p v-if="g.descricao" class="text-xs text-gray-400 dark:text-slate-500 mt-0.5 truncate max-w-[200px]">{{ g.descricao }}</p>
-            </td>
-            <td class="px-6 py-4">
-              <span v-if="g.lider" class="text-gray-700 dark:text-slate-300">{{ g.lider.name }}</span>
-              <span v-else class="text-gray-300 dark:text-slate-600 italic text-xs">Sem líder</span>
-            </td>
-            <td class="px-6 py-4 text-center">
-              <span class="inline-block bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 text-xs font-semibold px-2.5 py-1 rounded-full">
-                {{ g.total_membros }}
-              </span>
-            </td>
-            <td class="px-6 py-4 text-center">
-              <span class="inline-block bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-semibold px-2.5 py-1 rounded-full">
-                {{ g.total_escalas }}
-              </span>
-            </td>
-            <td class="px-6 py-4 text-right">
-              <div class="flex justify-end gap-2">
-                <Link :href="`/admin/grupos/${g.id}/edit`"
-                      class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
-                  Editar
-                </Link>
-                <button @click="confirmarExclusao(g)"
-                        class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-red-600 px-3 py-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
-                  Excluir
-                </button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div v-else class="py-20 text-center text-gray-400 dark:text-slate-500">
-        <p class="text-4xl mb-3">◉</p>
-        <p class="font-medium">Nenhum grupo cadastrado ainda.</p>
-        <Link href="/admin/grupos/create"
-              class="mt-4 inline-block text-sm text-blue-600 dark:text-blue-400 hover:underline">
-          Criar primeiro grupo
-        </Link>
-      </div>
+    <!-- EMPTY STATE -->
+    <div v-if="!grupos.length"
+         class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl py-20 text-center text-gray-400 dark:text-slate-500">
+      <p class="text-4xl mb-3">◉</p>
+      <p class="font-medium">Nenhum grupo cadastrado ainda.</p>
+      <Link href="/admin/grupos/create" class="mt-4 inline-block text-sm text-blue-600 dark:text-blue-400 hover:underline">
+        Criar primeiro grupo
+      </Link>
     </div>
+
+    <template v-else>
+
+      <!-- CARDS (mobile) -->
+      <div class="sm:hidden space-y-3">
+        <div v-for="g in grupos" :key="g.id"
+             class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-4 shadow-sm">
+          <!-- Nome + ações -->
+          <div class="flex items-start justify-between gap-2 mb-2">
+            <div class="min-w-0">
+              <p class="font-semibold text-gray-900 dark:text-white truncate">{{ g.nome }}</p>
+              <p v-if="g.descricao" class="text-xs text-gray-400 dark:text-slate-500 mt-0.5 truncate">{{ g.descricao }}</p>
+            </div>
+            <div class="flex gap-1 flex-shrink-0">
+              <Link :href="`/admin/grupos/${g.id}/edit`"
+                    class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-2.5 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
+                Editar
+              </Link>
+              <button @click="confirmarExclusao(g)"
+                      class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-red-600 px-2.5 py-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+                Excluir
+              </button>
+            </div>
+          </div>
+          <!-- Líder + contadores -->
+          <div class="flex items-center justify-between mt-3">
+            <span class="text-xs text-gray-500 dark:text-slate-400">
+              <span v-if="g.lider">{{ g.lider.name }}</span>
+              <span v-else class="italic text-gray-300 dark:text-slate-600">Sem líder</span>
+            </span>
+            <div class="flex gap-2">
+              <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300">
+                {{ g.total_membros }} membro{{ g.total_membros !== 1 ? 's' : '' }}
+              </span>
+              <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+                {{ g.total_escalas }} escala{{ g.total_escalas !== 1 ? 's' : '' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABELA (desktop) -->
+      <div class="hidden sm:block bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm min-w-[540px]">
+            <thead class="border-b border-gray-100 dark:border-slate-700">
+              <tr>
+                <th class="text-left px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500">Nome</th>
+                <th class="text-left px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500">Líder</th>
+                <th class="text-center px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500">Membros</th>
+                <th class="text-center px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500">Escalas</th>
+                <th class="px-6 py-4"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="g in grupos" :key="g.id"
+                  class="border-b border-gray-50 dark:border-slate-700/50 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition">
+                <td class="px-6 py-4">
+                  <p class="font-semibold text-gray-900 dark:text-white">{{ g.nome }}</p>
+                  <p v-if="g.descricao" class="text-xs text-gray-400 dark:text-slate-500 mt-0.5 truncate max-w-[200px]">{{ g.descricao }}</p>
+                </td>
+                <td class="px-6 py-4">
+                  <span v-if="g.lider" class="text-gray-700 dark:text-slate-300">{{ g.lider.name }}</span>
+                  <span v-else class="text-gray-300 dark:text-slate-600 italic text-xs">Sem líder</span>
+                </td>
+                <td class="px-6 py-4 text-center">
+                  <span class="inline-block bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 text-xs font-semibold px-2.5 py-1 rounded-full">{{ g.total_membros }}</span>
+                </td>
+                <td class="px-6 py-4 text-center">
+                  <span class="inline-block bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-semibold px-2.5 py-1 rounded-full">{{ g.total_escalas }}</span>
+                </td>
+                <td class="px-6 py-4 text-right">
+                  <div class="flex justify-end gap-2">
+                    <Link :href="`/admin/grupos/${g.id}/edit`"
+                          class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
+                      Editar
+                    </Link>
+                    <button @click="confirmarExclusao(g)"
+                            class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-red-600 px-3 py-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+                      Excluir
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </template>
 
     <!-- MODAL CONFIRMAR EXCLUSÃO -->
     <div v-if="grupoParaExcluir"

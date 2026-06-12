@@ -24,9 +24,67 @@
       {{ $page.props.flash.error }}
     </div>
 
-    <!-- TABELA -->
-    <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden">
-      <template v-if="usuarios.length">
+    <!-- EMPTY STATE -->
+    <div v-if="!usuarios.length"
+         class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl py-20 text-center text-gray-400 dark:text-slate-500">
+      <p class="text-4xl mb-3">◈</p>
+      <p class="font-medium">Nenhum usuário cadastrado.</p>
+    </div>
+
+    <template v-else>
+
+      <!-- CARDS (mobile) -->
+      <div class="sm:hidden space-y-3">
+        <div v-for="u in usuarios" :key="u.id"
+             class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-4 shadow-sm">
+          <!-- Nome + papel -->
+          <div class="flex items-start justify-between gap-2 mb-2">
+            <div class="min-w-0">
+              <p class="font-semibold text-gray-900 dark:text-white truncate">{{ u.name }}</p>
+              <p class="text-xs text-gray-400 dark:text-slate-500 truncate">{{ u.email }}</p>
+            </div>
+            <span :class="roleBadgeClass(u.role?.name)"
+                  class="text-xs font-bold px-2.5 py-1 rounded-full flex-shrink-0">
+              {{ u.role?.display_name ?? '—' }}
+            </span>
+          </div>
+          <!-- Grupos -->
+          <div v-if="u.grupos?.length" class="flex flex-wrap gap-1 mb-3">
+            <span v-for="g in u.grupos.slice(0, 3)" :key="g.id"
+                  class="text-[10px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap
+                         bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
+              {{ g.nome }}
+            </span>
+            <span v-if="u.grupos.length > 3"
+                  class="text-[10px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap cursor-default
+                         bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400"
+                  :title="u.grupos.slice(3).map(g => g.nome).join(', ')">
+              +{{ u.grupos.length - 3 }}
+            </span>
+          </div>
+          <!-- Telefone + ações -->
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs text-gray-500 dark:text-slate-400">{{ u.telefone ?? 'Sem telefone' }}</span>
+            <div class="flex gap-1">
+              <button @click="abrirAlterarSenha(u)"
+                      class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 px-2.5 py-1.5 rounded hover:bg-amber-50 dark:hover:bg-amber-900/20 transition">
+                Senha
+              </button>
+              <Link :href="`/admin/usuarios/${u.id}/edit`"
+                    class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-2.5 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
+                Editar
+              </Link>
+              <button @click="confirmarExclusao(u)"
+                      class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-red-600 px-2.5 py-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+                Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABELA (desktop) -->
+      <div class="hidden sm:block bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-sm min-w-[560px]">
             <thead class="border-b border-gray-100 dark:border-slate-700">
@@ -46,24 +104,27 @@
                   <p class="text-xs text-gray-400 dark:text-slate-500">{{ u.email }}</p>
                 </td>
                 <td class="px-6 py-4">
-                  <span :class="roleBadgeClass(u.role?.name)"
-                        class="text-xs font-bold px-2.5 py-1 rounded-full">
+                  <span :class="roleBadgeClass(u.role?.name)" class="text-xs font-bold px-2.5 py-1 rounded-full">
                     {{ u.role?.display_name ?? '—' }}
                   </span>
                 </td>
                 <td class="px-6 py-4">
-                  <div v-if="u.grupos?.length" class="flex flex-wrap gap-1">
-                    <span v-for="g in u.grupos" :key="g.id"
-                          class="text-[10px] font-semibold px-2 py-0.5 rounded-full
+                  <div v-if="u.grupos?.length" class="flex flex-wrap gap-1 items-center">
+                    <span v-for="g in u.grupos.slice(0, 2)" :key="g.id"
+                          class="text-[10px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap
                                  bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
                       {{ g.nome }}
+                    </span>
+                    <span v-if="u.grupos.length > 2"
+                          class="text-[10px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap cursor-default
+                                 bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400"
+                          :title="u.grupos.slice(2).map(g => g.nome).join(', ')">
+                      +{{ u.grupos.length - 2 }}
                     </span>
                   </div>
                   <span v-else class="text-gray-300 dark:text-slate-600 italic text-xs">—</span>
                 </td>
-                <td class="px-6 py-4 text-sm text-gray-500 dark:text-slate-400">
-                  {{ u.telefone ?? '—' }}
-                </td>
+                <td class="px-6 py-4 text-sm text-gray-500 dark:text-slate-400">{{ u.telefone ?? '—' }}</td>
                 <td class="px-6 py-4 text-right">
                   <div class="flex justify-end gap-2">
                     <button @click="abrirAlterarSenha(u)"
@@ -84,13 +145,9 @@
             </tbody>
           </table>
         </div>
-      </template>
-
-      <div v-else class="py-20 text-center text-gray-400 dark:text-slate-500">
-        <p class="text-4xl mb-3">◈</p>
-        <p class="font-medium">Nenhum usuário cadastrado.</p>
       </div>
-    </div>
+
+    </template>
 
     <!-- MODAL ALTERAR SENHA -->
     <div v-if="usuarioSenha"

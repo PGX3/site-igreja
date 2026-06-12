@@ -15,11 +15,11 @@
     </div>
 
     <!-- STATS -->
-    <div class="grid grid-cols-3 gap-4 mb-8">
+    <div class="grid grid-cols-3 gap-3 sm:gap-4 mb-8">
       <div v-for="stat in stats" :key="stat.label"
-           class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-5 shadow-sm text-center">
-        <p class="text-2xl font-bold" :class="stat.color">{{ stat.value }}</p>
-        <p class="text-xs text-gray-400 dark:text-slate-500 mt-1 uppercase tracking-wider">{{ stat.label }}</p>
+           class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-3 sm:p-5 shadow-sm text-center">
+        <p class="text-xl sm:text-2xl font-bold" :class="stat.color">{{ stat.value }}</p>
+        <p class="text-[10px] sm:text-xs text-gray-400 dark:text-slate-500 mt-1 uppercase tracking-wider leading-tight">{{ stat.label }}</p>
       </div>
     </div>
 
@@ -30,15 +30,13 @@
       </p>
       <div class="space-y-3">
         <div v-for="e in proximas" :key="e.id"
-             class="bg-white dark:bg-slate-800 border border-yellow-200 dark:border-yellow-800/50 rounded-xl p-5 shadow-sm">
-          <div class="flex items-start gap-4">
-            <!-- Data -->
-            <div class="text-center bg-yellow-50 dark:bg-yellow-900/20 rounded-lg px-3 py-2 min-w-[52px]">
+             class="bg-white dark:bg-slate-800 border border-yellow-200 dark:border-yellow-800/50 rounded-xl p-4 sm:p-5 shadow-sm">
+          <!-- Data + Info -->
+          <div class="flex items-start gap-3 sm:gap-4 mb-3">
+            <div class="flex-shrink-0 text-center bg-yellow-50 dark:bg-yellow-900/20 rounded-lg px-3 py-2 min-w-[52px]">
               <p class="text-xl font-black text-yellow-700 dark:text-yellow-400 leading-none">{{ diaDoMes(e.data) }}</p>
               <p class="text-[10px] font-bold uppercase text-yellow-500 dark:text-yellow-600">{{ mesAbrev(e.data) }}</p>
             </div>
-
-            <!-- Info -->
             <div class="flex-1 min-w-0">
               <p class="font-bold text-gray-900 dark:text-white">{{ e.titulo }}</p>
               <p class="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
@@ -48,20 +46,19 @@
                 Função: {{ e.funcao }}
               </p>
             </div>
-
-            <!-- Ações -->
-            <div class="flex gap-2 flex-shrink-0">
-              <Link :href="`/admin/escala-membros/${e.pivot_id}/confirmar`"
-                    method="patch" as="button" preserve-scroll
-                    class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition">
-                Confirmar ✓
-              </Link>
-              <Link :href="`/admin/escala-membros/${e.pivot_id}/recusar`"
-                    method="patch" as="button" preserve-scroll
-                    class="border border-red-200 dark:border-red-800 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 px-4 py-2 rounded-lg text-xs font-bold transition">
-                Recusar ✗
-              </Link>
-            </div>
+          </div>
+          <!-- Ações -->
+          <div class="flex gap-2">
+            <Link :href="`/admin/escala-membros/${e.pivot_id}/confirmar`"
+                  method="patch" as="button" preserve-scroll
+                  class="flex-1 text-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition">
+              Confirmar ✓
+            </Link>
+            <Link :href="`/admin/escala-membros/${e.pivot_id}/recusar`"
+                  method="patch" as="button" preserve-scroll
+                  class="flex-1 text-center border border-red-200 dark:border-red-800 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 px-4 py-2 rounded-lg text-xs font-bold transition">
+              Recusar ✗
+            </Link>
           </div>
         </div>
       </div>

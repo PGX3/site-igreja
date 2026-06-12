@@ -4,7 +4,7 @@
     <!-- NAV -->
     <nav
       class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-10 md:px-16 py-5 transition-all duration-500"
-      :class="scrolled ? 'bg-[#0a0a0a]/96 backdrop-blur-md border-b border-[var(--blue)]/10' : ''"
+      :class="scrolled || mobileOpen ? 'bg-[#0a0a0a]/96 backdrop-blur-md border-b border-[var(--blue)]/10' : ''"
     >
       <Link href="/" class="flex items-center gap-3 group">
         <LogoIcon :size="34" class="transition-transform duration-300 group-hover:scale-110" />
@@ -40,17 +40,21 @@
       </div>
 
       <!-- Mobile menu btn -->
-      <button class="md:hidden flex flex-col gap-1.5 p-2" @click="mobileOpen = !mobileOpen">
-        <span class="block w-5 h-px bg-white/60 transition-all duration-300" :class="mobileOpen ? 'rotate-45 translate-y-2' : ''"></span>
-        <span class="block w-5 h-px bg-white/60 transition-all duration-300" :class="mobileOpen ? 'opacity-0' : ''"></span>
-        <span class="block w-5 h-px bg-white/60 transition-all duration-300" :class="mobileOpen ? '-rotate-45 -translate-y-2' : ''"></span>
+      <button
+        class="md:hidden flex flex-col gap-1.5 p-2.5 rounded-lg transition-all duration-300"
+        :class="mobileOpen ? 'bg-white/15' : 'bg-white/5 hover:bg-white/10'"
+        @click="mobileOpen = !mobileOpen"
+      >
+        <span class="block w-5 h-px bg-white/80 transition-all duration-300" :class="mobileOpen ? 'rotate-45 translate-y-2' : ''"></span>
+        <span class="block w-5 h-px bg-white/80 transition-all duration-300" :class="mobileOpen ? 'opacity-0' : ''"></span>
+        <span class="block w-5 h-px bg-white/80 transition-all duration-300" :class="mobileOpen ? '-rotate-45 -translate-y-2' : ''"></span>
       </button>
     </nav>
 
     <!-- Mobile menu -->
     <Transition name="mobile-menu">
       <div v-if="mobileOpen"
-           class="fixed inset-0 z-40 bg-[#0a0a0a]/98 flex flex-col items-center justify-center gap-8">
+           class="fixed inset-0 z-40 bg-[#0a0a0a] flex flex-col items-center justify-center gap-8">
         <LogoIcon :size="52" class="mb-4 opacity-60" />
         <a v-for="link in links" :key="link.href" :href="anchor(link.href)"
            @click="mobileOpen = false"
@@ -70,7 +74,7 @@
     <slot />
 
     <!-- FOOTER -->
-    <footer class="px-10 md:px-16 py-16 border-t border-[var(--blue)]/10">
+    <footer class="px-6 sm:px-10 md:px-16 py-16 border-t border-[var(--blue)]/10">
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
         <div class="flex items-center gap-3">
           <LogoIcon :size="28" />

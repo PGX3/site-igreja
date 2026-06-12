@@ -1,14 +1,14 @@
 <template>
   <AdminLayout>
 
-    <div class="mb-8 flex items-end justify-between">
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
       <div>
         <p class="text-xs tracking-widest uppercase text-gray-400 dark:text-slate-500 mb-1">Pastoral</p>
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Famílias</h1>
         <p class="text-gray-500 dark:text-slate-400 text-sm mt-1">{{ familias.length }} família(s) cadastrada(s)</p>
       </div>
       <Link href="/admin/familias/create"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition">
+            class="self-start sm:self-auto bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition">
         + Nova Família
       </Link>
     </div>
@@ -18,9 +18,9 @@
       {{ $page.props.flash.success }}
     </div>
 
-    <form @submit.prevent="filtrar" class="mb-6 flex gap-3">
+    <form @submit.prevent="filtrar" class="mb-6 flex flex-col sm:flex-row gap-3">
       <input v-model="termo" type="text" placeholder="Buscar por cidade ou nome de integrante..."
-             class="flex-1 max-w-md border border-gray-200 dark:border-slate-600 rounded-lg px-4 py-2.5 text-sm
+             class="w-full sm:flex-1 sm:max-w-md border border-gray-200 dark:border-slate-600 rounded-lg px-4 py-2.5 text-sm
                     bg-white dark:bg-slate-700 text-gray-900 dark:text-white
                     placeholder-gray-400 dark:placeholder-slate-400
                     focus:outline-none focus:ring-2 focus:ring-blue-500" />

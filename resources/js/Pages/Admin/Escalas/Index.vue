@@ -2,14 +2,14 @@
   <AdminLayout>
 
     <!-- HEADER -->
-    <div class="mb-8 flex items-end justify-between">
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
       <div>
         <p class="text-xs tracking-widest uppercase text-gray-400 dark:text-slate-500 mb-1">Gestão</p>
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Escalas</h1>
         <p class="text-gray-500 dark:text-slate-400 text-sm mt-1">{{ escalas.length }} escala(s) encontrada(s)</p>
       </div>
       <Link href="/admin/escalas/create"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition">
+            class="self-start sm:self-auto bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition">
         + Nova Escala
       </Link>
     </div>

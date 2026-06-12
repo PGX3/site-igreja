@@ -2,7 +2,7 @@
   <AdminLayout>
 
     <!-- HEADER -->
-    <div class="flex items-end justify-between mb-8">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
       <div>
         <p class="text-xs tracking-widest uppercase text-gray-400 dark:text-slate-500 mb-2">
           Comunicações
@@ -16,7 +16,7 @@
       </div>
 
       <!-- FILTROS -->
-      <div class="flex gap-2">
+      <div class="flex gap-2 flex-wrap">
         <button
           @click="filtro = 'todas'"
           class="px-4 py-2 text-sm font-semibold rounded-lg border transition"
@@ -49,7 +49,7 @@
       <div v-for="s in filtradas" :key="s.id"
            class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6 shadow-sm hover:shadow-md transition">
 
-        <div class="flex items-start justify-between gap-6">
+        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
 
           <!-- CONTEÚDO -->
           <div class="flex-1">
@@ -78,7 +78,7 @@
           </div>
 
           <!-- AÇÕES -->
-          <div class="flex flex-col gap-2">
+          <div class="flex sm:flex-col gap-2 flex-shrink-0">
             <button
               @click="marcarLida(s)"
               class="text-xs font-semibold px-3 py-2 rounded-lg border transition"

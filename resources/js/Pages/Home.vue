@@ -89,7 +89,7 @@
     </section>
 
     <!-- ══ SOBRE ══════════════════════════════════════════════════════════ -->
-    <section id="sobre" class="px-10 md:px-20 py-32 border-t border-[var(--blue)]/10">
+    <section id="sobre" class="px-6 sm:px-10 md:px-20 py-24 md:py-32 border-t border-[var(--blue)]/10">
       <div class="grid md:grid-cols-2 gap-24 items-center">
         <div class="reveal">
           <p class="section-label">A Igreja</p>
@@ -108,7 +108,7 @@
     </section>
 
     <!-- ══ IDENTIDADE ═══════════════════════════════════════════════════ -->
-    <section id="identidade" class="px-10 md:px-20 py-32 border-t border-[var(--blue)]/10">
+    <section id="identidade" class="px-6 sm:px-10 md:px-20 py-24 md:py-32 border-t border-[var(--blue)]/10">
       <div class="reveal flex flex-col md:flex-row md:justify-between md:items-end mb-20">
         <div>
           <p class="section-label">Identidade</p>
@@ -180,7 +180,7 @@
     </section>
 
     <!-- ══ AGENDA ════════════════════════════════════════════════════════ -->
-    <section id="agenda" class="relative px-10 md:px-20 py-32 border-t border-[var(--blue)]/10 overflow-hidden">
+    <section id="agenda" class="relative px-6 sm:px-10 md:px-20 py-24 md:py-32 border-t border-[var(--blue)]/10 overflow-hidden">
       <!-- Marca d'água vertical -->
       <div class="hidden lg:block absolute -right-4 top-1/2 -translate-y-1/2 origin-right
                   pointer-events-none select-none opacity-[0.035] whitespace-nowrap"
@@ -267,7 +267,7 @@
     </section>
 
     <!-- ══ EVENTOS ═══════════════════════════════════════════════════════ -->
-    <section id="eventos" class="relative px-10 md:px-20 py-32 border-t border-[var(--blue)]/10 overflow-hidden">
+    <section id="eventos" class="relative px-6 sm:px-10 md:px-20 py-24 md:py-32 border-t border-[var(--blue)]/10 overflow-hidden">
       <!-- Atmosférico -->
       <div class="absolute inset-0 pointer-events-none"
            style="background: radial-gradient(ellipse 600px 400px at 15% 30%, rgba(0,167,255,0.05) 0%, transparent 60%)"></div>
@@ -430,7 +430,7 @@
     </section>
 
     <!-- ══ SUGESTÕES ═════════════════════════════════════════════════════ -->
-    <section id="sugestoes" class="px-10 md:px-20 py-32 border-t border-[var(--blue)]/10">
+    <section id="sugestoes" class="px-6 sm:px-10 md:px-20 py-24 md:py-32 border-t border-[var(--blue)]/10">
       <div class="grid md:grid-cols-2 gap-20 items-start">
         <div class="reveal">
           <p class="section-label">Participe</p>
@@ -455,7 +455,7 @@
             {{ $page.props.errors.mensagem }}
           </div>
           <form @submit.prevent="enviarSugestao" class="space-y-4">
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label class="block text-[9px] font-bold tracking-[0.3em] uppercase text-white/30 mb-2">Nome *</label>
                 <input v-model="formSugestao.nome" type="text" required class="field" placeholder="Seu nome" />
@@ -493,7 +493,7 @@
     </section>
 
     <!-- ══ PEDIDOS DE ORAÇÃO ═════════════════════════════════════════════ -->
-    <section id="oracao" class="px-10 md:px-20 py-32 border-t border-[var(--blue)]/10">
+    <section id="oracao" class="px-6 sm:px-10 md:px-20 py-24 md:py-32 border-t border-[var(--blue)]/10">
       <div class="grid md:grid-cols-2 gap-20 items-start">
         <div class="reveal">
           <p class="section-label">Oração</p>
@@ -564,7 +564,7 @@
     </section>
 
     <!-- ══ CTA ═══════════════════════════════════════════════════════════ -->
-    <section id="cta" class="px-10 md:px-20 py-40 border-t border-[var(--blue)]/10 text-center relative overflow-hidden">
+    <section id="cta" class="px-6 sm:px-10 md:px-20 py-28 md:py-40 border-t border-[var(--blue)]/10 text-center relative overflow-hidden">
       <div class="absolute inset-0 pointer-events-none"
            style="background: radial-gradient(ellipse at center, rgba(0,167,255,0.04) 0%, transparent 70%)"></div>
       <p class="section-label inline-block">Venha nos visitar</p>
