@@ -26,6 +26,7 @@ class CadastroController extends Controller
 
         $data = $request->validate([
             'name'            => 'required|string|max:100',
+            'email'           => 'nullable|email|max:191|unique:users,email',
             'telefone'        => 'required|string|max:20',
             'data_nascimento' => 'required|date|before:today',
             'sexo'            => 'nullable|in:M,F',
@@ -57,6 +58,7 @@ class CadastroController extends Controller
 
             $user = User::create([
                 'name'            => $data['name'],
+                'email'           => $data['email'] ?? null,
                 'telefone'        => $data['telefone'],
                 'data_nascimento' => $data['data_nascimento'] ?? null,
                 'sexo'            => $data['sexo'] ?? null,

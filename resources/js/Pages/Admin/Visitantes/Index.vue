@@ -52,6 +52,10 @@
               class="border-b border-gray-50 dark:border-slate-700/50 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition">
             <td class="px-6 py-4">
               <p class="font-semibold text-gray-900 dark:text-white">{{ v.name }}</p>
+              <p v-if="v.email" class="text-xs text-gray-400 dark:text-slate-500">{{ v.email }}</p>
+              <p v-if="v.data_nascimento" class="text-xs text-gray-400 dark:text-slate-500">
+                Nasc. {{ formatDate(v.data_nascimento) }}
+              </p>
               <p v-if="v.como_conheceu" class="text-xs text-gray-400 dark:text-slate-500">{{ v.como_conheceu }}</p>
             </td>
             <td class="px-6 py-4 text-sm text-gray-500 dark:text-slate-400">

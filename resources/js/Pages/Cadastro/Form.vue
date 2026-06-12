@@ -36,6 +36,10 @@
             </Campo>
           </div>
 
+          <Campo label="E-mail" :error="form.errors.email">
+            <input v-model="form.email" type="email" placeholder="voce@exemplo.com" :class="inputClass" />
+          </Campo>
+
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <Campo label="Sexo">
               <select v-model="form.sexo" :class="inputClass">
@@ -130,6 +134,7 @@ import { h } from 'vue'
 
 const form = useForm({
   name: '',
+  email: '',
   telefone: '',
   data_nascimento: '',
   sexo: '',

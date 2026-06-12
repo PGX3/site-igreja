@@ -28,7 +28,9 @@ class VisitanteController extends Controller
             ->map(fn($u) => [
                 'id'              => $u->id,
                 'name'            => $u->name,
+                'email'           => $u->email,
                 'telefone'        => $u->telefone,
+                'data_nascimento' => optional($u->data_nascimento)->format('Y-m-d'),
                 'como_conheceu'   => $u->como_conheceu,
                 'convidado_por'   => $u->convidadoPor?->name,
                 'primeira_visita' => optional($u->primeira_visita)->format('Y-m-d'),
@@ -64,11 +66,14 @@ class VisitanteController extends Controller
         abort_unless($visitante->tipo === 'visitante', 404);
 
         return Inertia::render('Admin/Visitantes/Form', [
-            'visitante' => $visitante->only(
-                'id', 'name', 'telefone',
-                'como_conheceu', 'convidado_por_id',
-                'primeira_visita', 'observacoes_pastorais',
-                'batizado_aguas', 'familia_id',
+            'visitante' => array_merge(
+                $visitante->only(
+                    'id', 'name', 'email', 'telefone',
+                    'como_conheceu', 'convidado_por_id',
+                    'primeira_visita', 'observacoes_pastorais',
+                    'batizado_aguas', 'familia_id',
+                ),
+                ['data_nascimento' => optional($visitante->data_nascimento)->format('Y-m-d')],
             ),
             'convidadores' => $this->convidadoresOptions($visitante->id),
             'familias'     => $this->familiasOptions(),
@@ -79,7 +84,7 @@ class VisitanteController extends Controller
     {
         abort_unless($visitante->tipo === 'visitante', 404);
 
-        $data = $this->validateData($request);
+        $data = $this->validateData($request, $visitante->id);
         $visitante->update($data);
 
         return redirect()->route('admin.visitantes.index')
@@ -106,14 +111,22 @@ class VisitanteController extends Controller
             ->with('success', "{$visitante->name} foi promovido a membro. Complete o cadastro pastoral.");
     }
 
-    private function validateData(Request $request): array
+    private function validateData(Request $request, ?int $ignoreId = null): array
     {
         $request->merge(['cpf' => Cpf::normalize($request->input('cpf'))]);
 
+        $emailRule = 'nullable|email|max:191';
+        $emailRule .= $ignoreId ? '|unique:users,email,' . $ignoreId : '|unique:users,email';
+
+        $cpfRule = 'nullable|string|max:14';
+        $cpfRule .= $ignoreId ? '|unique:users,cpf,' . $ignoreId : '|unique:users,cpf';
+
         return $request->validate([
             'name'                  => 'required|string|max:100',
+            'email'                 => $emailRule,
             'telefone'              => 'required|string|max:20',
-            'cpf'                   => 'nullable|string|max:14|unique:users,cpf',
+            'data_nascimento'       => 'required|date|before:today',
+            'cpf'                   => $cpfRule,
             'como_conheceu'         => 'nullable|string|max:255',
             'convidado_por_id'      => 'nullable|exists:users,id',
             'primeira_visita'       => 'nullable|date|before_or_equal:today',

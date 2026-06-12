@@ -25,11 +25,26 @@
           <p v-if="form.errors.name" class="mt-1 text-xs text-red-500">{{ form.errors.name }}</p>
         </div>
 
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div>
+            <label :class="labelClass">Telefone *</label>
+            <input v-model="form.telefone" type="text" placeholder="(51) 99999-9999"
+                   :class="[inputClass, form.errors.telefone && 'border-red-400']" />
+            <p v-if="form.errors.telefone" class="mt-1 text-xs text-red-500">{{ form.errors.telefone }}</p>
+          </div>
+          <div>
+            <label :class="labelClass">Data de nascimento *</label>
+            <input v-model="form.data_nascimento" type="date"
+                   :class="[inputClass, form.errors.data_nascimento && 'border-red-400']" />
+            <p v-if="form.errors.data_nascimento" class="mt-1 text-xs text-red-500">{{ form.errors.data_nascimento }}</p>
+          </div>
+        </div>
+
         <div>
-          <label :class="labelClass">Telefone *</label>
-          <input v-model="form.telefone" type="text" placeholder="(51) 99999-9999"
-                 :class="[inputClass, form.errors.telefone && 'border-red-400']" />
-          <p v-if="form.errors.telefone" class="mt-1 text-xs text-red-500">{{ form.errors.telefone }}</p>
+          <label :class="labelClass">E-mail</label>
+          <input v-model="form.email" type="email" placeholder="voce@exemplo.com"
+                 :class="[inputClass, form.errors.email && 'border-red-400']" />
+          <p v-if="form.errors.email" class="mt-1 text-xs text-red-500">{{ form.errors.email }}</p>
         </div>
 
         <div>
@@ -114,7 +129,9 @@ const editando = computed(() => !!props.visitante)
 
 const form = useForm({
   name:                  props.visitante?.name                  ?? '',
+  email:                 props.visitante?.email                 ?? '',
   telefone:              props.visitante?.telefone              ?? '',
+  data_nascimento:       props.visitante?.data_nascimento       ?? '',
   como_conheceu:         props.visitante?.como_conheceu         ?? '',
   convidado_por_id:      props.visitante?.convidado_por_id      ?? null,
   primeira_visita:       props.visitante?.primeira_visita       ?? '',
