@@ -68,8 +68,11 @@ class UserController extends Controller
 
         return Inertia::render('Admin/Usuarios/Form', [
             'usuario' => array_merge(
-                $usuario->only('id', 'name', 'email', 'role_id', 'telefone', 'data_nascimento'),
-                ['grupo_ids' => $usuario->grupos()->pluck('grupos.id')->map(fn($id) => (int) $id)->toArray()]
+                $usuario->only('id', 'name', 'email', 'role_id', 'telefone'),
+                [
+                    'data_nascimento' => $usuario->data_nascimento?->format('Y-m-d'),
+                    'grupo_ids'       => $usuario->grupos()->pluck('grupos.id')->map(fn($id) => (int) $id)->toArray(),
+                ]
             ),
             'roles'  => Role::all(['id', 'name', 'display_name']),
             'grupos' => Grupo::orderBy('nome')->get(['id', 'nome']),
@@ -122,7 +125,7 @@ class UserController extends Controller
     {
         if ($usuario->is_superadmin) abort(403);
 
-        if ($usuario->id === auth()->id()) {
+        if ($usuario->id === auth()->user()?->id) {
             return back()->with('error', 'Você não pode excluir seu próprio usuário.');
         }
 
