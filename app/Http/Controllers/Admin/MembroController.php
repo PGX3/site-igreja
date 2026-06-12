@@ -68,10 +68,13 @@ class MembroController extends Controller
         if ($membro->is_superadmin) abort(403);
 
         return Inertia::render('Admin/Membros/Form', [
-            'membro' => $membro->only(
-                'id', 'name', 'email', 'telefone', 'data_nascimento',
-                'sexo', 'estado_civil', 'cpf',
-                'batizado_aguas', 'familia_id',
+            'membro' => array_merge(
+                $membro->only(
+                    'id', 'name', 'email', 'telefone',
+                    'sexo', 'estado_civil', 'cpf',
+                    'batizado_aguas', 'familia_id',
+                ),
+                ['data_nascimento' => $membro->data_nascimento?->format('Y-m-d')],
             ),
             'familias' => $this->familiasOptions(),
         ]);
