@@ -44,6 +44,8 @@ class VisitanteController extends Controller
 
     public function create()
     {
+        if (! request()->user()?->isPastor()) abort(403);
+
         return Inertia::render('Admin/Visitantes/Form', [
             'convidadores' => $this->convidadoresOptions(),
             'familias'     => $this->familiasOptions(),
@@ -52,6 +54,8 @@ class VisitanteController extends Controller
 
     public function store(Request $request)
     {
+        if (! request()->user()?->isPastor()) abort(403);
+
         $data = $this->validateData($request);
         $data['tipo'] = 'visitante';
 
@@ -61,9 +65,30 @@ class VisitanteController extends Controller
             ->with('success', 'Visitante cadastrado!');
     }
 
+    public function show(User $visitante)
+    {
+        abort_unless($visitante->tipo === 'visitante', 404);
+
+        return Inertia::render('Admin/Visitantes/Form', [
+            'visitante'    => array_merge(
+                $visitante->only(
+                    'id', 'name', 'email', 'telefone',
+                    'como_conheceu', 'convidado_por_id',
+                    'primeira_visita', 'observacoes_pastorais',
+                    'batizado_aguas', 'familia_id',
+                ),
+                ['data_nascimento' => optional($visitante->data_nascimento)->format('Y-m-d')],
+            ),
+            'convidadores' => $this->convidadoresOptions($visitante->id),
+            'familias'     => $this->familiasOptions(),
+            'readonly'     => true,
+        ]);
+    }
+
     public function edit(User $visitante)
     {
         abort_unless($visitante->tipo === 'visitante', 404);
+        if (! request()->user()?->isPastor()) abort(403);
 
         return Inertia::render('Admin/Visitantes/Form', [
             'visitante' => array_merge(
@@ -94,6 +119,7 @@ class VisitanteController extends Controller
     public function destroy(User $visitante)
     {
         abort_unless($visitante->tipo === 'visitante', 404);
+        if (! request()->user()?->isPastor()) abort(403);
 
         $visitante->delete();
 

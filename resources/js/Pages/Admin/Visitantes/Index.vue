@@ -9,7 +9,7 @@
           {{ visitantes.length }} visitante(s) em acompanhamento
         </p>
       </div>
-      <Link href="/admin/visitantes/create"
+      <Link v-if="isPastor" href="/admin/visitantes/create"
             class="self-start sm:self-auto bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition">
         + Novo Visitante
       </Link>
@@ -55,11 +55,15 @@
                     class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-2.5 py-1.5 rounded transition">
               Promover
             </button>
-            <Link :href="`/admin/visitantes/${v.id}/edit`"
+            <Link v-if="isPastor" :href="`/admin/visitantes/${v.id}/edit`"
                   class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-2.5 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
               Editar
             </Link>
-            <button @click="paraExcluir = v"
+            <Link v-else :href="`/admin/visitantes/${v.id}`"
+                  class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-2.5 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
+              Visualizar
+            </Link>
+            <button v-if="isPastor" @click="paraExcluir = v"
                     class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-red-600 px-2.5 py-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
               Excluir
             </button>
@@ -131,15 +135,19 @@
 
         <template #item-actions="v">
           <div class="flex justify-end gap-2">
-            <button @click="paraPromover = v"
+            <button v-if="isPastor" @click="paraPromover = v"
                     class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-3 py-1.5 rounded transition">
               Promover
             </button>
-            <Link :href="`/admin/visitantes/${v.id}/edit`"
+            <Link v-if="isPastor" :href="`/admin/visitantes/${v.id}/edit`"
                   class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
               Editar
             </Link>
-            <button @click="paraExcluir = v"
+            <Link v-else :href="`/admin/visitantes/${v.id}`"
+                  class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
+              Visualizar
+            </Link>
+            <button v-if="isPastor" @click="paraExcluir = v"
                     class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-red-600 px-3 py-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
               Excluir
             </button>
@@ -196,8 +204,10 @@
 
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue'
-import { Link } from '@inertiajs/vue3'
+import { Link, usePage } from '@inertiajs/vue3'
 import { ref, computed } from 'vue'
+
+const isPastor = computed(() => usePage().props.auth?.role === 'pastor')
 
 const props = defineProps({
   visitantes: Array,

@@ -7,7 +7,7 @@
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Membros</h1>
         <p class="text-gray-500 dark:text-slate-400 text-sm mt-1">{{ membros.length }} membro(s) cadastrado(s)</p>
       </div>
-      <Link href="/admin/membros/create"
+      <Link v-if="isPastor" href="/admin/membros/create"
             class="self-start sm:self-auto bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition">
         + Novo Membro
       </Link>
@@ -48,11 +48,15 @@
             <p v-if="m.email" class="text-xs text-gray-400 dark:text-slate-500 truncate">{{ m.email }}</p>
           </div>
           <div class="flex gap-1 flex-shrink-0">
-            <Link :href="`/admin/membros/${m.id}/edit`"
+            <Link v-if="isPastor" :href="`/admin/membros/${m.id}/edit`"
                   class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-2.5 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
               Editar
             </Link>
-            <button @click="paraExcluir = m"
+            <Link v-else :href="`/admin/membros/${m.id}`"
+                  class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-2.5 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
+              Visualizar
+            </Link>
+            <button v-if="isPastor" @click="paraExcluir = m"
                     class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-red-600 px-2.5 py-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
               Excluir
             </button>
@@ -158,11 +162,15 @@
 
         <template #item-actions="m">
           <div class="flex justify-end gap-2">
-            <Link :href="`/admin/membros/${m.id}/edit`"
+            <Link v-if="isPastor" :href="`/admin/membros/${m.id}/edit`"
                   class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
               Editar
             </Link>
-            <button @click="paraExcluir = m"
+            <Link v-else :href="`/admin/membros/${m.id}`"
+                  class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
+              Visualizar
+            </Link>
+            <button v-if="isPastor" @click="paraExcluir = m"
                     class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-red-600 px-3 py-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
               Excluir
             </button>
@@ -197,8 +205,10 @@
 
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue'
-import { Link } from '@inertiajs/vue3'
+import { Link, usePage } from '@inertiajs/vue3'
 import { ref, computed } from 'vue'
+
+const isPastor = computed(() => usePage().props.auth?.role === 'pastor')
 
 const props = defineProps({
   membros: Array,
