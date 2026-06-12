@@ -1,4 +1,9 @@
 <template>
+  <Head>
+    <meta name="description" content="Igreja em Charqueadas, RS: comunidade de fé enraizada na cidade. Veja nossos cultos semanais, eventos e venha nos visitar." />
+    <meta property="og:title" content="Igreja em Charqueadas" />
+    <meta property="og:description" content="Comunidade de fé enraizada em Charqueadas, no Rio Grande do Sul. Cultos semanais, eventos e uma casa aberta pra quem busca." />
+  </Head>
   <MainLayout>
  <div id="app">
     <!-- ══ HERO ══════════════════════════════════════════════════════════ -->
@@ -22,12 +27,12 @@
       <!-- Linha vertical esquerda -->
       <div class="absolute left-3 sm:left-6 top-28 bottom-28 w-px bg-gradient-to-b from-transparent via-[var(--blue)]/30 to-transparent"></div>
 
-      <!-- Marcador editorial topo -->
-      <div class="absolute left-6 sm:left-10 md:left-20 top-24 md:top-32 flex items-center gap-3 z-10 animate-fade-up"
+      <!-- Marcador editorial topo (somente desktop) -->
+      <div class="hidden md:flex absolute md:left-20 md:top-32 items-center gap-3 z-10 animate-fade-up"
            style="animation-delay:0.05s">
         <span class="text-[var(--blue)] text-[10px] tracking-[0.35em] font-bold"
               style="font-family:'Barlow Condensed',sans-serif">Nº 01</span>
-        <span class="w-10 sm:w-12 h-px bg-[var(--blue)]/40"></span>
+        <span class="w-12 h-px bg-[var(--blue)]/40"></span>
         <span class="text-white/30 text-[9px] tracking-[0.3em] uppercase"
               style="font-family:'Barlow Condensed',sans-serif">Introdução</span>
       </div>
@@ -55,7 +60,7 @@
         <!-- Subtítulo editorial -->
         <p class="mt-6 sm:mt-8 italic text-[20px] sm:text-[26px] md:text-[32px] text-white/50 leading-[1.3] max-w-md animate-fade-up"
            style="font-family:'Cormorant Garamond',serif; font-weight:400; animation-delay:0.4s">
-          {{ t('hero_lead', 'Uma casa de fé no coração de Charqueadas.') }}
+          {{ t('hero_lead', 'Uma igreja simples, vivendo o que Cristo ensinou.') }}
         </p>
 
         <p class="mt-8 sm:mt-10 text-[10px] sm:text-[11px] tracking-[0.3em] uppercase text-white/30 animate-fade-up"
@@ -93,7 +98,7 @@
           </h2>
           <div class="blue-line"></div>
           <p class="text-white/45 text-[15px] leading-[1.85] max-w-md">
-            {{ t('sobre_texto', 'Somos uma comunidade de fé enraizada em Charqueadas, comprometida com o evangelho e com as pessoas desta cidade. Nossa missão é clara: ser Igreja.') }}
+            {{ t('sobre_texto', 'Uma comunidade evangélica em Charqueadas, conduzida em torno do evangelho de Jesus Cristo. Vivendo o que ele ensinou, sem rodeios e sem pirotecnia.') }}
           </p>
         </div>
         <div class="reveal hidden md:flex justify-center items-center relative h-80">
@@ -127,6 +132,49 @@
           <h3 class="text-2xl font-bold tracking-tight mb-5 text-white"
               style="font-family:'Cormorant Garamond',serif">{{ card.title }}</h3>
           <p class="text-white/35 text-[13px] leading-relaxed">{{ card.body }}</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ PORTAS ABERTAS ═══════════════════════════════════════════════ -->
+    <section id="portas" class="relative px-6 sm:px-10 md:px-20 py-32 border-t border-[var(--blue)]/10 overflow-hidden">
+      <!-- Atmosférico -->
+      <div class="absolute inset-0 pointer-events-none"
+           style="background: radial-gradient(ellipse 500px 400px at 80% 50%, rgba(0,167,255,0.04) 0%, transparent 60%)"></div>
+
+      <div class="relative grid md:grid-cols-12 gap-10 md:gap-16 items-start">
+        <div class="md:col-span-4 reveal">
+          <div class="flex items-center gap-4 mb-5">
+            <div class="w-8 h-px bg-[var(--blue)]"></div>
+            <p class="section-label !mb-0">As portas</p>
+          </div>
+          <h2 class="section-title text-[clamp(38px,5vw,68px)] text-white">
+            Estão <span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500" class="text-white/85">abertas</span><span class="text-[var(--blue)]">.</span>
+          </h2>
+          <div class="blue-line"></div>
+          <p class="text-white/40 text-[14px] leading-[1.85] max-w-sm">
+            Não importa de onde você vem, nem o que carrega. Não precisa estar pronto. Não precisa entender tudo. Vem.
+          </p>
+        </div>
+
+        <div class="md:col-span-8 reveal">
+          <div v-for="(linha, i) in portasLinhas" :key="i"
+               class="flex items-baseline gap-4 sm:gap-6 py-5 sm:py-6 border-b border-white/[0.06] group">
+            <span class="text-[10px] tracking-[0.35em] text-[var(--blue)]/40 font-bold w-6 sm:w-8 shrink-0
+                         group-hover:text-[var(--blue)] transition-colors"
+                  style="font-family:'Barlow Condensed',sans-serif">
+              {{ String(i + 1).padStart(2, '0') }}
+            </span>
+            <p class="text-[clamp(22px,3.5vw,38px)] italic text-white/70 leading-[1.2] flex-1
+                      group-hover:text-white/95 transition-colors"
+               style="font-family:'Cormorant Garamond',serif;font-weight:400">
+              {{ linha }}
+            </p>
+          </div>
+
+          <p class="mt-10 sm:mt-14 text-[clamp(34px,7vw,76px)] font-black text-white uppercase leading-[0.95] tracking-tight">
+            É para <span class="text-[var(--blue)]">todo mundo</span><span class="text-[var(--blue)]">.</span>
+          </p>
         </div>
       </div>
     </section>
@@ -262,29 +310,22 @@
 
           <div class="grid md:grid-cols-12 relative">
             <!-- Date block -->
-            <div class="md:col-span-4 p-10 md:p-14 bg-[var(--blue)]/[0.04] md:border-r border-[var(--blue)]/10
+            <div class="md:col-span-3 p-8 md:p-10 bg-[var(--blue)]/[0.04] md:border-r border-[var(--blue)]/10
                         group-hover:bg-[var(--blue)]/[0.07] transition-colors duration-500
-                        flex flex-col justify-center relative">
-              <!-- Selo decorativo -->
-              <span class="absolute top-6 left-6 text-[9px] font-bold tracking-[0.35em] uppercase text-[var(--blue)]/50"
-                    style="font-family:'Barlow Condensed',sans-serif">
-                {{ eventos[0].mes_curto }} · {{ new Date().getFullYear() }}
-              </span>
-
-              <p class="text-[clamp(96px,14vw,200px)] font-black leading-[0.85] text-white
+                        flex md:flex-col items-baseline md:items-start justify-start gap-4 md:gap-3">
+              <p class="text-[clamp(64px,8vw,112px)] font-black leading-[0.85] text-white
                         group-hover:text-[var(--blue)] transition-colors duration-500"
                  style="font-family:'Cormorant Garamond',serif;font-weight:600">
                 {{ eventos[0].dia }}
               </p>
-
-              <div class="mt-6 flex items-center gap-3 text-white/40 text-[10px] tracking-[0.3em] uppercase">
-                <span class="w-8 h-px bg-[var(--blue)]/50"></span>
-                <span style="font-family:'Barlow Condensed',sans-serif">{{ eventos[0].mes_curto }}</span>
-              </div>
+              <p class="text-[11px] font-bold tracking-[0.35em] uppercase text-[var(--blue)]"
+                 style="font-family:'Barlow Condensed',sans-serif">
+                {{ eventos[0].mes_curto }} · {{ new Date().getFullYear() }}
+              </p>
             </div>
 
             <!-- Content -->
-            <div class="md:col-span-8 p-10 md:p-14 flex flex-col justify-center">
+            <div class="md:col-span-9 p-8 md:p-12 flex flex-col justify-center">
               <h3 class="text-[clamp(28px,3.5vw,46px)] font-black leading-[1.05] text-white mb-6 tracking-tight">
                 {{ eventos[0].nome }}
               </h3>
@@ -531,7 +572,7 @@
         {{ t('cta_titulo', 'Você é bem-vindo.') }}
       </h2>
       <p class="mt-8 mb-14 text-[11px] tracking-[0.3em] uppercase text-white/25">
-        {{ t('endereco', 'Charqueadas · Rio Grande do Sul') }}
+        {{ t('endereco', 'Rua Rui Barbosa, 1433 · Charqueadas / RS') }}
       </p>
       <a href="https://www.google.com/maps/place/R.+Rui+Barbosa,+1433+-+Centro,+Charqueadas+-+RS,+96745-000" target="_blank" rel="noopener" class="btn-primary reveal">→ Como Chegar</a>
     </section>
@@ -543,7 +584,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { Link, router, usePage } from '@inertiajs/vue3'
+import { Head, Link, router, usePage } from '@inertiajs/vue3'
 import MainLayout from '@/Layouts/MainLayout.vue'
 import LogoIcon from '@/Components/LogoIcon.vue'
 import HCaptcha from '@/Components/HCaptcha.vue'
@@ -557,10 +598,17 @@ const hcaptchaSitekey = page.props.hcaptchaSitekey || 'da1a0e90-27ce-4d62-a2aa-5
 
 function t(key, fallback = '') { return props.textos?.[key] || fallback }
 
+const portasLinhas = [
+  'Pra quem nunca foi.',
+  'Pra quem tá voltando.',
+  'Pra quem tá em dúvida.',
+  'Pra quem chega cansado.',
+]
+
 const identCards = [
-  { title: 'O Brasão',  body: 'Uma referência direta à cidade de Charqueadas — carregamos o lugar onde fomos plantados. Somos daqui.' },
-  { title: 'A Cruz',    body: 'Fundamento e fé. A cruz não é decoração — ela define o centro do que acreditamos e de quem somos.' },
-  { title: 'O Ponto.', body: 'Uma declaração completa e fechada. Não é "igreja de algo". É Igreja. Ponto. Uma afirmação de identidade.' },
+  { title: 'Cristo no centro',     body: 'Que Cristo seja central. Não somos o sujeito da história, ele é. Tudo o que fazemos parte e volta para ele.' },
+  { title: 'Palavra a sério',      body: 'Que a Palavra seja levada a sério. Não como decoração, mas como autoridade, guia e alimento. O que ela diz, dizemos.' },
+  { title: 'Cuidado com verdade',  body: 'Que as pessoas sejam cuidadas com verdade. Não acolhimento raso nem dureza fria, mas amor que cura e que diz o que precisa ser dito.' },
 ]
 
 // ─── Sugestão ───────────────────────────────────────────────────────────────

@@ -1,4 +1,10 @@
 <template>
+  <Head>
+    <title>{{ evento.nome }}</title>
+    <meta name="description" :content="`${evento.nome} — ${evento.data_fmt}${evento.horario ? ' às ' + evento.horario : ''}${evento.local ? ' em ' + evento.local : ''}. ${evento.descricao || 'Venha participar.'}`" />
+    <meta property="og:title" :content="`${evento.nome} · Igreja em Charqueadas`" />
+    <meta property="og:description" :content="`${evento.data_fmt}${evento.horario ? ' às ' + evento.horario : ''}${evento.local ? ' · ' + evento.local : ''}. ${evento.descricao || 'Venha participar.'}`" />
+  </Head>
   <MainLayout>
     <div>
 
@@ -106,7 +112,7 @@
 
 <script setup>
 import MainLayout from '@/Layouts/MainLayout.vue'
-import { Link } from '@inertiajs/vue3'
+import { Head, Link } from '@inertiajs/vue3'
 
 defineProps({
   evento: Object,

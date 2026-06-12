@@ -79,7 +79,7 @@
               IGREJA<span class="text-[var(--blue)]">.</span> EM CHARQUEADAS
             </p>
             <p class="text-[10px] tracking-[0.2em] uppercase text-white/20 mt-0.5">
-              Charqueadas · Rio Grande do Sul · Brasil
+              Rua Rui Barbosa, 1433 · Charqueadas / RS
             </p>
           </div>
         </div>
@@ -135,6 +135,7 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 const links = [
   { href: '#sobre',      label: 'A Igreja' },
   { href: '#identidade', label: 'Identidade' },
+  { href: '#portas',     label: 'Portas' },
   { href: '#agenda',     label: 'Agenda' },
   { href: '#eventos',    label: 'Eventos' },
   { href: '#sugestoes',  label: 'Contato' },

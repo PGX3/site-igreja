@@ -5,7 +5,7 @@ import { ZiggyVue } from '../../vendor/tightenco/ziggy'
 import '../css/app.css'
 
 createInertiaApp({
-  title: (title) => title ? `${title} · Igreja Charqueadas` : 'Igreja em Charqueadas',
+  title: (title) => title ? `${title} · Igreja em Charqueadas` : 'Igreja em Charqueadas',
   resolve: (name) =>
     resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob('./Pages/**/*.vue')),
   setup({ el, App, props, plugin }) {
