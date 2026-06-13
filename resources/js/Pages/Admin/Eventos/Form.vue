@@ -13,7 +13,7 @@
     </div>
 
     <!-- FORM CARD -->
-    <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm p-8 max-w-xl">
+    <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm p-5 sm:p-8 max-w-xl">
 
       <form @submit.prevent="submit" class="flex flex-col gap-6">
 

@@ -15,73 +15,84 @@
       </Link>
     </div>
 
-    <!-- TABELA -->
-    <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden">
-      <div class="overflow-x-auto">
+    <!-- EMPTY STATE -->
+    <div v-if="eventos.length === 0"
+         class="text-center py-16 text-gray-400 dark:text-slate-500 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl">
+      <p class="text-4xl mb-3">📅</p>
+      <p class="font-medium">Nenhum evento cadastrado.</p>
+    </div>
 
-      <!-- HEAD -->
-      <div class="grid grid-cols-5 px-6 py-3 bg-gray-50 dark:bg-slate-700/50 text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider min-w-[480px]">
-        <span>Nome</span>
-        <span>Data</span>
-        <span>Local</span>
-        <span>Status</span>
-        <span class="text-right">Ações</span>
-      </div>
-
-      <!-- ROWS -->
+    <!-- CARDS (mobile) -->
+    <div class="sm:hidden space-y-3">
       <div v-for="evento in eventos" :key="evento.id"
-           class="grid grid-cols-5 items-center px-6 py-4 border-t border-gray-100 dark:border-slate-700/50 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition min-w-[480px]">
-
-        <!-- NOME -->
-        <div>
-          <p class="font-semibold text-gray-900 dark:text-white">{{ evento.nome }}</p>
-          <p v-if="evento.horario" class="text-xs text-gray-500 dark:text-slate-400">
-            {{ evento.horario }}
+           class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden">
+        <div class="p-4">
+          <div class="flex items-start justify-between gap-2 mb-1">
+            <p class="font-semibold text-gray-900 dark:text-white">{{ evento.nome }}</p>
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-full flex-shrink-0"
+                  :class="evento.ativo
+                    ? 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400'
+                    : 'bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400'">
+              {{ evento.ativo ? 'Ativo' : 'Inativo' }}
+            </span>
+          </div>
+          <p class="text-xs text-gray-500 dark:text-slate-400">
+            {{ formatarData(evento.data_evento) }}<span v-if="evento.horario"> · {{ evento.horario }}</span>
           </p>
+          <p v-if="evento.local" class="text-xs text-gray-400 dark:text-slate-500 mt-0.5">{{ evento.local }}</p>
         </div>
-
-        <!-- DATA -->
-        <div class="text-sm text-gray-600 dark:text-slate-300">
-          {{ formatarData(evento.data_evento) }}
-        </div>
-
-        <!-- LOCAL -->
-        <div class="text-sm text-gray-600 dark:text-slate-300 truncate">
-          {{ evento.local || '—' }}
-        </div>
-
-        <!-- STATUS -->
-        <div>
-          <span
-            class="text-xs font-semibold px-2.5 py-1 rounded-full"
-            :class="evento.ativo
-              ? 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400'
-              : 'bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400'"
-          >
-            {{ evento.ativo ? 'Ativo' : 'Inativo' }}
-          </span>
-        </div>
-
-        <!-- AÇÕES -->
-        <div class="flex justify-end gap-4 text-sm">
+        <div class="px-4 py-3 border-t border-gray-100 dark:border-slate-700/50 flex gap-2 justify-end">
           <Link :href="`/admin/eventos/${evento.id}/edit`"
-                class="text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition">
+                class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
             Editar
           </Link>
           <button @click="destroy(evento.id)"
-                  class="text-gray-400 dark:text-slate-500 hover:text-red-500 transition">
+                  class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-red-600 px-3 py-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
             Excluir
           </button>
         </div>
-
       </div>
+    </div>
 
-      <!-- EMPTY STATE -->
-      <div v-if="eventos.length === 0"
-           class="text-center py-12 text-gray-400 dark:text-slate-500 text-sm">
-        Nenhum evento cadastrado.
-      </div>
-
+    <!-- TABELA (desktop) -->
+    <div class="hidden sm:block bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden">
+      <div class="overflow-x-auto">
+        <!-- HEAD -->
+        <div class="grid grid-cols-5 px-6 py-3 bg-gray-50 dark:bg-slate-700/50 text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider min-w-[480px]">
+          <span>Nome</span>
+          <span>Data</span>
+          <span>Local</span>
+          <span>Status</span>
+          <span class="text-right">Ações</span>
+        </div>
+        <!-- ROWS -->
+        <div v-for="evento in eventos" :key="evento.id"
+             class="grid grid-cols-5 items-center px-6 py-4 border-t border-gray-100 dark:border-slate-700/50 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition min-w-[480px]">
+          <div>
+            <p class="font-semibold text-gray-900 dark:text-white">{{ evento.nome }}</p>
+            <p v-if="evento.horario" class="text-xs text-gray-500 dark:text-slate-400">{{ evento.horario }}</p>
+          </div>
+          <div class="text-sm text-gray-600 dark:text-slate-300">{{ formatarData(evento.data_evento) }}</div>
+          <div class="text-sm text-gray-600 dark:text-slate-300 truncate">{{ evento.local || '—' }}</div>
+          <div>
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-full"
+                  :class="evento.ativo
+                    ? 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400'
+                    : 'bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400'">
+              {{ evento.ativo ? 'Ativo' : 'Inativo' }}
+            </span>
+          </div>
+          <div class="flex justify-end gap-4 text-sm">
+            <Link :href="`/admin/eventos/${evento.id}/edit`"
+                  class="text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition">
+              Editar
+            </Link>
+            <button @click="destroy(evento.id)"
+                    class="text-gray-400 dark:text-slate-500 hover:text-red-500 transition">
+              Excluir
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 

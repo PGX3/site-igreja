@@ -32,66 +32,8 @@
 
     <!-- LISTA -->
     <div class="space-y-3">
-      <div v-for="e in escalasFiltered" :key="e.id"
-           class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-5 shadow-sm hover:shadow-md transition flex items-center gap-5">
 
-        <!-- DATA -->
-        <div class="text-center min-w-[54px]">
-          <p class="text-2xl font-black text-gray-900 dark:text-white leading-none">{{ diaDoMes(e.data) }}</p>
-          <p class="text-[11px] font-bold uppercase text-gray-400 dark:text-slate-500">{{ mesAbrev(e.data) }}</p>
-        </div>
-
-        <!-- DIVIDER -->
-        <div class="w-px h-10 bg-gray-100 dark:bg-slate-700"></div>
-
-        <!-- INFO -->
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-2 mb-0.5">
-            <p class="font-bold text-gray-900 dark:text-white truncate">{{ e.titulo }}</p>
-            <span :class="statusClass(e.status)"
-                  class="text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0">
-              {{ statusLabel(e.status) }}
-            </span>
-          </div>
-          <p class="text-xs text-gray-400 dark:text-slate-500 flex items-center gap-2 flex-wrap">
-            <span>{{ e.grupo?.nome }} · {{ e.hora_inicio }} – {{ e.hora_fim }}</span>
-            <span v-if="e.vinculo"
-                  :class="e.vinculo.tipo === 'culto'
-                    ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800'
-                    : 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-800'"
-                  class="text-[10px] font-semibold px-2 py-0.5 rounded-full border">
-              {{ e.vinculo.tipo === 'culto' ? 'Culto' : 'Evento' }}: {{ e.vinculo.nome }}
-            </span>
-          </p>
-        </div>
-
-        <!-- MEMBROS -->
-        <div class="text-center px-4">
-          <p class="text-sm font-bold text-gray-900 dark:text-white">{{ e.confirmados }}/{{ e.total_membros }}</p>
-          <p class="text-[10px] text-gray-400 dark:text-slate-500">confirmados</p>
-        </div>
-
-        <!-- AÇÕES -->
-        <div class="flex gap-2 flex-shrink-0">
-          <Link :href="`/admin/escalas/${e.id}`"
-                class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
-            Ver
-          </Link>
-          <Link :href="`/admin/escalas/${e.id}/edit`"
-                class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
-            Editar
-          </Link>
-          <button @click="abrirCompartilhar(e)"
-                  class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-green-600 dark:hover:text-green-400 px-3 py-1.5 rounded hover:bg-green-50 dark:hover:bg-green-900/20 transition">
-            Compartilhar
-          </button>
-          <button @click="confirmarExclusao(e)"
-                  class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-red-600 px-3 py-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
-            Excluir
-          </button>
-        </div>
-      </div>
-
+      <!-- VAZIO -->
       <div v-if="!escalasFiltered.length" class="py-20 text-center text-gray-400 dark:text-slate-500 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl">
         <p class="text-4xl mb-3">◱</p>
         <p class="font-medium">Nenhuma escala encontrada.</p>
@@ -99,6 +41,122 @@
               class="mt-4 inline-block text-sm text-blue-600 dark:text-blue-400 hover:underline">
           Criar primeira escala
         </Link>
+      </div>
+
+      <div v-for="e in escalasFiltered" :key="e.id"
+           class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden">
+
+        <!-- MOBILE -->
+        <div class="sm:hidden">
+          <div class="p-4">
+            <!-- Data + título + status -->
+            <div class="flex items-start gap-3 mb-3">
+              <div class="text-center min-w-[42px] flex-shrink-0">
+                <p class="text-2xl font-black text-gray-900 dark:text-white leading-none">{{ diaDoMes(e.data) }}</p>
+                <p class="text-[10px] font-bold uppercase text-gray-400 dark:text-slate-500">{{ mesAbrev(e.data) }}</p>
+              </div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <p class="font-bold text-gray-900 dark:text-white">{{ e.titulo }}</p>
+                  <span :class="statusClass(e.status)"
+                        class="text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0">
+                    {{ statusLabel(e.status) }}
+                  </span>
+                </div>
+                <p class="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
+                  {{ e.grupo?.nome }} · {{ e.hora_inicio }} – {{ e.hora_fim }}
+                </p>
+                <span v-if="e.vinculo"
+                      :class="e.vinculo.tipo === 'culto'
+                        ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800'
+                        : 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-800'"
+                      class="inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border">
+                  {{ e.vinculo.tipo === 'culto' ? 'Culto' : 'Evento' }}: {{ e.vinculo.nome }}
+                </span>
+              </div>
+              <!-- Confirmados -->
+              <div class="text-center flex-shrink-0 ml-auto">
+                <p class="text-sm font-bold text-gray-900 dark:text-white">{{ e.confirmados }}/{{ e.total_membros }}</p>
+                <p class="text-[10px] text-gray-400 dark:text-slate-500">confirm.</p>
+              </div>
+            </div>
+          </div>
+          <!-- Ações -->
+          <div class="px-4 py-3 border-t border-gray-100 dark:border-slate-700/50 flex gap-1 flex-wrap">
+            <Link :href="`/admin/escalas/${e.id}`"
+                  class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
+              Ver
+            </Link>
+            <Link :href="`/admin/escalas/${e.id}/edit`"
+                  class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
+              Editar
+            </Link>
+            <button @click="abrirCompartilhar(e)"
+                    class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-green-600 dark:hover:text-green-400 px-3 py-1.5 rounded hover:bg-green-50 dark:hover:bg-green-900/20 transition">
+              Compartilhar
+            </button>
+            <button @click="confirmarExclusao(e)"
+                    class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-red-600 px-3 py-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+              Excluir
+            </button>
+          </div>
+        </div>
+
+        <!-- DESKTOP -->
+        <div class="hidden sm:flex items-center gap-5 p-5">
+          <!-- Data -->
+          <div class="text-center min-w-[54px]">
+            <p class="text-2xl font-black text-gray-900 dark:text-white leading-none">{{ diaDoMes(e.data) }}</p>
+            <p class="text-[11px] font-bold uppercase text-gray-400 dark:text-slate-500">{{ mesAbrev(e.data) }}</p>
+          </div>
+          <!-- Divider -->
+          <div class="w-px h-10 bg-gray-100 dark:bg-slate-700"></div>
+          <!-- Info -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-0.5">
+              <p class="font-bold text-gray-900 dark:text-white truncate">{{ e.titulo }}</p>
+              <span :class="statusClass(e.status)"
+                    class="text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0">
+                {{ statusLabel(e.status) }}
+              </span>
+            </div>
+            <p class="text-xs text-gray-400 dark:text-slate-500 flex items-center gap-2 flex-wrap">
+              <span>{{ e.grupo?.nome }} · {{ e.hora_inicio }} – {{ e.hora_fim }}</span>
+              <span v-if="e.vinculo"
+                    :class="e.vinculo.tipo === 'culto'
+                      ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800'
+                      : 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-800'"
+                    class="text-[10px] font-semibold px-2 py-0.5 rounded-full border">
+                {{ e.vinculo.tipo === 'culto' ? 'Culto' : 'Evento' }}: {{ e.vinculo.nome }}
+              </span>
+            </p>
+          </div>
+          <!-- Confirmados -->
+          <div class="text-center px-4">
+            <p class="text-sm font-bold text-gray-900 dark:text-white">{{ e.confirmados }}/{{ e.total_membros }}</p>
+            <p class="text-[10px] text-gray-400 dark:text-slate-500">confirmados</p>
+          </div>
+          <!-- Ações -->
+          <div class="flex gap-2 flex-shrink-0">
+            <Link :href="`/admin/escalas/${e.id}`"
+                  class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
+              Ver
+            </Link>
+            <Link :href="`/admin/escalas/${e.id}/edit`"
+                  class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
+              Editar
+            </Link>
+            <button @click="abrirCompartilhar(e)"
+                    class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-green-600 dark:hover:text-green-400 px-3 py-1.5 rounded hover:bg-green-50 dark:hover:bg-green-900/20 transition">
+              Compartilhar
+            </button>
+            <button @click="confirmarExclusao(e)"
+                    class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-red-600 px-3 py-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+              Excluir
+            </button>
+          </div>
+        </div>
+
       </div>
     </div>
 
