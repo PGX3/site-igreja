@@ -115,14 +115,15 @@
                 </button>
 
                 <!-- Breadcrumb -->
-                <div class="flex items-center gap-2 text-sm min-w-0 flex-1">
+                <div class="flex items-center gap-1.5 text-sm min-w-0 flex-1">
                     <Link href="/admin"
-                          class="text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300 transition-colors flex-shrink-0">
+                          class="text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300 transition-colors flex-shrink-0"
+                          :class="pageTitle ? '' : 'font-semibold text-gray-700 dark:text-slate-200'">
                         Painel
                     </Link>
                     <template v-if="pageTitle">
-                        <span class="text-gray-200 dark:text-slate-700 flex-shrink-0">/</span>
-                        <span class="font-semibold text-gray-700 dark:text-slate-200 truncate">{{ pageTitle }}</span>
+                        <span class="text-gray-300 dark:text-slate-600 flex-shrink-0">/</span>
+                        <span class="font-semibold text-gray-800 dark:text-slate-100 truncate">{{ pageTitle }}</span>
                     </template>
                 </div>
 
@@ -138,7 +139,7 @@
             </header>
 
             <!-- Page content -->
-            <main class="flex-1 overflow-y-auto p-4 lg:p-8">
+            <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
                 <slot />
             </main>
         </div>
