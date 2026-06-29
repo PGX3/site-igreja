@@ -40,6 +40,20 @@
                            focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" />
         </div>
 
+        <!-- Músicas -->
+        <div>
+          <label class="flex items-start gap-3 cursor-pointer select-none">
+            <input v-model="form.tem_musicas" type="checkbox"
+                   class="mt-0.5 h-4 w-4 rounded border-gray-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500" />
+            <div>
+              <p class="text-sm font-semibold text-gray-700 dark:text-slate-300">Habilitar aba de músicas</p>
+              <p class="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
+                Permite ao líder fazer upload de PDFs de músicas para os membros do grupo.
+              </p>
+            </div>
+          </label>
+        </div>
+
         <!-- Líder -->
         <div>
           <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Líder do Grupo</label>
@@ -147,9 +161,10 @@ const props = defineProps({
 const editando = computed(() => !!props.grupo)
 
 const form = useForm({
-  nome:        props.grupo?.nome      ?? '',
-  descricao:   props.grupo?.descricao ?? '',
-  lider_id:    props.grupo?.lider?.id ?? null,
+  nome:        props.grupo?.nome        ?? '',
+  descricao:   props.grupo?.descricao   ?? '',
+  tem_musicas: props.grupo?.tem_musicas ?? false,
+  lider_id:    props.grupo?.lider?.id   ?? null,
   membros_ids: props.grupo?.membros_ids ?? [],
 })
 

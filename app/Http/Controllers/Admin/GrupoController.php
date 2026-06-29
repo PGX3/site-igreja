@@ -13,20 +13,27 @@ class GrupoController extends Controller
 {
     public function index()
     {
-        $grupos = Grupo::with(['lider', 'membros'])
-            ->withCount('escalas')
-            ->latest()
-            ->get()
-            ->map(fn($g) => [
-                'id'            => $g->id,
-                'nome'          => $g->nome,
-                'descricao'     => $g->descricao,
-                'lider'         => $g->lider?->only('id', 'name'),
-                'total_membros' => $g->membros->count(),
-                'total_escalas' => $g->escalas_count,
-            ]);
+        $user = auth()->user();
 
-        return Inertia::render('Admin/Grupos/Index', compact('grupos'));
+        $query = Grupo::with(['lider', 'membros'])->withCount('escalas')->latest();
+
+        if (!$user->isPastor()) {
+            $query->whereHas('membros', fn($q) => $q->where('users.id', $user->id));
+        }
+
+        $grupos = $query->get()->map(fn($g) => [
+            'id'            => $g->id,
+            'nome'          => $g->nome,
+            'descricao'     => $g->descricao,
+            'lider'         => $g->lider?->only('id', 'name'),
+            'total_membros' => $g->membros->count(),
+            'total_escalas' => $g->escalas_count,
+        ]);
+
+        return Inertia::render('Admin/Grupos/Index', [
+            'grupos'     => $grupos,
+            'can_create' => $user->isPastor(),
+        ]);
     }
 
     public function create()
@@ -41,10 +48,11 @@ class GrupoController extends Controller
         $data = $this->validateData($request);
 
         $grupo = Grupo::create([
-            'nome'       => $data['nome'],
-            'descricao'  => $data['descricao'] ?? null,
-            'lider_id'   => $data['lider_id'] ?? null,
-            'created_by' => auth()->id(),
+            'nome'        => $data['nome'],
+            'descricao'   => $data['descricao'] ?? null,
+            'tem_musicas' => $data['tem_musicas'] ?? false,
+            'lider_id'    => $data['lider_id'] ?? null,
+            'created_by'  => auth()->id(),
         ]);
 
         $this->sincronizarMembros($grupo, $data['membros_ids'] ?? []);
@@ -63,6 +71,7 @@ class GrupoController extends Controller
                 'id'          => $grupo->id,
                 'nome'        => $grupo->nome,
                 'descricao'   => $grupo->descricao,
+                'tem_musicas' => $grupo->tem_musicas,
                 'lider'       => $grupo->lider?->only('id', 'name'),
                 'membros_ids' => $grupo->membros->pluck('id')->all(),
             ],
@@ -76,9 +85,10 @@ class GrupoController extends Controller
 
         $oldLiderId = $grupo->lider_id;
         $grupo->update([
-            'nome'      => $data['nome'],
-            'descricao' => $data['descricao'] ?? null,
-            'lider_id'  => $data['lider_id'] ?? null,
+            'nome'        => $data['nome'],
+            'descricao'   => $data['descricao'] ?? null,
+            'tem_musicas' => $data['tem_musicas'] ?? false,
+            'lider_id'    => $data['lider_id'] ?? null,
         ]);
 
         $this->sincronizarMembros($grupo, $data['membros_ids'] ?? []);
@@ -100,6 +110,7 @@ class GrupoController extends Controller
         return $request->validate([
             'nome'          => 'required|string|max:100',
             'descricao'     => 'nullable|string',
+            'tem_musicas'   => 'boolean',
             'lider_id'      => 'nullable|exists:users,id',
             'membros_ids'   => 'nullable|array',
             'membros_ids.*' => 'integer|exists:users,id',

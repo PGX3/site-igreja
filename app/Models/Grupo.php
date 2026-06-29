@@ -6,11 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Grupo extends Model
 {
-    protected $fillable = ['nome', 'descricao', 'lider_id', 'created_by'];
-    
+    protected $fillable = ['nome', 'descricao', 'tem_musicas', 'lider_id', 'created_by'];
+
     protected $casts = [
-        'lider_id' => 'integer',
-        'created_by' => 'integer',
+        'lider_id'    => 'integer',
+        'created_by'  => 'integer',
+        'tem_musicas' => 'boolean',
     ];
     
     public function lider()
@@ -31,5 +32,15 @@ class Grupo extends Model
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function avisos()
+    {
+        return $this->hasMany(GrupoAviso::class);
+    }
+
+    public function musicas()
+    {
+        return $this->hasMany(GrupoMusica::class);
     }
 }

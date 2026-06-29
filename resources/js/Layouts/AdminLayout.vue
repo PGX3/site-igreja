@@ -252,6 +252,12 @@ const navGroups = computed(() => {
             gestao.push({ href: "/admin/eventos",  label: "Eventos",  icon: "calendar" });
         }
         groups.push({ label: "Gestão", items: gestao });
+    } else {
+        // Membros: apenas seus grupos
+        groups.push({
+            label: "Grupos",
+            items: [{ href: "/admin/grupos", label: "Meus Grupos", icon: "users" }],
+        });
     }
 
     if (isPastor) {

@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\MembroController;
 use App\Http\Controllers\Admin\VisitanteController;
 use App\Http\Controllers\Admin\FamiliaController;
 use App\Http\Controllers\Admin\MinhaSenhaController;
+use App\Http\Controllers\Admin\GrupoMuralController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/cultos/{culto}', [HomeController::class, 'showCulto'])->name('cultos.show');
@@ -45,6 +46,14 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
         Route::get('aniversarios', [AniversarioController::class, 'index'])->name('aniversarios.index');
     });
 
+    // Mural do grupo (pastor + lider + membro — autorização no controller)
+    Route::get('grupos/{grupo}/mural', [GrupoMuralController::class, 'show'])->name('grupos.mural.show');
+    Route::post('grupos/{grupo}/avisos', [GrupoMuralController::class, 'storeAviso'])->name('grupos.avisos.store');
+    Route::delete('grupos/{grupo}/avisos/{aviso}', [GrupoMuralController::class, 'destroyAviso'])->name('grupos.avisos.destroy');
+    Route::post('grupos/{grupo}/musicas', [GrupoMuralController::class, 'storeMusica'])->name('grupos.musicas.store');
+    Route::delete('grupos/{grupo}/musicas/{musica}', [GrupoMuralController::class, 'destroyMusica'])->name('grupos.musicas.destroy');
+    Route::get('grupos/{grupo}/musicas/{musica}/download', [GrupoMuralController::class, 'downloadMusica'])->name('grupos.musicas.download');
+
     // Todas as roles: ver suas próprias escalas e confirmar/recusar
     Route::get('minhas-escalas', [EscalaMembroController::class, 'index'])->name('minhas-escalas.index');
     Route::get('minha-senha', [MinhaSenhaController::class, 'edit'])->name('minha-senha.edit');
@@ -63,9 +72,12 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
         Route::resource('familias', FamiliaController::class);
     });
 
+    // Listagem de grupos: todos os autenticados veem seus grupos
+    Route::get('grupos', [GrupoController::class, 'index'])->name('admin.grupos.index');
+
     // Apenas Pastor: grupos, cultos, textos, sugestões, pedidos, usuários
     Route::middleware('role:pastor')->group(function () {
-        Route::resource('grupos', GrupoController::class);
+        Route::resource('grupos', GrupoController::class)->except(['index']);
         Route::resource('usuarios', UserController::class)->except(['show']);
         Route::post('usuarios/{usuario}/senha', [UserController::class, 'alterarSenha'])->name('usuarios.senha');
         Route::resource('cultos', CultoController::class);

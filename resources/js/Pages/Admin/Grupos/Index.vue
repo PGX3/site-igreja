@@ -8,7 +8,7 @@
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Grupos</h1>
         <p class="text-gray-500 dark:text-slate-400 text-sm mt-1">{{ grupos.length }} grupo(s) cadastrado(s)</p>
       </div>
-      <Link href="/admin/grupos/create"
+      <Link v-if="can_create" href="/admin/grupos/create"
             class="self-start sm:self-auto bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition">
         + Novo Grupo
       </Link>
@@ -24,8 +24,8 @@
     <div v-if="!grupos.length"
          class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl py-20 text-center text-gray-400 dark:text-slate-500">
       <p class="text-4xl mb-3">◉</p>
-      <p class="font-medium">Nenhum grupo cadastrado ainda.</p>
-      <Link href="/admin/grupos/create" class="mt-4 inline-block text-sm text-blue-600 dark:text-blue-400 hover:underline">
+      <p class="font-medium">{{ can_create ? 'Nenhum grupo cadastrado ainda.' : 'Você não pertence a nenhum grupo.' }}</p>
+      <Link v-if="can_create" href="/admin/grupos/create" class="mt-4 inline-block text-sm text-blue-600 dark:text-blue-400 hover:underline">
         Criar primeiro grupo
       </Link>
     </div>
@@ -58,14 +58,20 @@
           </div>
           <!-- Ações -->
           <div class="px-4 py-3 border-t border-gray-100 dark:border-slate-700/50 flex gap-2 justify-end">
-            <Link :href="`/admin/grupos/${g.id}/edit`"
-                  class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
-              Editar
+            <Link :href="`/admin/grupos/${g.id}/mural`"
+                  class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 px-3 py-1.5 rounded hover:bg-purple-50 dark:hover:bg-purple-900/20 transition">
+              Mural
             </Link>
-            <button @click="confirmarExclusao(g)"
-                    class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-red-600 px-3 py-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
-              Excluir
-            </button>
+            <template v-if="can_create">
+              <Link :href="`/admin/grupos/${g.id}/edit`"
+                    class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
+                Editar
+              </Link>
+              <button @click="confirmarExclusao(g)"
+                      class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-red-600 px-3 py-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+                Excluir
+              </button>
+            </template>
           </div>
         </div>
       </div>
@@ -102,14 +108,20 @@
                 </td>
                 <td class="px-6 py-4 text-right">
                   <div class="flex justify-end gap-2">
-                    <Link :href="`/admin/grupos/${g.id}/edit`"
-                          class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
-                      Editar
+                    <Link :href="`/admin/grupos/${g.id}/mural`"
+                          class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 px-3 py-1.5 rounded hover:bg-purple-50 dark:hover:bg-purple-900/20 transition">
+                      Mural
                     </Link>
-                    <button @click="confirmarExclusao(g)"
-                            class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-red-600 px-3 py-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
-                      Excluir
-                    </button>
+                    <template v-if="can_create">
+                      <Link :href="`/admin/grupos/${g.id}/edit`"
+                            class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
+                        Editar
+                      </Link>
+                      <button @click="confirmarExclusao(g)"
+                              class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-red-600 px-3 py-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+                        Excluir
+                      </button>
+                    </template>
                   </div>
                 </td>
               </tr>
@@ -149,7 +161,7 @@ import AdminLayout from '@/Layouts/AdminLayout.vue'
 import { Link } from '@inertiajs/vue3'
 import { ref } from 'vue'
 
-defineProps({ grupos: Array })
+defineProps({ grupos: Array, can_create: Boolean })
 
 const grupoParaExcluir = ref(null)
 function confirmarExclusao(g) { grupoParaExcluir.value = g }
