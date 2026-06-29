@@ -32,6 +32,7 @@ class AniversarioController extends Controller
                 return [
                     'id'             => $u->id,
                     'name'           => $u->name,
+                    'telefone'       => $u->telefone,
                     'initials'       => self::initials($u->name),
                     'color'          => self::avatarColor($u->name),
                     'data_fmt'       => $nasc->day . ' de ' . $meses[$nasc->month],

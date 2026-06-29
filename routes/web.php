@@ -56,10 +56,10 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::middleware('role:pastor,lider')->group(function () {
         Route::resource('escalas', EscalaController::class);
 
-        Route::resource('membros', MembroController::class);
+        Route::resource('membros', MembroController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
         Route::post('membros/{membro}/gerar-senha', [MembroController::class, 'gerarSenha'])
             ->name('membros.gerar-senha');
-        Route::resource('visitantes', VisitanteController::class);
+        Route::resource('visitantes', VisitanteController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
         Route::post('visitantes/{visitante}/promover', [VisitanteController::class, 'promoverParaMembro'])
             ->name('visitantes.promover');
         Route::resource('familias', FamiliaController::class);

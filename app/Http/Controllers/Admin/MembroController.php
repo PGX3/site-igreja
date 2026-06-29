@@ -47,6 +47,8 @@ class MembroController extends Controller
 
     public function create()
     {
+        if (! request()->user()?->isPastor()) abort(403);
+
         return Inertia::render('Admin/Membros/Form', [
             'familias' => $this->familiasOptions(),
         ]);
@@ -54,6 +56,8 @@ class MembroController extends Controller
 
     public function store(Request $request)
     {
+        if (! request()->user()?->isPastor()) abort(403);
+
         $data = $this->validateData($request);
         $data['tipo'] = 'membro';
 
@@ -63,10 +67,29 @@ class MembroController extends Controller
             ->with('success', 'Membro cadastrado!');
     }
 
+    public function show(User $membro)
+    {
+        abort_unless($membro->tipo === 'membro', 404);
+
+        return Inertia::render('Admin/Membros/Form', [
+            'membro'   => array_merge(
+                $membro->only(
+                    'id', 'name', 'email', 'telefone',
+                    'sexo', 'estado_civil', 'cpf',
+                    'batizado_aguas', 'familia_id',
+                ),
+                ['data_nascimento' => $membro->data_nascimento?->format('Y-m-d')],
+            ),
+            'familias' => $this->familiasOptions(),
+            'readonly' => true,
+        ]);
+    }
+
     public function edit(User $membro)
     {
         abort_unless($membro->tipo === 'membro', 404);
         if ($membro->is_superadmin) abort(403);
+        if (! request()->user()?->isPastor()) abort(403);
 
         return Inertia::render('Admin/Membros/Form', [
             'membro' => array_merge(
@@ -85,6 +108,7 @@ class MembroController extends Controller
     {
         abort_unless($membro->tipo === 'membro', 404);
         if ($membro->is_superadmin) abort(403);
+        if (! request()->user()?->isPastor()) abort(403);
 
         $data = $this->validateData($request, $membro->id);
         $membro->update($data);
@@ -97,6 +121,7 @@ class MembroController extends Controller
     {
         abort_unless($membro->tipo === 'membro', 404);
         if ($membro->is_superadmin) abort(403);
+        if (! request()->user()?->isPastor()) abort(403);
 
         $membro->delete();
 

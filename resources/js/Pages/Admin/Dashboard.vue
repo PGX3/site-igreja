@@ -18,33 +18,30 @@
       <!-- Ações Rápidas (pastor) -->
       <div v-if="role === 'pastor'" class="flex flex-wrap gap-2">
         <Link href="/admin/membros/create"
-              class="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-xl
-                     text-sm font-semibold shadow-sm transition-colors flex items-center gap-1.5">
+              class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-xl
+                     text-xs sm:text-sm font-semibold shadow-sm transition-colors flex items-center gap-1.5">
           <AppIcon name="user" size="xs" />
-          <span class="hidden xs:inline sm:inline">+ Membro</span>
-          <span class="sm:hidden">+</span>
+          + Membro
         </Link>
         <Link href="/admin/cultos/create"
               class="border border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700
-                     text-gray-700 dark:text-slate-200 px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold
+                     text-gray-700 dark:text-slate-200 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold
                      transition-colors flex items-center gap-1.5">
           <AppIcon name="mic" size="xs" />
-          <span class="hidden sm:inline">+ Culto</span>
-          <span class="sm:hidden">+</span>
+          + Culto
         </Link>
         <Link href="/admin/escalas/create"
               class="border border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700
-                     text-gray-700 dark:text-slate-200 px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold
+                     text-gray-700 dark:text-slate-200 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold
                      transition-colors flex items-center gap-1.5">
           <AppIcon name="calendar" size="xs" />
-          <span class="hidden sm:inline">+ Escala</span>
-          <span class="sm:hidden">+</span>
+          + Escala
         </Link>
       </div>
       <div v-else-if="role === 'lider'">
         <Link href="/admin/escalas/create"
-              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl
-                     text-sm font-semibold shadow-sm transition-colors flex items-center gap-1.5">
+              class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-xl
+                     text-xs sm:text-sm font-semibold shadow-sm transition-colors flex items-center gap-1.5">
           <AppIcon name="calendar" size="xs" />
           + Escala
         </Link>
@@ -190,7 +187,7 @@
     </div>
 
     <!-- ── BOTTOM ROW ── -->
-    <div class="grid grid-cols-1 xl:grid-cols-5 gap-5">
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
 
       <!-- Próximo Culto -->
       <div class="xl:col-span-3">

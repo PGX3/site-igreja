@@ -2,7 +2,7 @@
   <AdminLayout>
 
     <!-- HEADER -->
-    <div class="mb-8 flex items-start justify-between">
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
       <div>
         <p class="text-xs tracking-widest uppercase text-gray-400 dark:text-slate-500 mb-1">
           <Link href="/admin/escalas" class="hover:text-blue-600 dark:hover:text-blue-400">Escalas</Link>
@@ -10,7 +10,7 @@
           Detalhe
         </p>
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ escala.titulo }}</h1>
-        <div class="flex items-center gap-3 mt-2">
+        <div class="flex items-center gap-2 flex-wrap mt-2">
           <span :class="statusClass(escala.status)"
                 class="text-xs font-bold px-2.5 py-1 rounded-full">
             {{ statusLabel(escala.status) }}
@@ -23,7 +23,7 @@
       </div>
 
       <Link :href="`/admin/escalas/${escala.id}/edit`"
-            class="border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 px-5 py-2.5 rounded-lg text-sm font-semibold transition">
+            class="self-start border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 px-5 py-2.5 rounded-lg text-sm font-semibold transition">
         Editar
       </Link>
     </div>
@@ -67,11 +67,11 @@
     </div>
 
     <!-- RESUMO MEMBROS -->
-    <div class="grid grid-cols-3 gap-4 mb-8">
+    <div class="grid grid-cols-3 gap-3 sm:gap-4 mb-8">
       <div v-for="stat in membroStats" :key="stat.label"
-           class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-5 shadow-sm text-center">
-        <p class="text-3xl font-bold" :class="stat.color">{{ stat.value }}</p>
-        <p class="text-xs text-gray-400 dark:text-slate-500 mt-1 uppercase tracking-wider">{{ stat.label }}</p>
+           class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-3 sm:p-5 shadow-sm text-center">
+        <p class="text-2xl sm:text-3xl font-bold" :class="stat.color">{{ stat.value }}</p>
+        <p class="text-[10px] sm:text-xs text-gray-400 dark:text-slate-500 mt-1 uppercase tracking-wider">{{ stat.label }}</p>
       </div>
     </div>
 
@@ -84,7 +84,7 @@
 
       <div v-if="escala.membros?.length">
         <div v-for="m in escala.membros" :key="m.id"
-             class="flex items-center gap-4 px-6 py-4 border-b border-gray-50 dark:border-slate-700/50 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition">
+             class="flex items-center gap-3 px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-50 dark:border-slate-700/50 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition">
           <!-- Avatar inicial -->
           <div class="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-bold text-sm
                       flex items-center justify-center flex-shrink-0">
@@ -92,13 +92,16 @@
           </div>
 
           <div class="flex-1 min-w-0">
-            <p class="font-semibold text-gray-900 dark:text-white text-sm">{{ m.user?.name }}</p>
-            <p class="text-xs text-gray-400 dark:text-slate-500">{{ m.user?.email }}</p>
+            <p class="font-semibold text-gray-900 dark:text-white text-sm truncate">{{ m.user?.name }}</p>
+            <p class="text-xs text-gray-400 dark:text-slate-500 truncate">
+              <span class="hidden sm:inline">{{ m.user?.email }}</span>
+              <span class="sm:hidden">{{ m.funcao ?? m.user?.email ?? '' }}</span>
+            </p>
           </div>
 
-          <div class="text-sm text-gray-500 dark:text-slate-400">{{ m.funcao ?? '—' }}</div>
+          <div class="hidden sm:block text-sm text-gray-500 dark:text-slate-400 flex-shrink-0">{{ m.funcao ?? '—' }}</div>
 
-          <div class="text-right">
+          <div class="text-right flex-shrink-0">
             <span :class="membroStatusClass(m.status)"
                   class="inline-block text-xs font-bold px-2.5 py-1 rounded-full">
               {{ membroStatusLabel(m.status) }}

@@ -20,7 +20,7 @@ class EscalaController extends Controller
     public function index()
     {
         $user  = auth()->user();
-        $query = Escala::with(['grupo', 'createdBy', 'culto', 'evento'])
+        $query = Escala::with(['grupo', 'createdBy', 'culto', 'evento', 'escalaMembros.user'])
             ->withCount('escalaMembros')
             ->withCount(['escalaMembros as confirmados_count' => fn($q) => $q->where('status', 'confirmado')])
             ->latest('data');
@@ -41,6 +41,11 @@ class EscalaController extends Controller
             'total_membros'    => $e->escala_membros_count,
             'confirmados'      => $e->confirmados_count,
             'vinculo'          => $this->vinculoLabel($e),
+            'membros'          => $e->escalaMembros->map(fn($em) => [
+                'nome'   => $em->user?->name,
+                'funcao' => $em->funcao,
+                'status' => $em->status,
+            ])->values(),
         ]);
 
         return Inertia::render('Admin/Escalas/Index', compact('escalas'));
