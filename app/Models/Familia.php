@@ -31,16 +31,18 @@ class Familia extends Model
     public function getNomeAttribute(): string
     {
         if ($this->relationLoaded('responsavel') && $this->responsavel) {
-            return 'Família de ' . $this->responsavel->name;
+            return 'Família de '.$this->responsavel->name;
         }
 
         if ($this->responsavel_id) {
             $r = User::find($this->responsavel_id);
-            if ($r) return 'Família de ' . $r->name;
+            if ($r) {
+                return 'Família de '.$r->name;
+            }
         }
 
         if ($this->relationLoaded('membros') && $this->membros->isNotEmpty()) {
-            return 'Família de ' . $this->membros->first()->name;
+            return 'Família de '.$this->membros->first()->name;
         }
 
         return 'Família sem responsável';
@@ -54,6 +56,7 @@ class Familia extends Model
             $this->uf,
             $this->cep,
         ]);
+
         return implode(', ', $partes);
     }
 }

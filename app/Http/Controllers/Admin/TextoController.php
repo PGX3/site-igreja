@@ -28,6 +28,7 @@ class TextoController extends Controller
         ]);
 
         $texto->update($data);
+
         return redirect()->route('admin.textos.index')->with('success', 'Texto atualizado!');
     }
 }

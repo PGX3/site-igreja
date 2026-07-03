@@ -25,10 +25,10 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'data_nascimento'   => 'date',
-        'primeira_visita'   => 'date',
-        'batizado_aguas'    => 'boolean',
-        'password'          => 'hashed',
+        'data_nascimento' => 'date',
+        'primeira_visita' => 'date',
+        'batizado_aguas' => 'boolean',
+        'password' => 'hashed',
     ];
 
     public function setCpfAttribute($value): void
@@ -48,7 +48,7 @@ class User extends Authenticatable
 
     public function grupoIds(): array
     {
-        return $this->grupos()->pluck('grupos.id')->map(fn($id) => (int) $id)->toArray();
+        return $this->grupos()->pluck('grupos.id')->map(fn ($id) => (int) $id)->toArray();
     }
 
     public function escalas()
@@ -78,8 +78,15 @@ class User extends Authenticatable
         return $this->belongsTo(Familia::class);
     }
 
-    public function scopeMembros($q)    { return $q->where('tipo', 'membro'); }
-    public function scopeVisitantes($q) { return $q->where('tipo', 'visitante'); }
+    public function scopeMembros($q)
+    {
+        return $q->where('tipo', 'membro');
+    }
+
+    public function scopeVisitantes($q)
+    {
+        return $q->where('tipo', 'visitante');
+    }
 
     public function isPastor()
     {
@@ -96,7 +103,10 @@ class User extends Authenticatable
         return $this->role?->name === 'membro';
     }
 
-    public function isVisitante(): bool { return $this->tipo === 'visitante'; }
+    public function isVisitante(): bool
+    {
+        return $this->tipo === 'visitante';
+    }
 
     public function isResponsavelFamilia(): bool
     {
@@ -107,4 +117,4 @@ class User extends Authenticatable
     {
         return $this->isPastor() || ($this->isLider() && in_array($grupoId, $this->grupoIds()));
     }
-};
+}

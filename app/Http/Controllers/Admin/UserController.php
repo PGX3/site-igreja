@@ -18,12 +18,12 @@ class UserController extends Controller
             ->where('is_superadmin', false)
             ->orderBy('name')
             ->get()
-            ->map(fn($u) => [
-                'id'       => $u->id,
-                'name'     => $u->name,
-                'email'    => $u->email,
-                'role'     => $u->role?->only('name', 'display_name'),
-                'grupos'   => $u->grupos->map->only('id', 'nome')->values(),
+            ->map(fn ($u) => [
+                'id' => $u->id,
+                'name' => $u->name,
+                'email' => $u->email,
+                'role' => $u->role?->only('name', 'display_name'),
+                'grupos' => $u->grupos->map->only('id', 'nome')->values(),
                 'telefone' => $u->telefone,
             ]);
 
@@ -33,7 +33,7 @@ class UserController extends Controller
     public function create()
     {
         return Inertia::render('Admin/Usuarios/Form', [
-            'roles'  => Role::all(['id', 'name', 'display_name']),
+            'roles' => Role::all(['id', 'name', 'display_name']),
             'grupos' => Grupo::orderBy('nome')->get(['id', 'nome']),
         ]);
     }
@@ -41,14 +41,14 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name'             => 'required|string|max:100',
-            'email'            => 'required|email|unique:users',
-            'password'         => 'required|string|min:6',
-            'role_id'          => 'required|exists:roles,id',
-            'grupo_ids'        => 'nullable|array',
-            'grupo_ids.*'      => 'exists:grupos,id',
-            'telefone'         => 'nullable|string|max:20',
-            'data_nascimento'  => 'nullable|date|before:today',
+            'name' => 'required|string|max:100',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|string|min:6',
+            'role_id' => 'required|exists:roles,id',
+            'grupo_ids' => 'nullable|array',
+            'grupo_ids.*' => 'exists:grupos,id',
+            'telefone' => 'nullable|string|max:20',
+            'data_nascimento' => 'nullable|date|before:today',
         ]);
 
         $grupoIds = $data['grupo_ids'] ?? [];
@@ -64,17 +64,19 @@ class UserController extends Controller
 
     public function edit(User $usuario)
     {
-        if ($usuario->is_superadmin) abort(403);
+        if ($usuario->is_superadmin) {
+            abort(403);
+        }
 
         return Inertia::render('Admin/Usuarios/Form', [
             'usuario' => array_merge(
                 $usuario->only('id', 'name', 'email', 'role_id', 'telefone'),
                 [
                     'data_nascimento' => $usuario->data_nascimento?->format('Y-m-d'),
-                    'grupo_ids'       => $usuario->grupos()->pluck('grupos.id')->map(fn($id) => (int) $id)->toArray(),
+                    'grupo_ids' => $usuario->grupos()->pluck('grupos.id')->map(fn ($id) => (int) $id)->toArray(),
                 ]
             ),
-            'roles'  => Role::all(['id', 'name', 'display_name']),
+            'roles' => Role::all(['id', 'name', 'display_name']),
             'grupos' => Grupo::orderBy('nome')->get(['id', 'nome']),
         ]);
     }
@@ -82,20 +84,20 @@ class UserController extends Controller
     public function update(Request $request, User $usuario)
     {
         $data = $request->validate([
-            'name'             => 'required|string|max:100',
-            'email'            => 'required|email|unique:users,email,' . $usuario->id,
-            'password'         => 'nullable|string|min:6',
-            'role_id'          => 'required|exists:roles,id',
-            'grupo_ids'        => 'nullable|array',
-            'grupo_ids.*'      => 'exists:grupos,id',
-            'telefone'         => 'nullable|string|max:20',
-            'data_nascimento'  => 'nullable|date|before:today',
+            'name' => 'required|string|max:100',
+            'email' => 'required|email|unique:users,email,'.$usuario->id,
+            'password' => 'nullable|string|min:6',
+            'role_id' => 'required|exists:roles,id',
+            'grupo_ids' => 'nullable|array',
+            'grupo_ids.*' => 'exists:grupos,id',
+            'telefone' => 'nullable|string|max:20',
+            'data_nascimento' => 'nullable|date|before:today',
         ]);
 
         $grupoIds = $data['grupo_ids'] ?? [];
         unset($data['grupo_ids']);
 
-        if (!empty($data['password'])) {
+        if (! empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
         } else {
             unset($data['password']);
@@ -110,7 +112,9 @@ class UserController extends Controller
 
     public function alterarSenha(Request $request, User $usuario)
     {
-        if ($usuario->is_superadmin) abort(403);
+        if ($usuario->is_superadmin) {
+            abort(403);
+        }
 
         $data = $request->validate([
             'password' => 'required|string|min:6|confirmed',
@@ -123,13 +127,16 @@ class UserController extends Controller
 
     public function destroy(User $usuario)
     {
-        if ($usuario->is_superadmin) abort(403);
+        if ($usuario->is_superadmin) {
+            abort(403);
+        }
 
         if ($usuario->id === auth()->user()?->id) {
             return back()->with('error', 'Você não pode excluir seu próprio usuário.');
         }
 
         $usuario->delete();
+
         return redirect()->route('admin.usuarios.index')
             ->with('success', 'Usuário excluído!');
     }

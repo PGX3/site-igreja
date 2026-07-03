@@ -22,14 +22,15 @@ class HCaptchaService
 
         try {
             $response = Http::asForm()->post('https://hcaptcha.com/siteverify', [
-                'secret'   => $secret,
+                'secret' => $secret,
                 'response' => $token,
                 'remoteip' => $ip,
             ]);
 
             return $response->json('success', false);
         } catch (\Exception $e) {
-            Log::error('hCaptcha verification failed: ' . $e->getMessage());
+            Log::error('hCaptcha verification failed: '.$e->getMessage());
+
             return false;
         }
     }

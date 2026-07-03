@@ -52,4 +52,19 @@ class Escala extends Model
     {
         return $this->hasMany(EscalaMembro::class);
     }
+
+    public function assets()
+    {
+        return $this->belongsToMany(Asset::class, 'asset_escala')->withTimestamps();
+    }
+
+    public function notas()
+    {
+        return $this->hasMany(EscalaNota::class);
+    }
+
+    public function setlist()
+    {
+        return $this->hasMany(EscalaSetlistItem::class)->orderBy('ordem');
+    }
 }

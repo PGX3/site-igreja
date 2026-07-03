@@ -13,26 +13,26 @@ return new class extends Migration
             ->whereNull('familia_id')
             ->where(function ($q) {
                 $q->whereNotNull('endereco')
-                  ->orWhereNotNull('cidade')
-                  ->orWhereNotNull('cep');
+                    ->orWhereNotNull('cidade')
+                    ->orWhereNotNull('cep');
             })
             ->get();
 
         foreach ($usersComEndereco as $user) {
             $partes = preg_split('/\s+/', trim($user->name ?? ''), -1, PREG_SPLIT_NO_EMPTY);
             $sobrenome = count($partes) > 1 ? end($partes) : ($partes[0] ?? 'Sem Nome');
-            $nomeFamilia = 'Família ' . $sobrenome;
+            $nomeFamilia = 'Família '.$sobrenome;
 
             $familiaId = DB::table('familias')->insertGetId([
-                'nome'               => mb_substr($nomeFamilia, 0, 100),
-                'endereco'           => $user->endereco ?? '',
-                'cidade'             => $user->cidade ?? '',
-                'uf'                 => $user->uf ?? '',
-                'cep'                => $user->cep ?? '',
+                'nome' => mb_substr($nomeFamilia, 0, 100),
+                'endereco' => $user->endereco ?? '',
+                'cidade' => $user->cidade ?? '',
+                'uf' => $user->uf ?? '',
+                'cep' => $user->cep ?? '',
                 'telefone_principal' => $user->telefone,
-                'responsavel_id'     => $user->id,
-                'created_at'         => now(),
-                'updated_at'         => now(),
+                'responsavel_id' => $user->id,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
 
             DB::table('users')->where('id', $user->id)->update(['familia_id' => $familiaId]);
@@ -58,9 +58,9 @@ return new class extends Migration
             if ($f) {
                 DB::table('users')->where('id', $user->id)->update([
                     'endereco' => $f->endereco,
-                    'cidade'   => $f->cidade,
-                    'uf'       => $f->uf,
-                    'cep'      => $f->cep,
+                    'cidade' => $f->cidade,
+                    'uf' => $f->uf,
+                    'cep' => $f->cep,
                 ]);
             }
         }

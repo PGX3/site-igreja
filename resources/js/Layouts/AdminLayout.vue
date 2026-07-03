@@ -191,6 +191,8 @@ const routeTitles = {
     "/admin/visitantes": "Visitantes",
     "/admin/aniversarios": "Aniversários",
     "/admin/escalas": "Escalas",
+    "/admin/musicas": "Músicas",
+    "/admin/assets": "Anexos",
     "/admin/grupos": "Grupos",
     "/admin/cultos": "Cultos",
     "/admin/eventos": "Eventos",
@@ -245,7 +247,11 @@ const navGroups = computed(() => {
             ],
         });
 
-        const gestao = [{ href: "/admin/escalas", label: "Escalas", icon: "calendar" }];
+        const gestao = [
+            { href: "/admin/escalas", label: "Escalas", icon: "calendar" },
+            { href: "/admin/musicas", label: "Músicas", icon: "mic" },
+            { href: "/admin/assets", label: "Anexos", icon: "file-text" },
+        ];
         if (isPastor) {
             gestao.push({ href: "/admin/grupos",   label: "Grupos",   icon: "users" });
             gestao.push({ href: "/admin/cultos",   label: "Cultos",   icon: "mic" });

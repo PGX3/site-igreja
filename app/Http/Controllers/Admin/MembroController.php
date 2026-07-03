@@ -18,35 +18,36 @@ class MembroController extends Controller
         $membros = User::membros()
             ->where('is_superadmin', false)
             ->with(['familia:id,cidade,responsavel_id', 'familia.responsavel:id,name'])
-            ->when($busca !== '', fn($q) =>
-                $q->where(fn($w) => $w
-                    ->where('name', 'like', "%{$busca}%")
-                    ->orWhere('telefone', 'like', "%{$busca}%")
-                    ->orWhere('email', 'like', "%{$busca}%")))
+            ->when($busca !== '', fn ($q) => $q->where(fn ($w) => $w
+                ->where('name', 'like', "%{$busca}%")
+                ->orWhere('telefone', 'like', "%{$busca}%")
+                ->orWhere('email', 'like', "%{$busca}%")))
             ->with('grupos:id,nome')
             ->orderBy('name')
             ->get()
-            ->map(fn($u) => [
-                'id'              => $u->id,
-                'name'            => $u->name,
-                'email'           => $u->email,
-                'telefone'        => $u->telefone,
-                'batizado_aguas'  => $u->batizado_aguas,
-                'cidade'          => $u->familia?->cidade,
-                'familia'         => $u->familia?->nome,
+            ->map(fn ($u) => [
+                'id' => $u->id,
+                'name' => $u->name,
+                'email' => $u->email,
+                'telefone' => $u->telefone,
+                'batizado_aguas' => $u->batizado_aguas,
+                'cidade' => $u->familia?->cidade,
+                'familia' => $u->familia?->nome,
                 'data_nascimento' => optional($u->data_nascimento)->format('Y-m-d'),
-                'grupos'          => $u->grupos->map(fn($g) => ['id' => $g->id, 'nome' => $g->nome])->values(),
+                'grupos' => $u->grupos->map(fn ($g) => ['id' => $g->id, 'nome' => $g->nome])->values(),
             ]);
 
         return Inertia::render('Admin/Membros/Index', [
             'membros' => $membros,
-            'busca'   => $busca,
+            'busca' => $busca,
         ]);
     }
 
     public function create()
     {
-        if (! request()->user()?->isPastor()) abort(403);
+        if (! request()->user()?->isPastor()) {
+            abort(403);
+        }
 
         return Inertia::render('Admin/Membros/Form', [
             'familias' => $this->familiasOptions(),
@@ -55,7 +56,9 @@ class MembroController extends Controller
 
     public function store(Request $request)
     {
-        if (! request()->user()?->isPastor()) abort(403);
+        if (! request()->user()?->isPastor()) {
+            abort(403);
+        }
 
         $data = $this->validateData($request);
         $data['tipo'] = 'membro';
@@ -71,7 +74,7 @@ class MembroController extends Controller
         abort_unless($membro->tipo === 'membro', 404);
 
         return Inertia::render('Admin/Membros/Form', [
-            'membro'   => array_merge(
+            'membro' => array_merge(
                 $membro->only(
                     'id', 'name', 'email', 'telefone',
                     'sexo', 'estado_civil', 'cpf',
@@ -87,8 +90,12 @@ class MembroController extends Controller
     public function edit(User $membro)
     {
         abort_unless($membro->tipo === 'membro', 404);
-        if ($membro->is_superadmin) abort(403);
-        if (! request()->user()?->isPastor()) abort(403);
+        if ($membro->is_superadmin) {
+            abort(403);
+        }
+        if (! request()->user()?->isPastor()) {
+            abort(403);
+        }
 
         return Inertia::render('Admin/Membros/Form', [
             'membro' => array_merge(
@@ -106,8 +113,12 @@ class MembroController extends Controller
     public function update(Request $request, User $membro)
     {
         abort_unless($membro->tipo === 'membro', 404);
-        if ($membro->is_superadmin) abort(403);
-        if (! request()->user()?->isPastor()) abort(403);
+        if ($membro->is_superadmin) {
+            abort(403);
+        }
+        if (! request()->user()?->isPastor()) {
+            abort(403);
+        }
 
         $data = $this->validateData($request, $membro->id);
         $membro->update($data);
@@ -119,8 +130,12 @@ class MembroController extends Controller
     public function destroy(User $membro)
     {
         abort_unless($membro->tipo === 'membro', 404);
-        if ($membro->is_superadmin) abort(403);
-        if (! request()->user()?->isPastor()) abort(403);
+        if ($membro->is_superadmin) {
+            abort(403);
+        }
+        if (! request()->user()?->isPastor()) {
+            abort(403);
+        }
 
         $membro->delete();
 
@@ -133,21 +148,21 @@ class MembroController extends Controller
         $request->merge(['cpf' => Cpf::normalize($request->input('cpf'))]);
 
         $emailRule = 'nullable|email';
-        $emailRule .= $ignoreId ? '|unique:users,email,' . $ignoreId : '|unique:users,email';
+        $emailRule .= $ignoreId ? '|unique:users,email,'.$ignoreId : '|unique:users,email';
 
         $cpfRule = 'nullable|string|max:14';
-        $cpfRule .= $ignoreId ? '|unique:users,cpf,' . $ignoreId : '|unique:users,cpf';
+        $cpfRule .= $ignoreId ? '|unique:users,cpf,'.$ignoreId : '|unique:users,cpf';
 
         return $request->validate([
-            'name'            => 'required|string|max:100',
-            'email'           => $emailRule,
-            'telefone'        => 'required|string|max:20',
+            'name' => 'required|string|max:100',
+            'email' => $emailRule,
+            'telefone' => 'required|string|max:20',
             'data_nascimento' => 'required|date|before:today',
-            'sexo'            => 'nullable|in:M,F',
-            'estado_civil'    => 'nullable|string|max:30',
-            'cpf'             => $cpfRule,
-            'batizado_aguas'  => 'required|boolean',
-            'familia_id'      => 'nullable|exists:familias,id',
+            'sexo' => 'nullable|in:M,F',
+            'estado_civil' => 'nullable|string|max:30',
+            'cpf' => $cpfRule,
+            'batizado_aguas' => 'required|boolean',
+            'familia_id' => 'nullable|exists:familias,id',
         ]);
     }
 
@@ -155,7 +170,7 @@ class MembroController extends Controller
     {
         return Familia::with('responsavel:id,name')
             ->get(['id', 'responsavel_id'])
-            ->map(fn($f) => ['id' => $f->id, 'nome' => $f->nome])
+            ->map(fn ($f) => ['id' => $f->id, 'nome' => $f->nome])
             ->sortBy('nome')
             ->values()
             ->all();

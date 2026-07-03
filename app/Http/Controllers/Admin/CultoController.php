@@ -24,14 +24,15 @@ class CultoController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'nome'       => 'required|string|max:100',
+            'nome' => 'required|string|max:100',
             'dia_semana' => 'required|string',
-            'horario'    => 'required|string',
-            'descricao'  => 'nullable|string',
-            'ativo'      => 'boolean',
+            'horario' => 'required|string',
+            'descricao' => 'nullable|string',
+            'ativo' => 'boolean',
         ]);
 
         Culto::create($data);
+
         return redirect()->route('admin.cultos.index')->with('success', 'Culto criado!');
     }
 
@@ -43,20 +44,22 @@ class CultoController extends Controller
     public function update(Request $request, Culto $culto)
     {
         $data = $request->validate([
-            'nome'       => 'required|string|max:100',
+            'nome' => 'required|string|max:100',
             'dia_semana' => 'required|string',
-            'horario'    => 'required|string',
-            'descricao'  => 'nullable|string',
-            'ativo'      => 'boolean',
+            'horario' => 'required|string',
+            'descricao' => 'nullable|string',
+            'ativo' => 'boolean',
         ]);
 
         $culto->update($data);
+
         return redirect()->route('admin.cultos.index')->with('success', 'Culto atualizado!');
     }
 
     public function destroy(Culto $culto)
     {
         $culto->delete();
+
         return redirect()->route('admin.cultos.index')->with('success', 'Culto removido!');
     }
 }
