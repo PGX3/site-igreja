@@ -18,6 +18,42 @@ class AniversarioController extends Controller
             7=>'julho',8=>'agosto',9=>'setembro',10=>'outubro',11=>'novembro',12=>'dezembro',
         ];
 
+        $diasSemanaNome = [
+            0=>'domingo', 1=>'segunda-feira', 2=>'terça-feira', 3=>'quarta-feira',
+            4=>'quinta-feira', 5=>'sexta-feira', 6=>'sábado',
+        ];
+
+        // Datas da semana atual (segunda a domingo)
+        $inicioSemana  = $hoje->copy()->startOfWeek(Carbon::MONDAY);
+        $diasDaSemana  = collect(range(0, 6))->map(fn($i) => $inicioSemana->copy()->addDays($i));
+
+        $aniversariantesSemana = User::whereNotNull('data_nascimento')
+            ->where('is_superadmin', false)
+            ->get()
+            ->map(function ($u) use ($diasDaSemana, $meses, $diasSemanaNome, $hoje) {
+                $nasc  = $u->data_nascimento;
+                $match = $diasDaSemana->first(fn($d) => $d->month === $nasc->month && $d->day === $nasc->day);
+                if (!$match) return null;
+
+                return [
+                    'id'               => $u->id,
+                    'name'             => $u->name,
+                    'telefone'         => $u->telefone,
+                    'initials'         => self::initials($u->name),
+                    'color'            => self::avatarColor($u->name),
+                    'data_fmt'         => $nasc->day . ' de ' . $meses[$nasc->month],
+                    'dia_semana'       => $diasSemanaNome[$match->dayOfWeek],
+                    'dia_semana_ordem' => $match->dayOfWeek === 0 ? 7 : $match->dayOfWeek,
+                    'dia'              => $match->day,
+                    'idade'            => $match->year - $nasc->year,
+                    'hoje'             => $match->isSameDay($hoje),
+                    'ja_passou'        => $match->lt($hoje),
+                ];
+            })
+            ->filter()
+            ->sortBy('dia_semana_ordem')
+            ->values();
+
         $comAniversario = User::whereNotNull('data_nascimento')
             ->where('is_superadmin', false)
             ->get()
@@ -60,8 +96,9 @@ class AniversarioController extends Controller
             ]);
 
         return Inertia::render('Admin/Aniversarios', [
-            'comAniversario' => $comAniversario,
-            'semAniversario' => $semAniversario,
+            'comAniversario'         => $comAniversario,
+            'semAniversario'         => $semAniversario,
+            'aniversariantesSemana'  => $aniversariantesSemana,
         ]);
     }
 
