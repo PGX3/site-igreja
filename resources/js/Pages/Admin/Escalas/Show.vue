@@ -22,16 +22,26 @@
         </div>
       </div>
 
-      <Link :href="`/admin/escalas/${escala.id}/edit`"
-            class="self-start border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 px-5 py-2.5 rounded-lg text-sm font-semibold transition">
-        Editar
-      </Link>
+      <div class="flex items-center gap-2 self-start">
+        <button v-if="can_manage && escala.grupo?.tem_whatsapp" @click="enviarWhatsapp" :disabled="enviandoWhatsapp"
+                class="border border-green-300 dark:border-green-800 text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 disabled:opacity-50 px-4 py-2.5 rounded-lg text-sm font-semibold transition">
+          {{ enviandoWhatsapp ? 'Enviando…' : '📲 Enviar no grupo' }}
+        </button>
+        <Link :href="`/admin/escalas/${escala.id}/edit`"
+              class="border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 px-5 py-2.5 rounded-lg text-sm font-semibold transition">
+          Editar
+        </Link>
+      </div>
     </div>
 
     <!-- FLASH -->
     <div v-if="$page.props.flash?.success"
          class="mb-6 p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 text-sm font-medium">
       {{ $page.props.flash.success }}
+    </div>
+    <div v-if="$page.props.flash?.error"
+         class="mb-6 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm font-medium">
+      {{ $page.props.flash.error }}
     </div>
 
     <!-- DESCRIÇÃO -->
@@ -77,9 +87,16 @@
 
     <!-- LISTA MEMBROS -->
     <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden">
-      <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
+      <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between gap-3">
         <p class="font-semibold text-gray-900 dark:text-white">Membros Escalados</p>
-        <span class="text-xs text-gray-400 dark:text-slate-500">{{ escala.membros?.length ?? 0 }} total</span>
+        <div class="flex items-center gap-2">
+          <button v-if="can_manage && temAlgumApikey" @click="enviarConvites" :disabled="enviandoConvites"
+                  class="text-xs font-semibold text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 disabled:opacity-50 px-3 py-1.5 rounded transition"
+                  title="Envia automaticamente para quem tem API Key">
+            {{ enviandoConvites ? 'Enviando…' : '📨 Enviar convites' }}
+          </button>
+          <span class="text-xs text-gray-400 dark:text-slate-500">{{ escala.membros?.length ?? 0 }} total</span>
+        </div>
       </div>
 
       <div v-if="escala.membros?.length">
@@ -100,6 +117,10 @@
           </div>
 
           <div class="hidden sm:block text-sm text-gray-500 dark:text-slate-400 flex-shrink-0">{{ m.funcao ?? '—' }}</div>
+
+          <a v-if="can_manage && m.telefone" :href="linkWhatsappMembro(m)" target="_blank" rel="noopener"
+             class="flex-shrink-0 text-xs font-semibold text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 px-2.5 py-1.5 rounded transition"
+             title="Enviar convite pelo WhatsApp">📲</a>
 
           <div class="text-right flex-shrink-0">
             <span :class="membroStatusClass(m.status)"
@@ -127,6 +148,8 @@
                     class="text-xs font-semibold text-gray-900 dark:text-white bg-gray-900/5 dark:bg-white/10 hover:bg-gray-900/10 dark:hover:bg-white/20 px-3 py-1.5 rounded transition">▶ Apresentar</button>
             <button @click="compartilharSetlist"
                     class="text-xs font-semibold text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 px-3 py-1.5 rounded transition">Compartilhar</button>
+            <a :href="`/admin/escalas/${escala.id}/setlist/imprimir`" target="_blank" rel="noopener"
+               class="text-xs font-semibold text-gray-600 dark:text-slate-300 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 px-3 py-1.5 rounded transition">🖨 PDF</a>
           </template>
           <span class="text-xs text-gray-400 dark:text-slate-500">{{ escala.setlist?.length ?? 0 }} música(s)</span>
         </div>
@@ -495,6 +518,50 @@ function enviarAnexo() {
       assetForm.reset('titulo', 'arquivo')
       arquivoNome.value = ''
     },
+  })
+}
+
+// ── Convites (confirmação) ──────────────────────────────────
+const enviandoConvites = ref(false)
+const temAlgumApikey = computed(() => (props.escala.membros ?? []).some(m => m.tem_apikey))
+
+function enviarConvites() {
+  if (!confirm('Enviar convite automático para quem tem WhatsApp configurado?')) return
+  enviandoConvites.value = true
+  router.post(`/admin/escalas/${props.escala.id}/convites`, {}, {
+    preserveScroll: true,
+    onFinish: () => { enviandoConvites.value = false },
+  })
+}
+
+function foneDigitos(tel) {
+  const d = (tel || '').replace(/\D/g, '')
+  if (d.length === 10 || d.length === 11) return '55' + d
+  return d
+}
+
+function linkWhatsappMembro(m) {
+  const e = props.escala
+  const linhas = [
+    `Olá, ${m.user?.name || ''}! Você foi escalado(a):`,
+    `*${e.titulo}*`,
+    `📅 ${formatarData(e.data)}`,
+    `⏰ ${e.hora_inicio} - ${e.hora_fim}`,
+  ]
+  if (e.grupo?.nome) linhas.push(`👥 ${e.grupo.nome}`)
+  if (m.funcao) linhas.push(`🎯 Função: ${m.funcao}`)
+  linhas.push('', 'Confirme sua presença:', m.convite_url)
+  return `https://wa.me/${foneDigitos(m.telefone)}?text=${encodeURIComponent(linhas.join('\n'))}`
+}
+
+// ── WhatsApp ────────────────────────────────────────────────
+const enviandoWhatsapp = ref(false)
+function enviarWhatsapp() {
+  if (!confirm('Enviar esta escala no grupo do WhatsApp?')) return
+  enviandoWhatsapp.value = true
+  router.post(`/admin/escalas/${props.escala.id}/whatsapp`, {}, {
+    preserveScroll: true,
+    onFinish: () => { enviandoWhatsapp.value = false },
   })
 }
 

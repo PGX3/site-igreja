@@ -9,6 +9,15 @@ use Illuminate\Http\Request;
 
 class EscalaSetlistController extends Controller
 {
+    public function imprimir(Escala $escala)
+    {
+        $this->authorizeEscala($escala);
+
+        $escala->load(['grupo:id,nome', 'setlist.musica']);
+
+        return view('print.setlist', ['escala' => $escala]);
+    }
+
     public function store(Request $request, Escala $escala)
     {
         $this->authorizeEscala($escala);

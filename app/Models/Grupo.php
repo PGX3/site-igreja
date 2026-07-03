@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Grupo extends Model
 {
-    protected $fillable = ['nome', 'descricao', 'tem_musicas', 'lider_id', 'created_by'];
+    protected $fillable = ['nome', 'descricao', 'tem_musicas', 'whatsapp_apikey', 'whatsapp_phone', 'lider_id', 'created_by'];
 
     protected $casts = [
         'lider_id' => 'integer',
@@ -27,6 +27,11 @@ class Grupo extends Model
     public function escalas()
     {
         return $this->hasMany(Escala::class);
+    }
+
+    public function funcoes()
+    {
+        return $this->hasMany(GrupoFuncao::class)->orderBy('nome');
     }
 
     public function createdBy()

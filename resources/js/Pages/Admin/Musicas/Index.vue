@@ -20,13 +20,21 @@
       {{ $page.props.flash.success }}
     </div>
 
-    <!-- BUSCA -->
-    <div class="mb-6 relative max-w-md">
-      <input v-model="busca" type="text" placeholder="Buscar música..."
-             class="w-full pl-10 pr-3 py-2.5 rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500">
-        <AppIcon name="search" />
-      </span>
+    <!-- BUSCA + ORDENAÇÃO -->
+    <div class="mb-6 flex flex-col sm:flex-row gap-3 sm:items-center">
+      <div class="relative flex-1 max-w-md">
+        <input v-model="busca" type="text" placeholder="Buscar música..."
+               class="w-full pl-10 pr-3 py-2.5 rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500">
+          <AppIcon name="search" />
+        </span>
+      </div>
+      <select v-model="ordenacao"
+              class="rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <option value="nome">Ordenar: A-Z</option>
+        <option value="mais">Mais tocadas</option>
+        <option value="descanso">Não tocadas há mais tempo</option>
+      </select>
     </div>
 
     <!-- LISTA -->
@@ -47,7 +55,10 @@
         </div>
         <div class="flex-1 min-w-0">
           <p class="font-semibold text-gray-900 dark:text-white text-sm truncate">{{ m.nome }}</p>
-          <p class="text-xs text-gray-400 dark:text-slate-500 mt-0.5 truncate">{{ m.created_by?.name }} · {{ m.created_at }}</p>
+          <p class="text-xs text-gray-400 dark:text-slate-500 mt-0.5 truncate">
+            <template v-if="m.vezes">Tocada {{ m.vezes }}x · última: {{ m.ultima }}</template>
+            <template v-else>Nunca tocada</template>
+          </p>
         </div>
         <span v-if="m.tom"
               class="hidden sm:inline-block bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-xs font-bold px-2.5 py-1 rounded-full flex-shrink-0">
@@ -60,9 +71,13 @@
             {{ linkLabel(m.link) }}
           </a>
           <button @click="verNoCelular(m)"
-                  class="text-xs font-semibold text-gray-900 dark:text-white bg-gray-900/5 dark:bg-white/10 hover:bg-gray-900/10 dark:hover:bg-white/20 px-3 py-1.5 rounded transition">
-            📱 Ver
+                  class="text-xs font-semibold text-gray-900 dark:text-white bg-gray-900/5 dark:bg-white/10 hover:bg-gray-900/10 dark:hover:bg-white/20 px-2.5 py-1.5 rounded transition" title="Ver no celular">
+            📱
           </button>
+          <Link :href="`/admin/musicas/${m.id}`"
+                class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
+            Ver
+          </Link>
           <Link :href="`/admin/musicas/${m.id}/edit`"
                 class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
             Editar
@@ -111,13 +126,30 @@ import { ref, computed } from 'vue'
 const props = defineProps({ musicas: Array })
 
 const busca = ref('')
+const ordenacao = ref('nome')
 const musicaParaExcluir = ref(null)
 const musicaAtiva = ref(null)
 
+// converte "dd/mm/yyyy" em número comparável (0 = nunca tocada)
+function ultimaValor(m) {
+  if (!m.ultima) return 0
+  const [d, mes, a] = m.ultima.split('/')
+  return Number(`${a}${mes}${d}`)
+}
+
 const musicasFiltradas = computed(() => {
   const q = busca.value.trim().toLowerCase()
-  if (!q) return props.musicas
-  return props.musicas.filter(m => m.nome.toLowerCase().includes(q))
+  let lista = q ? props.musicas.filter(m => m.nome.toLowerCase().includes(q)) : [...props.musicas]
+
+  if (ordenacao.value === 'mais') {
+    lista.sort((a, b) => (b.vezes ?? 0) - (a.vezes ?? 0))
+  } else if (ordenacao.value === 'descanso') {
+    // nunca tocadas primeiro, depois as tocadas há mais tempo
+    lista.sort((a, b) => ultimaValor(a) - ultimaValor(b))
+  } else {
+    lista.sort((a, b) => a.nome.localeCompare(b.nome))
+  }
+  return lista
 })
 
 function verNoCelular(m) {

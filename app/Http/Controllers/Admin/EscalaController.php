@@ -15,6 +15,7 @@ use App\Notifications\EscalaConvite;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\URL;
 use Inertia\Inertia;
 
 class EscalaController extends Controller
@@ -57,8 +58,8 @@ class EscalaController extends Controller
     {
         $user = auth()->user();
         $grupos = $user->isPastor()
-            ? Grupo::with(['membros' => fn ($q) => $q->select('users.id', 'users.name')])->get(['id', 'nome'])
-            : Grupo::with(['membros' => fn ($q) => $q->select('users.id', 'users.name')])->whereIn('id', $user->grupoIds())->get(['id', 'nome']);
+            ? Grupo::with(['membros' => fn ($q) => $q->select('users.id', 'users.name'), 'funcoes:id,grupo_id,nome'])->get(['id', 'nome'])
+            : Grupo::with(['membros' => fn ($q) => $q->select('users.id', 'users.name'), 'funcoes:id,grupo_id,nome'])->whereIn('id', $user->grupoIds())->get(['id', 'nome']);
 
         return Inertia::render('Admin/Escalas/Form', [
             'grupos' => $grupos,
@@ -133,6 +134,173 @@ class EscalaController extends Controller
             ->with('success', 'Escala criada!');
     }
 
+    public function duplicar(Escala $escala)
+    {
+        $user = auth()->user();
+        if ($user->isLider() && ! in_array($escala->grupo_id, $user->grupoIds())) {
+            abort(403);
+        }
+
+        $escala->load(['escalaMembros', 'setlist', 'notas', 'assets']);
+
+        $nova = Escala::create([
+            'titulo' => $escala->titulo.' (cópia)',
+            'descricao' => $escala->descricao,
+            'data' => $escala->data?->copy()->addWeek(),
+            'hora_inicio' => $escala->hora_inicio,
+            'hora_fim' => $escala->hora_fim,
+            'grupo_id' => $escala->grupo_id,
+            'culto_id' => $escala->culto_id,
+            'evento_id' => $escala->evento_id,
+            'status' => 'pendente',
+            'created_by' => $user->id,
+        ]);
+
+        foreach ($escala->escalaMembros as $m) {
+            $nova->escalaMembros()->create([
+                'user_id' => $m->user_id,
+                'funcao' => $m->funcao,
+            ]);
+        }
+
+        foreach ($escala->setlist as $s) {
+            $nova->setlist()->create([
+                'musica_id' => $s->musica_id,
+                'tom' => $s->tom,
+                'ordem' => $s->ordem,
+                'observacao' => $s->observacao,
+            ]);
+        }
+
+        foreach ($escala->notas as $n) {
+            $nova->notas()->create([
+                'titulo' => $n->titulo,
+                'corpo' => $n->corpo,
+                'created_by' => $user->id,
+            ]);
+        }
+
+        $nova->assets()->attach($escala->assets->pluck('id'));
+
+        return redirect()->route('admin.escalas.edit', $nova)
+            ->with('success', 'Escala duplicada! Ajuste a data e confirme.');
+    }
+
+    public function enviarWhatsapp(Escala $escala, \App\Services\CallMeBot $bot)
+    {
+        $user = auth()->user();
+        if ($user->isLider() && ! in_array($escala->grupo_id, $user->grupoIds())) {
+            abort(403);
+        }
+
+        $escala->load(['grupo', 'escalaMembros.user', 'setlist.musica']);
+        $grupo = $escala->grupo;
+
+        if (! $grupo?->whatsapp_apikey) {
+            return back()->with('error', 'Configure a API Key do WhatsApp nas configurações do grupo.');
+        }
+
+        $ok = $bot->enviar($grupo->whatsapp_phone, $grupo->whatsapp_apikey, $this->mensagemWhatsapp($escala));
+
+        return $ok
+            ? back()->with('success', 'Escala enviada no WhatsApp do grupo!')
+            : back()->with('error', 'Não foi possível enviar. Verifique a API Key/número do grupo.');
+    }
+
+    private function mensagemWhatsapp(Escala $escala): string
+    {
+        $data = $escala->data?->translatedFormat('d/m/Y (l)') ?? '';
+        $inicio = substr((string) $escala->hora_inicio, 0, 5);
+        $fim = substr((string) $escala->hora_fim, 0, 5);
+
+        $l = [];
+        $l[] = "*{$escala->titulo}*";
+        $l[] = "📅 {$data}";
+        $l[] = "⏰ {$inicio} - {$fim}";
+        if ($escala->grupo) {
+            $l[] = "👥 {$escala->grupo->nome}";
+        }
+
+        if ($escala->escalaMembros->count()) {
+            $l[] = '';
+            $l[] = '*Equipe:*';
+            foreach ($escala->escalaMembros as $m) {
+                $nome = $m->user?->name ?? '—';
+                $l[] = $m->funcao ? "• {$nome}: {$m->funcao}" : "• {$nome}";
+            }
+        }
+
+        $setlist = $escala->setlist->filter(fn ($s) => $s->musica);
+        if ($setlist->count()) {
+            $l[] = '';
+            $l[] = '*Setlist:*';
+            $i = 1;
+            foreach ($setlist as $s) {
+                $tom = $s->tom ?: $s->musica->tom;
+                $l[] = "{$i}. {$s->musica->nome}".($tom ? " ({$tom})" : '');
+                $i++;
+            }
+        }
+
+        return implode("\n", $l);
+    }
+
+    public function enviarConvites(Escala $escala, \App\Services\CallMeBot $bot)
+    {
+        $user = auth()->user();
+        if ($user->isLider() && ! in_array($escala->grupo_id, $user->grupoIds())) {
+            abort(403);
+        }
+
+        $escala->load(['grupo', 'escalaMembros.user']);
+
+        $enviados = 0;
+        foreach ($escala->escalaMembros as $em) {
+            $u = $em->user;
+            if (! $u?->callmebot_apikey) {
+                continue;
+            }
+            $ok = $bot->enviar($u->telefone, $u->callmebot_apikey, $this->conviteMensagem($escala, $em));
+            if ($ok) {
+                $enviados++;
+            }
+        }
+
+        return $enviados
+            ? back()->with('success', "Convite enviado automaticamente para {$enviados} pessoa(s).")
+            : back()->with('error', 'Ninguém tem API Key do CallMeBot configurada. Use o botão do WhatsApp em cada pessoa.');
+    }
+
+    private function conviteUrl(EscalaMembro $em): string
+    {
+        return URL::signedRoute('convite.show', ['escalaMembro' => $em->id]);
+    }
+
+    private function conviteMensagem(Escala $escala, EscalaMembro $em): string
+    {
+        $data = $escala->data?->translatedFormat('d/m/Y (l)') ?? '';
+        $inicio = substr((string) $escala->hora_inicio, 0, 5);
+        $fim = substr((string) $escala->hora_fim, 0, 5);
+        $nome = $em->user?->name ?? '';
+
+        $l = [];
+        $l[] = "Olá, {$nome}! Você foi escalado(a):";
+        $l[] = "*{$escala->titulo}*";
+        $l[] = "📅 {$data}";
+        $l[] = "⏰ {$inicio} - {$fim}";
+        if ($escala->grupo) {
+            $l[] = "👥 {$escala->grupo->nome}";
+        }
+        if ($em->funcao) {
+            $l[] = "🎯 Função: {$em->funcao}";
+        }
+        $l[] = '';
+        $l[] = 'Confirme sua presença:';
+        $l[] = $this->conviteUrl($em);
+
+        return implode("\n", $l);
+    }
+
     public function show(Escala $escala)
     {
         $user = auth()->user();
@@ -177,6 +345,7 @@ class EscalaController extends Controller
                     'id' => $escala->grupo->id,
                     'nome' => $escala->grupo->nome,
                     'tem_musicas' => (bool) $escala->grupo->tem_musicas,
+                    'tem_whatsapp' => (bool) $escala->grupo->whatsapp_apikey,
                 ] : null,
                 'created_by' => $escala->createdBy?->only('id', 'name'),
                 'assets' => $escala->assets->map(fn ($a) => [
@@ -227,6 +396,9 @@ class EscalaController extends Controller
                     'status' => $em->status,
                     'observacao' => $em->observacao,
                     'confirmado_em' => $em->confirmado_em?->format('d/m/Y H:i'),
+                    'telefone' => $em->user?->telefone,
+                    'tem_apikey' => (bool) $em->user?->callmebot_apikey,
+                    'convite_url' => $this->conviteUrl($em),
                 ]),
             ],
         ]);
@@ -240,8 +412,8 @@ class EscalaController extends Controller
         }
 
         $grupos = $user->isPastor()
-            ? Grupo::with(['membros' => fn ($q) => $q->select('users.id', 'users.name')])->get(['id', 'nome'])
-            : Grupo::with(['membros' => fn ($q) => $q->select('users.id', 'users.name')])->whereIn('id', $user->grupoIds())->get(['id', 'nome']);
+            ? Grupo::with(['membros' => fn ($q) => $q->select('users.id', 'users.name'), 'funcoes:id,grupo_id,nome'])->get(['id', 'nome'])
+            : Grupo::with(['membros' => fn ($q) => $q->select('users.id', 'users.name'), 'funcoes:id,grupo_id,nome'])->whereIn('id', $user->grupoIds())->get(['id', 'nome']);
 
         $escala->load('escalaMembros');
 

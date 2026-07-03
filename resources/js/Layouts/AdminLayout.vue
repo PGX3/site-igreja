@@ -74,6 +74,16 @@
                     </div>
                 </div>
 
+                <Link href="/admin/perfil"
+                      @click="sidebarOpen = false"
+                      class="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-[13px] font-medium transition-colors"
+                      :class="page.url.startsWith('/admin/perfil')
+                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-semibold'
+                          : 'text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800'">
+                    <AppIcon name="user" size="sm" />
+                    Meu Perfil
+                </Link>
+
                 <Link href="/admin/minha-senha"
                       @click="sidebarOpen = false"
                       class="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-[13px] font-medium transition-colors"
@@ -190,6 +200,7 @@ const routeTitles = {
     "/admin/membros": "Membros",
     "/admin/visitantes": "Visitantes",
     "/admin/aniversarios": "Aniversários",
+    "/admin/calendario": "Calendário",
     "/admin/escalas": "Escalas",
     "/admin/musicas": "Músicas",
     "/admin/assets": "Anexos",
@@ -201,6 +212,7 @@ const routeTitles = {
     "/admin/pedidos-oracao": "Pedidos de Oração",
     "/admin/minhas-escalas": "Minhas Escalas",
     "/admin/minha-senha": "Alterar Senha",
+    "/admin/perfil": "Meu Perfil",
     "/admin/familias": "Famílias",
 };
 
@@ -248,6 +260,7 @@ const navGroups = computed(() => {
         });
 
         const gestao = [
+            { href: "/admin/calendario", label: "Calendário", icon: "calendar" },
             { href: "/admin/escalas", label: "Escalas", icon: "calendar" },
             { href: "/admin/musicas", label: "Músicas", icon: "mic" },
             { href: "/admin/assets", label: "Anexos", icon: "file-text" },

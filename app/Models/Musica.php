@@ -14,4 +14,9 @@ class Musica extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    public function setlistItens()
+    {
+        return $this->hasMany(EscalaSetlistItem::class);
+    }
 }

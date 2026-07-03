@@ -51,6 +51,8 @@ class GrupoController extends Controller
             'nome' => $data['nome'],
             'descricao' => $data['descricao'] ?? null,
             'tem_musicas' => $data['tem_musicas'] ?? false,
+            'whatsapp_apikey' => $data['whatsapp_apikey'] ?? null,
+            'whatsapp_phone' => $data['whatsapp_phone'] ?? null,
             'lider_id' => $data['lider_id'] ?? null,
             'created_by' => auth()->id(),
         ]);
@@ -64,7 +66,7 @@ class GrupoController extends Controller
 
     public function edit(Grupo $grupo)
     {
-        $grupo->load(['lider', 'membros:id']);
+        $grupo->load(['lider', 'membros:id', 'funcoes:id,grupo_id,nome']);
 
         return Inertia::render('Admin/Grupos/Form', [
             'grupo' => [
@@ -72,8 +74,11 @@ class GrupoController extends Controller
                 'nome' => $grupo->nome,
                 'descricao' => $grupo->descricao,
                 'tem_musicas' => $grupo->tem_musicas,
+                'whatsapp_apikey' => $grupo->whatsapp_apikey,
+                'whatsapp_phone' => $grupo->whatsapp_phone,
                 'lider' => $grupo->lider?->only('id', 'name'),
                 'membros_ids' => $grupo->membros->pluck('id')->all(),
+                'funcoes' => $grupo->funcoes->map(fn ($f) => ['id' => $f->id, 'nome' => $f->nome])->values(),
             ],
             'usuarios' => $this->usuariosDisponiveis(),
         ]);
@@ -88,6 +93,8 @@ class GrupoController extends Controller
             'nome' => $data['nome'],
             'descricao' => $data['descricao'] ?? null,
             'tem_musicas' => $data['tem_musicas'] ?? false,
+            'whatsapp_apikey' => $data['whatsapp_apikey'] ?? null,
+            'whatsapp_phone' => $data['whatsapp_phone'] ?? null,
             'lider_id' => $data['lider_id'] ?? null,
         ]);
 
@@ -112,6 +119,8 @@ class GrupoController extends Controller
             'nome' => 'required|string|max:100',
             'descricao' => 'nullable|string',
             'tem_musicas' => 'boolean',
+            'whatsapp_apikey' => 'nullable|string|max:100',
+            'whatsapp_phone' => 'nullable|string|max:30',
             'lider_id' => 'nullable|exists:users,id',
             'membros_ids' => 'nullable|array',
             'membros_ids.*' => 'integer|exists:users,id',
