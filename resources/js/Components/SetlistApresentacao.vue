@@ -125,6 +125,8 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .letra-apresentacao :deep(p) { margin: 0; }
+/* Linhas em branco (parágrafos vazios) valem uma linha */
+.letra-apresentacao :deep(p:empty)::before { content: "\00a0"; }
 .letra-apresentacao :deep(h2) { font-size: 1.25em; font-weight: 800; margin: 0.8em 0 0.3em; color: #fbbf24; }
 .letra-apresentacao :deep(h3) { font-size: 1.1em; font-weight: 700; margin: 0.7em 0 0.2em; color: #fbbf24; }
 .letra-apresentacao :deep(ul) { list-style: disc; padding-left: 1.5em; }
