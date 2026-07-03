@@ -237,7 +237,7 @@ const msgArea = ref(null)
 const mensagemSemana = computed(() => {
   const linhas = props.aniversariantesSemana.map(a => {
     const dia = a.dia_semana.charAt(0).toUpperCase() + a.dia_semana.slice(1)
-    return `🎂 ${a.name} - ${dia} (dia ${a.dia})`
+    return `🎂 ${primeiroEUltimoNome(a.name)} - ${dia} (dia ${a.dia})`
   })
   return [
     '🎉 *Aniversariantes da semana* 🎉',
@@ -281,6 +281,12 @@ const BIRTHDAY_MESSAGES = [
 
 function primeiroNome(nome) {
   return (nome || '').trim().split(/\s+/)[0] || ''
+}
+
+function primeiroEUltimoNome(nome) {
+  const partes = (nome || '').trim().split(/\s+/).filter(Boolean)
+  if (partes.length <= 1) return partes[0] || ''
+  return `${partes[0]} ${partes[partes.length - 1]}`
 }
 
 function whatsappBirthdayUrl(pessoa) {
