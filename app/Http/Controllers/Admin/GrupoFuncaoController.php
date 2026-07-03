@@ -26,7 +26,7 @@ class GrupoFuncaoController extends Controller
 
         GrupoFuncao::create([
             'grupo_id' => $grupo->id,
-            'nome'     => $data['nome'],
+            'nome' => $data['nome'],
         ]);
 
         return back()->with('success', 'Função adicionada.');

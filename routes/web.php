@@ -18,8 +18,9 @@ use App\Http\Controllers\Admin\GrupoMuralController;
 use App\Http\Controllers\Admin\MembroController;
 use App\Http\Controllers\Admin\MinhaSenhaController;
 use App\Http\Controllers\Admin\MusicaController;
-use App\Http\Controllers\Admin\PerfilController;
 use App\Http\Controllers\Admin\PedidoOracaoController;
+use App\Http\Controllers\Admin\PerfilController;
+use App\Http\Controllers\Admin\PlanejadorController;
 use App\Http\Controllers\Admin\SugestaoController;
 use App\Http\Controllers\Admin\TextoController;
 use App\Http\Controllers\Admin\UserController;
@@ -78,6 +79,8 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     // Pastor + Líder: gerenciar escalas (líder restrito ao seu grupo via controller)
     Route::middleware('role:pastor,lider')->group(function () {
         Route::get('calendario', [CalendarioController::class, 'index'])->name('calendario.index');
+        Route::get('planejador', [PlanejadorController::class, 'index'])->name('planejador.index');
+        Route::post('planejador', [PlanejadorController::class, 'salvar'])->name('planejador.salvar');
 
         Route::resource('escalas', EscalaController::class);
         Route::post('escalas/{escala}/duplicar', [EscalaController::class, 'duplicar'])->name('escalas.duplicar');

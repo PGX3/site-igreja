@@ -201,6 +201,7 @@ const routeTitles = {
     "/admin/visitantes": "Visitantes",
     "/admin/aniversarios": "Aniversários",
     "/admin/calendario": "Calendário",
+    "/admin/planejador": "Planejador",
     "/admin/escalas": "Escalas",
     "/admin/musicas": "Músicas",
     "/admin/assets": "Anexos",
@@ -261,6 +262,7 @@ const navGroups = computed(() => {
 
         const gestao = [
             { href: "/admin/calendario", label: "Calendário", icon: "calendar" },
+            { href: "/admin/planejador", label: "Planejador", icon: "dashboard" },
             { href: "/admin/escalas", label: "Escalas", icon: "calendar" },
             { href: "/admin/musicas", label: "Músicas", icon: "mic" },
             { href: "/admin/assets", label: "Anexos", icon: "file-text" },

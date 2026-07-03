@@ -12,6 +12,7 @@ use App\Models\Grupo;
 use App\Models\Musica;
 use App\Models\User;
 use App\Notifications\EscalaConvite;
+use App\Services\CallMeBot;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -23,33 +24,32 @@ class EscalaController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $query = Escala::with(['grupo', 'createdBy', 'culto', 'evento', 'escalaMembros.user'])
+
+        // Líder também vê as escalas de outros grupos (somente leitura).
+        $escalas = Escala::with(['grupo', 'createdBy', 'culto', 'evento', 'escalaMembros.user'])
             ->withCount('escalaMembros')
             ->withCount(['escalaMembros as confirmados_count' => fn ($q) => $q->where('status', 'confirmado')])
-            ->latest('data');
-
-        if ($user->isLider()) {
-            $query->whereIn('grupo_id', $user->grupoIds());
-        }
-
-        $escalas = $query->get()->map(fn ($e) => [
-            'id' => $e->id,
-            'titulo' => $e->titulo,
-            'data' => $e->data?->format('Y-m-d'),
-            'hora_inicio' => $e->hora_inicio,
-            'hora_fim' => $e->hora_fim,
-            'status' => $e->status,
-            'grupo' => $e->grupo?->only('id', 'nome'),
-            'created_by' => $e->createdBy?->only('id', 'name'),
-            'total_membros' => $e->escala_membros_count,
-            'confirmados' => $e->confirmados_count,
-            'vinculo' => $this->vinculoLabel($e),
-            'membros' => $e->escalaMembros->map(fn ($em) => [
-                'nome' => $em->user?->name,
-                'funcao' => $em->funcao,
-                'status' => $em->status,
-            ])->values(),
-        ]);
+            ->latest('data')
+            ->get()
+            ->map(fn ($e) => [
+                'id' => $e->id,
+                'titulo' => $e->titulo,
+                'data' => $e->data?->format('Y-m-d'),
+                'hora_inicio' => $e->hora_inicio,
+                'hora_fim' => $e->hora_fim,
+                'status' => $e->status,
+                'grupo' => $e->grupo?->only('id', 'nome'),
+                'created_by' => $e->createdBy?->only('id', 'name'),
+                'total_membros' => $e->escala_membros_count,
+                'confirmados' => $e->confirmados_count,
+                'vinculo' => $this->vinculoLabel($e),
+                'editavel' => $user->canManageGrupo($e->grupo_id),
+                'membros' => $e->escalaMembros->map(fn ($em) => [
+                    'nome' => $em->user?->name,
+                    'funcao' => $em->funcao,
+                    'status' => $em->status,
+                ])->values(),
+            ]);
 
         return Inertia::render('Admin/Escalas/Index', compact('escalas'));
     }
@@ -59,7 +59,7 @@ class EscalaController extends Controller
         $user = auth()->user();
         $grupos = $user->isPastor()
             ? Grupo::with(['membros' => fn ($q) => $q->select('users.id', 'users.name'), 'funcoes:id,grupo_id,nome'])->get(['id', 'nome'])
-            : Grupo::with(['membros' => fn ($q) => $q->select('users.id', 'users.name'), 'funcoes:id,grupo_id,nome'])->whereIn('id', $user->grupoIds())->get(['id', 'nome']);
+            : Grupo::with(['membros' => fn ($q) => $q->select('users.id', 'users.name'), 'funcoes:id,grupo_id,nome'])->whereIn('id', $user->grupoIdsLiderados())->get(['id', 'nome']);
 
         return Inertia::render('Admin/Escalas/Form', [
             'grupos' => $grupos,
@@ -98,7 +98,7 @@ class EscalaController extends Controller
             return back()->withErrors(['culto_id' => 'Selecione apenas um vínculo: culto OU evento.'])->withInput();
         }
 
-        if ($user->isLider() && ! in_array((int) $data['grupo_id'], $user->grupoIds())) {
+        if (! $user->canManageGrupo((int) $data['grupo_id'])) {
             abort(403);
         }
 
@@ -137,7 +137,7 @@ class EscalaController extends Controller
     public function duplicar(Escala $escala)
     {
         $user = auth()->user();
-        if ($user->isLider() && ! in_array($escala->grupo_id, $user->grupoIds())) {
+        if (! $user->canManageGrupo($escala->grupo_id)) {
             abort(403);
         }
 
@@ -186,10 +186,10 @@ class EscalaController extends Controller
             ->with('success', 'Escala duplicada! Ajuste a data e confirme.');
     }
 
-    public function enviarWhatsapp(Escala $escala, \App\Services\CallMeBot $bot)
+    public function enviarWhatsapp(Escala $escala, CallMeBot $bot)
     {
         $user = auth()->user();
-        if ($user->isLider() && ! in_array($escala->grupo_id, $user->grupoIds())) {
+        if (! $user->canManageGrupo($escala->grupo_id)) {
             abort(403);
         }
 
@@ -245,10 +245,10 @@ class EscalaController extends Controller
         return implode("\n", $l);
     }
 
-    public function enviarConvites(Escala $escala, \App\Services\CallMeBot $bot)
+    public function enviarConvites(Escala $escala, CallMeBot $bot)
     {
         $user = auth()->user();
-        if ($user->isLider() && ! in_array($escala->grupo_id, $user->grupoIds())) {
+        if (! $user->canManageGrupo($escala->grupo_id)) {
             abort(403);
         }
 
@@ -303,10 +303,8 @@ class EscalaController extends Controller
 
     public function show(Escala $escala)
     {
+        // Líder pode visualizar qualquer escala; a edição é controlada por can_manage.
         $user = auth()->user();
-        if ($user->isLider() && ! in_array($escala->grupo_id, $user->grupoIds())) {
-            abort(403);
-        }
 
         $escala->load([
             'grupo',
@@ -322,7 +320,7 @@ class EscalaController extends Controller
         $temMusicas = (bool) $escala->grupo?->tem_musicas;
 
         return Inertia::render('Admin/Escalas/Show', [
-            'can_manage' => $user->isPastor() || in_array($escala->grupo_id, $user->grupoIds()),
+            'can_manage' => $user->canManageGrupo($escala->grupo_id),
             'musicas' => $temMusicas
                 ? Musica::orderBy('nome')->get(['id', 'nome', 'tom'])
                 : [],
@@ -407,13 +405,13 @@ class EscalaController extends Controller
     public function edit(Escala $escala)
     {
         $user = auth()->user();
-        if ($user->isLider() && ! in_array($escala->grupo_id, $user->grupoIds())) {
+        if (! $user->canManageGrupo($escala->grupo_id)) {
             abort(403);
         }
 
         $grupos = $user->isPastor()
             ? Grupo::with(['membros' => fn ($q) => $q->select('users.id', 'users.name'), 'funcoes:id,grupo_id,nome'])->get(['id', 'nome'])
-            : Grupo::with(['membros' => fn ($q) => $q->select('users.id', 'users.name'), 'funcoes:id,grupo_id,nome'])->whereIn('id', $user->grupoIds())->get(['id', 'nome']);
+            : Grupo::with(['membros' => fn ($q) => $q->select('users.id', 'users.name'), 'funcoes:id,grupo_id,nome'])->whereIn('id', $user->grupoIdsLiderados())->get(['id', 'nome']);
 
         $escala->load('escalaMembros');
 
@@ -443,7 +441,7 @@ class EscalaController extends Controller
     public function update(Request $request, Escala $escala)
     {
         $user = auth()->user();
-        if ($user->isLider() && $escala->grupo_id !== $user->grupo_id) {
+        if (! $user->canManageGrupo($escala->grupo_id)) {
             abort(403);
         }
 
@@ -475,7 +473,7 @@ class EscalaController extends Controller
             return back()->withErrors(['culto_id' => 'Selecione apenas um vínculo: culto OU evento.'])->withInput();
         }
 
-        if ($user->isLider() && ! in_array((int) $data['grupo_id'], $user->grupoIds())) {
+        if (! $user->canManageGrupo((int) $data['grupo_id'])) {
             abort(403);
         }
 
@@ -520,7 +518,7 @@ class EscalaController extends Controller
     public function destroy(Escala $escala)
     {
         $user = auth()->user();
-        if ($user->isLider() && ! in_array($escala->grupo_id, $user->grupoIds())) {
+        if (! $user->canManageGrupo($escala->grupo_id)) {
             abort(403);
         }
 

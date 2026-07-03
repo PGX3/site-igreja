@@ -51,6 +51,16 @@ class User extends Authenticatable
         return $this->grupos()->pluck('grupos.id')->map(fn ($id) => (int) $id)->toArray();
     }
 
+    public function gruposLiderados()
+    {
+        return $this->hasMany(Grupo::class, 'lider_id');
+    }
+
+    public function grupoIdsLiderados(): array
+    {
+        return $this->gruposLiderados()->pluck('id')->map(fn ($id) => (int) $id)->toArray();
+    }
+
     public function escalas()
     {
         return $this->belongsToMany(Escala::class, 'escala_membros')
@@ -115,6 +125,6 @@ class User extends Authenticatable
 
     public function canManageGrupo(int $grupoId): bool
     {
-        return $this->isPastor() || ($this->isLider() && in_array($grupoId, $this->grupoIds()));
+        return $this->isPastor() || in_array($grupoId, $this->grupoIdsLiderados());
     }
 }

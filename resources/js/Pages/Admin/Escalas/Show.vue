@@ -27,10 +27,11 @@
                 class="border border-green-300 dark:border-green-800 text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 disabled:opacity-50 px-4 py-2.5 rounded-lg text-sm font-semibold transition">
           {{ enviandoWhatsapp ? 'Enviando…' : '📲 Enviar no grupo' }}
         </button>
-        <Link :href="`/admin/escalas/${escala.id}/edit`"
+        <Link v-if="can_manage" :href="`/admin/escalas/${escala.id}/edit`"
               class="border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 px-5 py-2.5 rounded-lg text-sm font-semibold transition">
           Editar
         </Link>
+        <span v-else class="text-xs text-gray-400 dark:text-slate-500 self-center px-2">Somente leitura</span>
       </div>
     </div>
 
@@ -133,7 +134,7 @@
       </div>
 
       <div v-else class="py-10 text-center text-gray-400 dark:text-slate-500 text-sm">
-        Nenhum membro escalado ainda. <Link :href="`/admin/escalas/${escala.id}/edit`" class="text-blue-600 dark:text-blue-400 hover:underline">Editar escala</Link> para adicionar.
+        Nenhum membro escalado ainda.<template v-if="can_manage"> <Link :href="`/admin/escalas/${escala.id}/edit`" class="text-blue-600 dark:text-blue-400 hover:underline">Editar escala</Link> para adicionar.</template>
       </div>
     </div>
 

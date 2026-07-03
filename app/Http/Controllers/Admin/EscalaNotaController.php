@@ -39,9 +39,6 @@ class EscalaNotaController extends Controller
 
     private function authorizeEscala(Escala $escala): void
     {
-        $user = auth()->user();
-        if ($user->isLider() && ! in_array($escala->grupo_id, $user->grupoIds())) {
-            abort(403);
-        }
+        abort_unless(auth()->user()->canManageGrupo($escala->grupo_id), 403);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\EscalaSetlistItem;
 use App\Models\Musica;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -30,7 +31,7 @@ class MusicaController extends Controller
                 'link' => $m->link,
                 'vezes' => $m->setlist_itens_count,
                 'ultima' => isset($ultimas[$m->id])
-                    ? \Carbon\Carbon::parse($ultimas[$m->id])->format('d/m/Y')
+                    ? Carbon::parse($ultimas[$m->id])->format('d/m/Y')
                     : null,
                 'created_by' => $m->createdBy?->only('id', 'name'),
                 'created_at' => $m->created_at->format('d/m/Y'),

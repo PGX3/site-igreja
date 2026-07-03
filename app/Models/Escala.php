@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Escala extends Model
 {
     protected $fillable = [
-        'titulo', 'descricao', 'data', 'hora_inicio', 'hora_fim',
+        'titulo', 'descricao', 'restricoes', 'data', 'hora_inicio', 'hora_fim',
         'status', 'grupo_id', 'culto_id', 'evento_id',
         'created_by', 'updated_by',
     ];
