@@ -36,8 +36,8 @@
     </div>
 
     <template v-else>
-      <!-- GRADE -->
-      <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm overflow-x-auto">
+      <!-- GRADE (desktop) -->
+      <div class="hidden lg:block bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm overflow-x-auto">
         <table class="w-full text-sm border-collapse min-w-[720px]">
           <thead>
             <tr class="bg-gray-50 dark:bg-slate-900/40 text-left">
@@ -91,6 +91,46 @@
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- GRADE (mobile) -->
+      <div class="lg:hidden space-y-3">
+        <div v-for="(row, ri) in linhas" :key="ri"
+             class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm p-4">
+          <div class="flex items-start justify-between gap-2 mb-3">
+            <div>
+              <span class="font-bold text-gray-900 dark:text-white">{{ row.dia }}</span>
+              <span class="text-xs text-gray-400 dark:text-slate-500 ml-1 capitalize">{{ row.semana }}</span>
+              <span v-if="row.vinculo" class="block text-[11px] text-gray-400 dark:text-slate-500">{{ row.vinculo }}</span>
+            </div>
+            <button v-if="editavel && !row.escala_id" @click="linhas.splice(ri, 1)"
+                    class="text-gray-300 dark:text-slate-600 hover:text-red-500 text-xl leading-none" title="Remover linha">×</button>
+          </div>
+
+          <div class="space-y-2.5">
+            <div v-for="f in funcoes" :key="f">
+              <label class="block text-[11px] font-semibold text-gray-500 dark:text-slate-400 mb-1">{{ f }}</label>
+              <select :value="row.cells[f] ?? ''" @change="setCell(row, f, $event.target.value)" :disabled="!editavel"
+                      class="w-full rounded-md text-sm font-semibold px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      :class="row.cells[f] ? 'border-transparent' : 'border-dashed border-gray-300 dark:border-slate-500 text-gray-400 dark:text-slate-400 bg-gray-50 dark:bg-slate-700/40'"
+                      :style="cellStyle(row.cells[f])">
+                <option value="">+ Escalar</option>
+                <option v-for="m in membrosDisponiveis(row, f)" :key="m.id" :value="m.id">
+                  {{ m.nome }}{{ conflito(row, m.id) ? ` · já em ${conflito(row, m.id)}` : '' }}
+                </option>
+              </select>
+              <p v-if="row.cells[f] && conflito(row, row.cells[f])" class="text-[10px] text-red-500 mt-0.5">
+                ⚠ também em {{ conflito(row, row.cells[f]) }}
+              </p>
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-500 dark:text-slate-400 mb-1">Não pode</label>
+              <input :value="row.restricoes" @input="row.restricoes = $event.target.value"
+                     type="text" placeholder="—" :disabled="!editavel"
+                     class="w-full rounded-md border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-70" />
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- AÇÕES -->
