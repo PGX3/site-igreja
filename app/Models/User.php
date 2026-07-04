@@ -66,7 +66,7 @@ class User extends Authenticatable
     public function escalas()
     {
         return $this->belongsToMany(Escala::class, 'escala_membros')
-            ->withPivot('status', 'funcao', 'confirmado_em')
+            ->withPivot('id', 'status', 'funcao', 'confirmado_em')
             ->withTimestamps();
     }
 
