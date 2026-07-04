@@ -20,72 +20,72 @@ class HomeController extends Controller
             ->orderBy('data_evento')
             ->get()
             ->map(fn ($e) => [
-                'id'          => $e->id,
-                'nome'        => $e->nome,
+                'id' => $e->id,
+                'nome' => $e->nome,
                 'data_evento' => $e->data_evento->format('Y-m-d'),
-                'horario'     => $e->horario,
-                'local'       => $e->local,
-                'descricao'   => $e->descricao,
-                'dia'         => $e->data_evento->day,
-                'mes_curto'   => mb_strtoupper(self::mesesCurtos()[$e->data_evento->month]),
+                'horario' => $e->horario,
+                'local' => $e->local,
+                'descricao' => $e->descricao,
+                'dia' => $e->data_evento->day,
+                'mes_curto' => mb_strtoupper(self::mesesCurtos()[$e->data_evento->month]),
             ]);
 
         $textos = Texto::pluck('conteudo', 'chave');
 
         return Inertia::render('Home', [
-            'cultos'  => $cultos,
+            'cultos' => $cultos,
             'eventos' => $eventos,
-            'textos'  => $textos,
+            'textos' => $textos,
         ]);
     }
 
     public function showCulto(Culto $culto, CultoProximaDataResolver $resolver)
     {
-        $meses     = self::meses();
+        $meses = self::meses();
         $diasNomes = self::diasNomes();
 
         $proxData = $resolver->resolve($culto);
-        $nomeMes  = $meses[$proxData->month];
+        $nomeMes = $meses[$proxData->month];
         $nomeDia = $diasNomes[$proxData->dayOfWeek];
 
         return Inertia::render('CultoDetalhe', [
             'culto' => [
-                'id'         => $culto->id,
-                'nome'       => $culto->nome,
+                'id' => $culto->id,
+                'nome' => $culto->nome,
                 'dia_semana' => $culto->dia_semana,
-                'horario'    => $culto->horario,
-                'descricao'  => $culto->descricao,
-                'ativo'      => $culto->ativo,
-                'dia'        => $proxData->day,
-                'mes'        => mb_strtoupper($nomeMes),
-                'ano'        => $proxData->year,
-                'data_fmt'   => ucfirst($nomeDia) . ', ' . $proxData->day . ' de ' . $nomeMes . ' de ' . $proxData->year,
+                'horario' => $culto->horario,
+                'descricao' => $culto->descricao,
+                'ativo' => $culto->ativo,
+                'dia' => $proxData->day,
+                'mes' => mb_strtoupper($nomeMes),
+                'ano' => $proxData->year,
+                'data_fmt' => ucfirst($nomeDia).', '.$proxData->day.' de '.$nomeMes.' de '.$proxData->year,
             ],
         ]);
     }
 
     public function showEvento(Evento $evento)
     {
-        $meses     = self::meses();
+        $meses = self::meses();
         $diasNomes = self::diasNomes();
 
         $dataEvento = $evento->data_evento;
-        $nomeMes    = $meses[$dataEvento->month];
-        $nomeDia    = $diasNomes[$dataEvento->dayOfWeek];
+        $nomeMes = $meses[$dataEvento->month];
+        $nomeDia = $diasNomes[$dataEvento->dayOfWeek];
 
         return Inertia::render('EventoDetalhe', [
             'evento' => [
-                'id'        => $evento->id,
-                'nome'      => $evento->nome,
-                'horario'   => $evento->horario,
-                'local'     => $evento->local,
+                'id' => $evento->id,
+                'nome' => $evento->nome,
+                'horario' => $evento->horario,
+                'local' => $evento->local,
                 'descricao' => $evento->descricao,
-                'ativo'     => $evento->ativo,
-                'dia'       => $dataEvento->day,
-                'mes'       => mb_strtoupper($nomeMes),
-                'ano'       => $dataEvento->year,
-                'data_fmt'  => ucfirst($nomeDia) . ', ' . $dataEvento->day . ' de ' . $nomeMes . ' de ' . $dataEvento->year,
-                'passado'   => $dataEvento->lt(Carbon::today()),
+                'ativo' => $evento->ativo,
+                'dia' => $dataEvento->day,
+                'mes' => mb_strtoupper($nomeMes),
+                'ano' => $dataEvento->year,
+                'data_fmt' => ucfirst($nomeDia).', '.$dataEvento->day.' de '.$nomeMes.' de '.$dataEvento->year,
+                'passado' => $dataEvento->lt(Carbon::today()),
             ],
         ]);
     }
@@ -95,7 +95,7 @@ class HomeController extends Controller
         return [
             1 => 'janeiro', 2 => 'fevereiro', 3 => 'março',    4 => 'abril',
             5 => 'maio',    6 => 'junho',     7 => 'julho',    8 => 'agosto',
-            9 => 'setembro',10 => 'outubro', 11 => 'novembro', 12 => 'dezembro',
+            9 => 'setembro', 10 => 'outubro', 11 => 'novembro', 12 => 'dezembro',
         ];
     }
 

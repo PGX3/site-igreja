@@ -13,6 +13,6 @@ class Evento extends Model
 
     protected $casts = [
         'data_evento' => 'date',
-        'ativo'       => 'boolean',
+        'ativo' => 'boolean',
     ];
 }

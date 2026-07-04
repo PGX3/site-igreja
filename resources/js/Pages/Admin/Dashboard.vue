@@ -48,6 +48,10 @@
       </div>
     </div>
 
+    <!-- ── LAYOUT: conteúdo + feed lateral ── -->
+    <div class="lg:flex lg:gap-6 lg:items-start">
+    <div class="lg:flex-1 min-w-0">
+
     <!-- ── STATS PESSOAS (pastor/líder) ── -->
     <div v-if="role !== 'membro'" class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5">
       <Link href="/admin/membros"
@@ -352,6 +356,42 @@
 
     </div>
 
+    </div><!-- /coluna conteúdo -->
+
+    <!-- ── FEED DO MURAL (lado direito) ── -->
+    <aside class="lg:w-80 xl:w-96 lg:flex-shrink-0 mt-8 lg:mt-0">
+      <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-3">
+        Mural dos Grupos
+      </p>
+      <div class="lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto space-y-3 pr-0.5">
+        <Link v-for="a in muralAvisos" :key="a.id"
+              :href="`/admin/grupos/${a.grupo?.id}/mural`"
+              class="block bg-white dark:bg-slate-800 rounded-2xl border shadow-sm hover:shadow-md transition-shadow p-4"
+              :class="a.fixado ? 'border-blue-200 dark:border-blue-800/60' : 'border-gray-100 dark:border-slate-700/50'">
+          <div class="flex items-center gap-2 flex-wrap mb-1.5">
+            <span class="text-[10px] font-bold uppercase tracking-wide text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">
+              {{ a.grupo?.nome }}
+            </span>
+            <span v-if="a.fixado"
+                  class="text-[10px] font-bold uppercase tracking-wide text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 rounded-full">
+              Fixado
+            </span>
+          </div>
+          <p class="font-bold text-gray-900 dark:text-white text-sm">{{ a.titulo }}</p>
+          <p class="text-sm text-gray-600 dark:text-slate-300 mt-1 whitespace-pre-wrap line-clamp-4">{{ a.corpo }}</p>
+          <p class="text-[11px] text-gray-400 dark:text-slate-500 mt-2">{{ a.autor?.name }} · {{ a.created_at }}</p>
+        </Link>
+
+        <div v-if="!muralAvisos?.length"
+             class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700/50 shadow-sm py-10 px-4 text-center">
+          <p class="text-2xl mb-1">📌</p>
+          <p class="text-sm text-gray-500 dark:text-slate-400">Nenhum aviso nos seus grupos ainda.</p>
+        </div>
+      </div>
+    </aside>
+
+    </div><!-- /layout conteúdo + feed -->
+
   </AdminLayout>
 </template>
 
@@ -375,6 +415,7 @@ const props = defineProps({
   escalasProximas:     Array,
   minhasProximas:      Array,
   aniversariantes:     Array,
+  muralAvisos:         Array,
 })
 
 function statusLabel(s) {

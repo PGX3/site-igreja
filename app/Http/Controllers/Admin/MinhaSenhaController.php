@@ -17,14 +17,14 @@ class MinhaSenhaController extends Controller
     public function update(Request $request)
     {
         $data = $request->validate([
-            'senha_atual'            => 'required|string',
-            'nova_senha'             => 'required|string|min:6|confirmed',
+            'senha_atual' => 'required|string',
+            'nova_senha' => 'required|string|min:6|confirmed',
             'nova_senha_confirmation' => 'required|string',
         ]);
 
         $user = auth()->user();
 
-        if (!Hash::check($data['senha_atual'], $user->password)) {
+        if (! Hash::check($data['senha_atual'], $user->password)) {
             return back()->withErrors(['senha_atual' => 'Senha atual incorreta.']);
         }
 

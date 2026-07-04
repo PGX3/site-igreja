@@ -18,7 +18,7 @@ return new class extends Migration
             $table->text('observacao')->nullable();
             $table->timestamp('confirmado_em')->nullable();
             $table->timestamps();
-            
+
             $table->unique(['escala_id', 'user_id']);
         });
     }

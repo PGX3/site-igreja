@@ -17,44 +17,47 @@ class VisitanteController extends Controller
 
         $visitantes = User::visitantes()
             ->where('is_superadmin', false)
-            ->when($busca !== '', fn($q) =>
-                $q->where(fn($w) => $w
-                    ->where('name', 'like', "%{$busca}%")
-                    ->orWhere('telefone', 'like', "%{$busca}%")))
+            ->when($busca !== '', fn ($q) => $q->where(fn ($w) => $w
+                ->where('name', 'like', "%{$busca}%")
+                ->orWhere('telefone', 'like', "%{$busca}%")))
             ->with('convidadoPor:id,name')
             ->orderByDesc('primeira_visita')
             ->orderBy('name')
             ->get()
-            ->map(fn($u) => [
-                'id'              => $u->id,
-                'name'            => $u->name,
-                'email'           => $u->email,
-                'telefone'        => $u->telefone,
+            ->map(fn ($u) => [
+                'id' => $u->id,
+                'name' => $u->name,
+                'email' => $u->email,
+                'telefone' => $u->telefone,
                 'data_nascimento' => optional($u->data_nascimento)->format('Y-m-d'),
-                'como_conheceu'   => $u->como_conheceu,
-                'convidado_por'   => $u->convidadoPor?->name,
+                'como_conheceu' => $u->como_conheceu,
+                'convidado_por' => $u->convidadoPor?->name,
                 'primeira_visita' => optional($u->primeira_visita)->format('Y-m-d'),
             ]);
 
         return Inertia::render('Admin/Visitantes/Index', [
             'visitantes' => $visitantes,
-            'busca'      => $busca,
+            'busca' => $busca,
         ]);
     }
 
     public function create()
     {
-        if (! request()->user()?->isPastor()) abort(403);
+        if (! request()->user()?->isPastor()) {
+            abort(403);
+        }
 
         return Inertia::render('Admin/Visitantes/Form', [
             'convidadores' => $this->convidadoresOptions(),
-            'familias'     => $this->familiasOptions(),
+            'familias' => $this->familiasOptions(),
         ]);
     }
 
     public function store(Request $request)
     {
-        if (! request()->user()?->isPastor()) abort(403);
+        if (! request()->user()?->isPastor()) {
+            abort(403);
+        }
 
         $data = $this->validateData($request);
         $data['tipo'] = 'visitante';
@@ -70,7 +73,7 @@ class VisitanteController extends Controller
         abort_unless($visitante->tipo === 'visitante', 404);
 
         return Inertia::render('Admin/Visitantes/Form', [
-            'visitante'    => array_merge(
+            'visitante' => array_merge(
                 $visitante->only(
                     'id', 'name', 'email', 'telefone',
                     'como_conheceu', 'convidado_por_id',
@@ -80,15 +83,17 @@ class VisitanteController extends Controller
                 ['data_nascimento' => optional($visitante->data_nascimento)->format('Y-m-d')],
             ),
             'convidadores' => $this->convidadoresOptions($visitante->id),
-            'familias'     => $this->familiasOptions(),
-            'readonly'     => true,
+            'familias' => $this->familiasOptions(),
+            'readonly' => true,
         ]);
     }
 
     public function edit(User $visitante)
     {
         abort_unless($visitante->tipo === 'visitante', 404);
-        if (! request()->user()?->isPastor()) abort(403);
+        if (! request()->user()?->isPastor()) {
+            abort(403);
+        }
 
         return Inertia::render('Admin/Visitantes/Form', [
             'visitante' => array_merge(
@@ -101,7 +106,7 @@ class VisitanteController extends Controller
                 ['data_nascimento' => optional($visitante->data_nascimento)->format('Y-m-d')],
             ),
             'convidadores' => $this->convidadoresOptions($visitante->id),
-            'familias'     => $this->familiasOptions(),
+            'familias' => $this->familiasOptions(),
         ]);
     }
 
@@ -119,7 +124,9 @@ class VisitanteController extends Controller
     public function destroy(User $visitante)
     {
         abort_unless($visitante->tipo === 'visitante', 404);
-        if (! request()->user()?->isPastor()) abort(403);
+        if (! request()->user()?->isPastor()) {
+            abort(403);
+        }
 
         $visitante->delete();
 
@@ -142,23 +149,23 @@ class VisitanteController extends Controller
         $request->merge(['cpf' => Cpf::normalize($request->input('cpf'))]);
 
         $emailRule = 'nullable|email|max:191';
-        $emailRule .= $ignoreId ? '|unique:users,email,' . $ignoreId : '|unique:users,email';
+        $emailRule .= $ignoreId ? '|unique:users,email,'.$ignoreId : '|unique:users,email';
 
         $cpfRule = 'nullable|string|max:14';
-        $cpfRule .= $ignoreId ? '|unique:users,cpf,' . $ignoreId : '|unique:users,cpf';
+        $cpfRule .= $ignoreId ? '|unique:users,cpf,'.$ignoreId : '|unique:users,cpf';
 
         return $request->validate([
-            'name'                  => 'required|string|max:100',
-            'email'                 => $emailRule,
-            'telefone'              => 'required|string|max:20',
-            'data_nascimento'       => 'required|date|before:today',
-            'cpf'                   => $cpfRule,
-            'como_conheceu'         => 'nullable|string|max:255',
-            'convidado_por_id'      => 'nullable|exists:users,id',
-            'primeira_visita'       => 'nullable|date|before_or_equal:today',
+            'name' => 'required|string|max:100',
+            'email' => $emailRule,
+            'telefone' => 'required|string|max:20',
+            'data_nascimento' => 'required|date|before:today',
+            'cpf' => $cpfRule,
+            'como_conheceu' => 'nullable|string|max:255',
+            'convidado_por_id' => 'nullable|exists:users,id',
+            'primeira_visita' => 'nullable|date|before_or_equal:today',
             'observacoes_pastorais' => 'nullable|string|max:2000',
-            'batizado_aguas'        => 'nullable|boolean',
-            'familia_id'            => 'nullable|exists:familias,id',
+            'batizado_aguas' => 'nullable|boolean',
+            'familia_id' => 'nullable|exists:familias,id',
         ]);
     }
 
@@ -166,10 +173,10 @@ class VisitanteController extends Controller
     {
         return User::where('tipo', 'membro')
             ->where('is_superadmin', false)
-            ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
+            ->when($excludeId, fn ($q) => $q->where('id', '!=', $excludeId))
             ->orderBy('name')
             ->get(['id', 'name'])
-            ->map(fn($u) => ['id' => $u->id, 'name' => $u->name])
+            ->map(fn ($u) => ['id' => $u->id, 'name' => $u->name])
             ->all();
     }
 
@@ -177,7 +184,7 @@ class VisitanteController extends Controller
     {
         return Familia::with('responsavel:id,name')
             ->get(['id', 'responsavel_id'])
-            ->map(fn($f) => ['id' => $f->id, 'nome' => $f->nome])
+            ->map(fn ($f) => ['id' => $f->id, 'nome' => $f->nome])
             ->sortBy('nome')
             ->values()
             ->all();

@@ -40,6 +40,20 @@
                            focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" />
         </div>
 
+        <!-- Músicas -->
+        <div>
+          <label class="flex items-start gap-3 cursor-pointer select-none">
+            <input v-model="form.tem_musicas" type="checkbox"
+                   class="mt-0.5 h-4 w-4 rounded border-gray-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500" />
+            <div>
+              <p class="text-sm font-semibold text-gray-700 dark:text-slate-300">Grupo de louvor (habilita setlist)</p>
+              <p class="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
+                Permite montar o setlist de músicas (com tom) nas escalas deste grupo.
+              </p>
+            </div>
+          </label>
+        </div>
+
         <!-- Líder -->
         <div>
           <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Líder do Grupo</label>
@@ -53,6 +67,28 @@
           <p class="mt-1.5 text-xs text-gray-400 dark:text-slate-500">
             O usuário selecionado terá seu papel alterado para "Líder" e entrará no grupo automaticamente.
           </p>
+        </div>
+
+        <!-- WhatsApp do grupo (CallMeBot) -->
+        <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
+          <h2 class="text-sm font-bold text-gray-900 dark:text-white">WhatsApp do grupo</h2>
+          <p class="text-xs text-gray-400 dark:text-slate-500 mt-0.5 mb-3">
+            Para disparar escalas no grupo do WhatsApp via CallMeBot. Adicione o número do CallMeBot ao grupo,
+            faça a autorização e cole aqui a apikey recebida.
+          </p>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">API Key (CallMeBot)</label>
+              <input v-model="form.whatsapp_apikey" type="text" placeholder="Ex: 123456"
+                     class="w-full border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">Número/destino do grupo <span class="font-normal text-gray-400">(opcional)</span></label>
+              <input v-model="form.whatsapp_phone" type="text" placeholder="Só se o CallMeBot pedir um número"
+                     class="w-full border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <p class="mt-1 text-[11px] text-gray-400 dark:text-slate-500">Se o CallMeBot te deu só a API Key, pode deixar em branco.</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -116,6 +152,44 @@
         <p class="mt-1.5 text-xs text-gray-400 dark:text-slate-500">
           O líder fica selecionado obrigatoriamente. Para trocá-lo, use o campo "Líder".
         </p>
+
+        <!-- FUNÇÕES DO GRUPO (só ao editar) -->
+        <div v-if="editando" class="mt-6 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden">
+          <div class="px-5 py-4 border-b border-gray-100 dark:border-slate-700">
+            <h2 class="text-sm font-bold text-gray-900 dark:text-white">Funções do Grupo</h2>
+            <p class="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
+              Lista de funções sugeridas ao montar escalas (ex: Vocal, Guitarra, Bateria).
+            </p>
+          </div>
+
+          <ul v-if="funcoes.length" class="divide-y divide-gray-50 dark:divide-slate-700/50">
+            <li v-for="f in funcoes" :key="f.id" class="flex items-center justify-between px-5 py-2.5">
+              <span class="text-sm text-gray-800 dark:text-slate-200">{{ f.nome }}</span>
+              <button type="button" @click="removerFuncao(f)"
+                      class="text-xs font-semibold text-gray-400 dark:text-slate-500 hover:text-red-600 px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+                Remover
+              </button>
+            </li>
+          </ul>
+          <p v-else class="px-5 py-4 text-xs text-gray-400 dark:text-slate-500">
+            Nenhuma função cadastrada ainda.
+          </p>
+
+          <form @submit.prevent="adicionarFuncao"
+                class="px-5 py-3 border-t border-gray-100 dark:border-slate-700 flex gap-2">
+            <input v-model="novaFuncao" type="text" placeholder="Nova função..." maxlength="100"
+                   class="flex-1 border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm
+                          bg-white dark:bg-slate-700 text-gray-900 dark:text-white
+                          placeholder-gray-400 dark:placeholder-slate-400
+                          focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   :class="{ 'border-red-400': funcaoErro }" />
+            <button type="submit" :disabled="!novaFuncao.trim() || salvandoFuncao"
+                    class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-semibold transition">
+              Adicionar
+            </button>
+          </form>
+          <p v-if="funcaoErro" class="px-5 pb-3 text-xs text-red-500">{{ funcaoErro }}</p>
+        </div>
       </div>
 
       <!-- AÇÕES -->
@@ -136,7 +210,7 @@
 
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue'
-import { Link, useForm } from '@inertiajs/vue3'
+import { Link, router, useForm } from '@inertiajs/vue3'
 import { computed, ref, watch } from 'vue'
 
 const props = defineProps({
@@ -146,11 +220,48 @@ const props = defineProps({
 
 const editando = computed(() => !!props.grupo)
 
+const funcoes = ref([...(props.grupo?.funcoes ?? [])])
+const novaFuncao = ref('')
+const funcaoErro = ref('')
+const salvandoFuncao = ref(false)
+
+watch(() => props.grupo?.funcoes, (novas) => {
+  if (novas) funcoes.value = [...novas]
+})
+
+function adicionarFuncao() {
+  const nome = novaFuncao.value.trim()
+  if (!nome || !props.grupo) return
+  salvandoFuncao.value = true
+  funcaoErro.value = ''
+  router.post(`/admin/grupos/${props.grupo.id}/funcoes`,
+    { nome },
+    {
+      preserveScroll: true,
+      preserveState: true,
+      onSuccess: () => { novaFuncao.value = '' },
+      onError: (errors) => { funcaoErro.value = errors.nome ?? 'Erro ao adicionar função.' },
+      onFinish: () => { salvandoFuncao.value = false },
+    },
+  )
+}
+
+function removerFuncao(f) {
+  if (!props.grupo) return
+  router.delete(`/admin/grupos/${props.grupo.id}/funcoes/${f.id}`, {
+    preserveScroll: true,
+    preserveState: true,
+  })
+}
+
 const form = useForm({
-  nome:        props.grupo?.nome      ?? '',
-  descricao:   props.grupo?.descricao ?? '',
-  lider_id:    props.grupo?.lider?.id ?? null,
-  membros_ids: props.grupo?.membros_ids ?? [],
+  nome:            props.grupo?.nome            ?? '',
+  descricao:       props.grupo?.descricao       ?? '',
+  tem_musicas:     props.grupo?.tem_musicas     ?? false,
+  whatsapp_apikey: props.grupo?.whatsapp_apikey ?? '',
+  whatsapp_phone:  props.grupo?.whatsapp_phone  ?? '',
+  lider_id:        props.grupo?.lider?.id       ?? null,
+  membros_ids:     props.grupo?.membros_ids     ?? [],
 })
 
 const errors = computed(() => form.errors)

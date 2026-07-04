@@ -12,13 +12,13 @@ class EventoController extends Controller
     public function index()
     {
         $eventos = Evento::orderBy('data_evento')->get()->map(fn ($e) => [
-            'id'          => $e->id,
-            'nome'        => $e->nome,
+            'id' => $e->id,
+            'nome' => $e->nome,
             'data_evento' => $e->data_evento->format('Y-m-d'),
-            'horario'     => $e->horario,
-            'local'       => $e->local,
-            'descricao'   => $e->descricao,
-            'ativo'       => $e->ativo,
+            'horario' => $e->horario,
+            'local' => $e->local,
+            'descricao' => $e->descricao,
+            'ativo' => $e->ativo,
         ]);
 
         return Inertia::render('Admin/Eventos/Index', [
@@ -34,15 +34,16 @@ class EventoController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'nome'      => 'required|string|max:120',
+            'nome' => 'required|string|max:120',
             'data_evento' => 'required|date',
-            'horario'   => 'nullable|string|max:20',
-            'local'     => 'nullable|string|max:120',
+            'horario' => 'nullable|string|max:20',
+            'local' => 'nullable|string|max:120',
             'descricao' => 'nullable|string',
-            'ativo'     => 'boolean',
+            'ativo' => 'boolean',
         ]);
 
         Evento::create($data);
+
         return redirect()->route('admin.eventos.index')->with('success', 'Evento criado!');
     }
 
@@ -58,21 +59,23 @@ class EventoController extends Controller
     public function update(Request $request, Evento $evento)
     {
         $data = $request->validate([
-            'nome'      => 'required|string|max:120',
+            'nome' => 'required|string|max:120',
             'data_evento' => 'required|date',
-            'horario'   => 'nullable|string|max:20',
-            'local'     => 'nullable|string|max:120',
+            'horario' => 'nullable|string|max:20',
+            'local' => 'nullable|string|max:120',
             'descricao' => 'nullable|string',
-            'ativo'     => 'boolean',
+            'ativo' => 'boolean',
         ]);
 
         $evento->update($data);
+
         return redirect()->route('admin.eventos.index')->with('success', 'Evento atualizado!');
     }
 
     public function destroy(Evento $evento)
     {
         $evento->delete();
+
         return redirect()->route('admin.eventos.index')->with('success', 'Evento removido!');
     }
 }

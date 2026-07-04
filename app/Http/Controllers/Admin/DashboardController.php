@@ -5,8 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Culto;
 use App\Models\Escala;
-use App\Models\Sugestao;
+use App\Models\GrupoAviso;
 use App\Models\PedidoOracao;
+use App\Models\Sugestao;
 use App\Models\User;
 use Carbon\Carbon;
 use Inertia\Inertia;
@@ -20,17 +21,17 @@ class DashboardController extends Controller
         // ── Stats
         $inicioMes = Carbon::today()->startOfMonth();
         $stats = [
-            'totalCultos'      => Culto::count(),
-            'novasSugestoes'   => Sugestao::where('lida', false)->count(),
-            'novosPedidos'     => PedidoOracao::where('lido', false)->count(),
-            'totalSugestoes'   => Sugestao::count(),
-            'totalPedidos'     => PedidoOracao::count(),
-            'totalMembros'     => User::where('tipo', 'membro')->where('is_superadmin', false)->count(),
-            'totalVisitantes'  => User::where('tipo', 'visitante')->where('is_superadmin', false)->count(),
-            'novosMembrosMes'  => User::where('tipo', 'membro')->where('is_superadmin', false)
-                                      ->where('created_at', '>=', $inicioMes)->count(),
+            'totalCultos' => Culto::count(),
+            'novasSugestoes' => Sugestao::where('lida', false)->count(),
+            'novosPedidos' => PedidoOracao::where('lido', false)->count(),
+            'totalSugestoes' => Sugestao::count(),
+            'totalPedidos' => PedidoOracao::count(),
+            'totalMembros' => User::where('tipo', 'membro')->where('is_superadmin', false)->count(),
+            'totalVisitantes' => User::where('tipo', 'visitante')->where('is_superadmin', false)->count(),
+            'novosMembrosMes' => User::where('tipo', 'membro')->where('is_superadmin', false)
+                ->where('created_at', '>=', $inicioMes)->count(),
             'novosVisitantesMes' => User::where('tipo', 'visitante')->where('is_superadmin', false)
-                                        ->where('created_at', '>=', $inicioMes)->count(),
+                ->where('created_at', '>=', $inicioMes)->count(),
         ];
 
         // ── Próximo culto (calcula próxima data pelo dia_semana)
@@ -39,47 +40,47 @@ class DashboardController extends Controller
         if ($culto) {
             $diasPt = [
                 'Domingo' => 0, 'Segunda' => 1, 'Terça' => 2,
-                'Quarta'  => 3, 'Quinta'  => 4, 'Sexta' => 5, 'Sábado' => 6,
+                'Quarta' => 3, 'Quinta' => 4, 'Sexta' => 5, 'Sábado' => 6,
             ];
             $diaAlvo = $diasPt[$culto->dia_semana] ?? 0;
-            $hoje    = Carbon::today();
-            $diff    = ($diaAlvo - (int) $hoje->format('w') + 7) % 7;
+            $hoje = Carbon::today();
+            $diff = ($diaAlvo - (int) $hoje->format('w') + 7) % 7;
             $proxData = $hoje->copy()->addDays($diff ?: 7);
 
             $proximoCulto = [
-                'id'         => $culto->id,
-                'nome'       => $culto->nome,
+                'id' => $culto->id,
+                'nome' => $culto->nome,
                 'dia_semana' => $culto->dia_semana,
-                'horario'    => $culto->horario,
-                'descricao'  => $culto->descricao,
-                'dia'        => $proxData->day,
-                'mes'        => mb_strtoupper($proxData->translatedFormat('M')),
-                'data_fmt'   => $proxData->translatedFormat('l, d \d\e F'),
+                'horario' => $culto->horario,
+                'descricao' => $culto->descricao,
+                'dia' => $proxData->day,
+                'mes' => mb_strtoupper($proxData->translatedFormat('M')),
+                'data_fmt' => $proxData->translatedFormat('l, d \d\e F'),
             ];
         }
 
         // ── Escalas: pastor/líder veem todas do grupo; membro vê só as suas
         if ($user->isMembro()) {
             $escalasProximas = collect([]);
-            $minhasProximas  = $user->escalas()
+            $minhasProximas = $user->escalas()
                 ->where('data', '>=', Carbon::today())
                 ->orderBy('data')
                 ->take(5)
                 ->with('grupo')
                 ->get()
                 ->map(fn ($e) => [
-                    'id'          => $e->id,
-                    'titulo'      => $e->titulo,
-                    'data'        => $e->data->format('Y-m-d'),
-                    'dia'         => $e->data->day,
-                    'dia_semana'  => mb_strtoupper(mb_substr($e->data->translatedFormat('D'), 0, 3)),
+                    'id' => $e->id,
+                    'titulo' => $e->titulo,
+                    'data' => $e->data->format('Y-m-d'),
+                    'dia' => $e->data->day,
+                    'dia_semana' => mb_strtoupper(mb_substr($e->data->translatedFormat('D'), 0, 3)),
                     'hora_inicio' => substr($e->hora_inicio, 0, 5),
-                    'grupo'       => $e->grupo?->only('id', 'nome'),
-                    'status'      => $e->pivot->status,
+                    'grupo' => $e->grupo?->only('id', 'nome'),
+                    'status' => $e->pivot->status,
                 ]);
         } else {
-            $minhasProximas  = collect([]);
-            $escalasQuery    = Escala::with(['grupo', 'membros:id,name'])
+            $minhasProximas = collect([]);
+            $escalasQuery = Escala::with(['grupo', 'membros:id,name'])
                 ->where('data', '>=', Carbon::today())
                 ->orderBy('data')
                 ->take(6);
@@ -89,17 +90,17 @@ class DashboardController extends Controller
             }
 
             $escalasProximas = $escalasQuery->get()->map(fn ($e) => [
-                'id'          => $e->id,
-                'titulo'      => $e->titulo,
-                'data'        => $e->data->format('Y-m-d'),
-                'dia'         => $e->data->day,
-                'dia_semana'  => mb_strtoupper(mb_substr($e->data->translatedFormat('D'), 0, 3)),
+                'id' => $e->id,
+                'titulo' => $e->titulo,
+                'data' => $e->data->format('Y-m-d'),
+                'dia' => $e->data->day,
+                'dia_semana' => mb_strtoupper(mb_substr($e->data->translatedFormat('D'), 0, 3)),
                 'hora_inicio' => substr($e->hora_inicio, 0, 5),
-                'grupo'       => $e->grupo?->only('id', 'nome'),
-                'membros'     => $e->membros->take(5)->map(fn ($m) => [
-                    'id'       => $m->id,
+                'grupo' => $e->grupo?->only('id', 'nome'),
+                'membros' => $e->membros->take(5)->map(fn ($m) => [
+                    'id' => $m->id,
                     'initials' => self::initials($m->name),
-                    'color'    => self::avatarColor($m->name),
+                    'color' => self::avatarColor($m->name),
                 ])->values(),
                 'total_membros' => $e->membros->count(),
             ]);
@@ -107,8 +108,8 @@ class DashboardController extends Controller
 
         // ── Aniversariantes (só para pastor/líder)
         $aniversariantes = collect([]);
-        if (!$user->isMembro()) {
-            $hoje   = Carbon::today();
+        if (! $user->isMembro()) {
+            $hoje = Carbon::today();
             $limite = $hoje->copy()->addDays(30);
 
             $aniversariantes = User::whereNotNull('data_nascimento')
@@ -121,56 +122,81 @@ class DashboardController extends Controller
                     if ($proxAniv->lt($hoje)) {
                         $proxAniv->addYear();
                     }
+
                     return $proxAniv->between($hoje, $limite);
                 })
                 ->map(function ($u) use ($hoje) {
-                    $nasc     = $u->data_nascimento;
+                    $nasc = $u->data_nascimento;
                     $proxAniv = Carbon::create($hoje->year, $nasc->month, $nasc->day);
-                    if ($proxAniv->lt($hoje)) $proxAniv->addYear();
+                    if ($proxAniv->lt($hoje)) {
+                        $proxAniv->addYear();
+                    }
 
                     $diasRestantes = (int) $hoje->diffInDays($proxAniv);
                     $idade = $proxAniv->year - $nasc->year;
 
                     $meses = [
-                        1=>'jan',2=>'fev',3=>'mar',4=>'abr',5=>'mai',6=>'jun',
-                        7=>'jul',8=>'ago',9=>'set',10=>'out',11=>'nov',12=>'dez',
+                        1 => 'jan', 2 => 'fev', 3 => 'mar', 4 => 'abr', 5 => 'mai', 6 => 'jun',
+                        7 => 'jul', 8 => 'ago', 9 => 'set', 10 => 'out', 11 => 'nov', 12 => 'dez',
                     ];
 
                     return [
-                        'id'             => $u->id,
-                        'name'           => $u->name,
-                        'initials'       => self::initials($u->name),
-                        'color'          => self::avatarColor($u->name),
-                        'data_fmt'       => $nasc->day . ' de ' . $meses[$nasc->month],
+                        'id' => $u->id,
+                        'name' => $u->name,
+                        'initials' => self::initials($u->name),
+                        'color' => self::avatarColor($u->name),
+                        'data_fmt' => $nasc->day.' de '.$meses[$nasc->month],
                         'dias_restantes' => $diasRestantes,
-                        'idade'          => $idade,
-                        'hoje'           => $diasRestantes === 0,
+                        'idade' => $idade,
+                        'hoje' => $diasRestantes === 0,
                     ];
                 })
                 ->sortBy('dias_restantes')
                 ->values();
         }
 
+        // ── Mural: avisos dos grupos que a pessoa participa
+        $muralAvisos = GrupoAviso::whereIn('grupo_id', $user->grupoIds())
+            ->with(['grupo:id,nome', 'autor:id,name'])
+            ->orderByDesc('fixado')
+            ->orderByDesc('created_at')
+            ->take(10)
+            ->get()
+            ->map(fn ($a) => [
+                'id' => $a->id,
+                'titulo' => $a->titulo,
+                'corpo' => $a->corpo,
+                'fixado' => $a->fixado,
+                'grupo' => $a->grupo?->only('id', 'nome'),
+                'autor' => $a->autor?->only('id', 'name'),
+                'created_at' => $a->created_at->format('d/m/Y H:i'),
+            ]);
+
         return Inertia::render('Admin/Dashboard', array_merge($stats, [
-            'proximoCulto'    => $proximoCulto,
+            'proximoCulto' => $proximoCulto,
             'escalasProximas' => $escalasProximas,
-            'minhasProximas'  => $minhasProximas,
+            'minhasProximas' => $minhasProximas,
             'aniversariantes' => $aniversariantes,
+            'muralAvisos' => $muralAvisos,
         ]));
     }
 
     private static function initials(string $name): string
     {
         $parts = array_filter(explode(' ', $name));
-        if (!$parts) return '?';
+        if (! $parts) {
+            return '?';
+        }
         $first = $parts[array_key_first($parts)][0] ?? '';
-        $last  = count($parts) > 1 ? $parts[array_key_last($parts)][0] ?? '' : '';
-        return strtoupper($first . $last);
+        $last = count($parts) > 1 ? $parts[array_key_last($parts)][0] ?? '' : '';
+
+        return strtoupper($first.$last);
     }
 
     private static function avatarColor(string $name): string
     {
-        $colors = ['#f97316','#3b82f6','#8b5cf6','#10b981','#ef4444','#f59e0b','#06b6d4','#ec4899'];
+        $colors = ['#f97316', '#3b82f6', '#8b5cf6', '#10b981', '#ef4444', '#f59e0b', '#06b6d4', '#ec4899'];
+
         return $colors[ord($name[0] ?? 'A') % count($colors)];
     }
 }

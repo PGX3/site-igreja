@@ -163,15 +163,27 @@
             <label :for="`m-${membro.id}`" class="flex-1 cursor-pointer">
               <span class="text-sm font-medium text-gray-800 dark:text-slate-200">{{ membro.name }}</span>
             </label>
-            <input v-if="isEscalado(membro.id)"
-                   v-model="funcaoDoMembro(membro.id).funcao"
-                   type="text" placeholder="Função (ex: vocal, guitarra...)"
-                   class="border border-gray-200 dark:border-slate-600 rounded px-3 py-1.5 text-xs w-48
-                          bg-white dark:bg-slate-700 text-gray-900 dark:text-white
-                          placeholder-gray-400 dark:placeholder-slate-400
-                          focus:outline-none focus:ring-1 focus:ring-blue-500" />
+            <template v-if="isEscalado(membro.id)">
+              <input v-model="funcaoDoMembro(membro.id).funcao"
+                     :list="`funcoes-grupo-${form.grupo_id}`"
+                     type="text" placeholder="Função..." maxlength="100"
+                     class="border border-gray-200 dark:border-slate-600 rounded px-3 py-1.5 text-xs w-40
+                            bg-white dark:bg-slate-700 text-gray-900 dark:text-white
+                            placeholder-gray-400 dark:placeholder-slate-400
+                            focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              <button type="button" @click="abrirNovaFuncao"
+                      :title="`Adicionar nova função ao grupo`"
+                      class="text-xs font-bold text-gray-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 w-7 h-7 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
+                +
+              </button>
+            </template>
           </div>
         </div>
+
+        <!-- DATALIST global de funções do grupo atual -->
+        <datalist v-if="form.grupo_id" :id="`funcoes-grupo-${form.grupo_id}`">
+          <option v-for="f in funcoesDoGrupoAtual" :key="f.id" :value="f.nome" />
+        </datalist>
 
         <div v-else class="px-5 py-6 text-sm text-gray-400 dark:text-slate-500 text-center">
           Nenhum membro associado a este grupo ainda.
@@ -191,12 +203,42 @@
       </div>
 
     </form>
+
+    <!-- MODAL: nova função do grupo -->
+    <div v-if="modalNovaFuncao" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div class="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-xl max-w-sm w-full mx-4">
+        <h3 class="font-bold text-gray-900 dark:text-white mb-1">Nova função do grupo</h3>
+        <p class="text-xs text-gray-500 dark:text-slate-400 mb-4">
+          Fica salva no grupo e aparece como sugestão nas próximas escalas.
+        </p>
+        <input v-model="novaFuncaoNome" type="text" placeholder="Ex: Vocal, Guitarra, Bateria..." maxlength="100"
+               @keyup.enter="salvarNovaFuncao"
+               class="w-full border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm mb-2
+                      bg-white dark:bg-slate-700 text-gray-900 dark:text-white
+                      placeholder-gray-400 dark:placeholder-slate-400
+                      focus:outline-none focus:ring-2 focus:ring-blue-500"
+               :class="{ 'border-red-400': novaFuncaoErro }" />
+        <p v-if="novaFuncaoErro" class="text-xs text-red-500 mb-2">{{ novaFuncaoErro }}</p>
+        <div class="flex gap-3 justify-end mt-4">
+          <button type="button" @click="fecharNovaFuncao"
+                  class="px-4 py-2 text-sm font-semibold text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition">
+            Cancelar
+          </button>
+          <button type="button" @click="salvarNovaFuncao"
+                  :disabled="!novaFuncaoNome.trim() || salvandoNovaFuncao"
+                  class="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-lg transition">
+            Adicionar
+          </button>
+        </div>
+      </div>
+    </div>
+
   </AdminLayout>
 </template>
 
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue'
-import { Link, useForm } from '@inertiajs/vue3'
+import { Link, router, useForm } from '@inertiajs/vue3'
 import { computed, reactive, ref, onMounted } from 'vue'
 
 const props = defineProps({
@@ -244,10 +286,48 @@ onMounted(() => {
   }
 })
 
-const membrosDoGrupo = computed(() => {
-  const g = props.grupos?.find(g => g.id === Number(form.grupo_id))
-  return g?.membros ?? []
-})
+const grupoAtual = computed(() =>
+  props.grupos?.find(g => g.id === Number(form.grupo_id)) ?? null,
+)
+
+const membrosDoGrupo = computed(() => grupoAtual.value?.membros ?? [])
+
+const funcoesDoGrupoAtual = computed(() => grupoAtual.value?.funcoes ?? [])
+
+const modalNovaFuncao = ref(false)
+const novaFuncaoNome = ref('')
+const novaFuncaoErro = ref('')
+const salvandoNovaFuncao = ref(false)
+
+function abrirNovaFuncao() {
+  if (!form.grupo_id) return
+  novaFuncaoNome.value = ''
+  novaFuncaoErro.value = ''
+  modalNovaFuncao.value = true
+}
+
+function fecharNovaFuncao() {
+  modalNovaFuncao.value = false
+  novaFuncaoNome.value = ''
+  novaFuncaoErro.value = ''
+}
+
+function salvarNovaFuncao() {
+  const nome = novaFuncaoNome.value.trim()
+  if (!nome || !form.grupo_id) return
+  salvandoNovaFuncao.value = true
+  novaFuncaoErro.value = ''
+  router.post(`/admin/grupos/${form.grupo_id}/funcoes`,
+    { nome },
+    {
+      preserveScroll: true,
+      preserveState: true,
+      onSuccess: () => { fecharNovaFuncao() },
+      onError: (errors) => { novaFuncaoErro.value = errors.nome ?? 'Erro ao adicionar função.' },
+      onFinish: () => { salvandoNovaFuncao.value = false },
+    },
+  )
+}
 
 function isEscalado(userId) {
   return membrosLocal.some(m => m.user_id === userId)

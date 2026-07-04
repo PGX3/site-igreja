@@ -27,8 +27,8 @@ return new class extends Migration
             ->all();
 
         if (count($duplicados) > 0) {
-            throw new \RuntimeException(
-                'CPFs duplicados encontrados na tabela users: ' . implode(', ', $duplicados) .
+            throw new RuntimeException(
+                'CPFs duplicados encontrados na tabela users: '.implode(', ', $duplicados).
                 '. Resolva manualmente antes de rodar essa migration.'
             );
         }

@@ -60,6 +60,7 @@
               Recusar ✗
             </Link>
           </div>
+          <Detalhes :escala="e" />
         </div>
       </div>
     </div>
@@ -69,17 +70,20 @@
       <p class="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-3">Confirmadas</p>
       <div class="space-y-2">
         <div v-for="e in confirmadas" :key="e.id"
-             class="bg-white dark:bg-slate-800 border border-green-100 dark:border-green-900/50 rounded-xl p-4 shadow-sm flex items-center gap-4">
-          <div class="text-center min-w-[44px]">
-            <p class="text-lg font-black text-green-700 dark:text-green-400">{{ diaDoMes(e.data) }}</p>
-            <p class="text-[10px] font-bold uppercase text-green-400 dark:text-green-600">{{ mesAbrev(e.data) }}</p>
+             class="bg-white dark:bg-slate-800 border border-green-100 dark:border-green-900/50 rounded-xl p-4 shadow-sm">
+          <div class="flex items-center gap-4">
+            <div class="text-center min-w-[44px]">
+              <p class="text-lg font-black text-green-700 dark:text-green-400">{{ diaDoMes(e.data) }}</p>
+              <p class="text-[10px] font-bold uppercase text-green-400 dark:text-green-600">{{ mesAbrev(e.data) }}</p>
+            </div>
+            <div class="flex-1">
+              <p class="font-semibold text-gray-900 dark:text-white text-sm">{{ e.titulo }}</p>
+              <p class="text-xs text-gray-400 dark:text-slate-500">{{ e.grupo?.nome }} · {{ e.hora_inicio }} – {{ e.hora_fim }}</p>
+            </div>
+            <span class="text-xs font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-2.5 py-1 rounded-full">Confirmado</span>
+            <p v-if="e.confirmado_em" class="text-[10px] text-gray-400 dark:text-slate-500 hidden sm:block">{{ e.confirmado_em }}</p>
           </div>
-          <div class="flex-1">
-            <p class="font-semibold text-gray-900 dark:text-white text-sm">{{ e.titulo }}</p>
-            <p class="text-xs text-gray-400 dark:text-slate-500">{{ e.grupo?.nome }} · {{ e.hora_inicio }} – {{ e.hora_fim }}</p>
-          </div>
-          <span class="text-xs font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-2.5 py-1 rounded-full">Confirmado</span>
-          <p v-if="e.confirmado_em" class="text-[10px] text-gray-400 dark:text-slate-500 hidden sm:block">{{ e.confirmado_em }}</p>
+          <Detalhes :escala="e" />
         </div>
       </div>
     </div>
@@ -115,6 +119,7 @@
 
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue'
+import Detalhes from '@/Components/EscalaDetalhes.vue'
 import { Link } from '@inertiajs/vue3'
 import { computed } from 'vue'
 

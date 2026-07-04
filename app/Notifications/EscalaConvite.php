@@ -11,7 +11,7 @@ use Illuminate\Notifications\Notification;
 class EscalaConvite extends Notification
 {
     public function __construct(
-        public readonly Escala  $escala,
+        public readonly Escala $escala,
         public readonly ?string $funcao = null,
     ) {}
 
@@ -48,10 +48,10 @@ class EscalaConvite extends Notification
     public function toMail(mixed $notifiable): MailMessage
     {
         $escala = $this->escala;
-        $data   = $escala->data?->format('d/m/Y') ?? '';
+        $data = $escala->data?->format('d/m/Y') ?? '';
         $inicio = substr((string) $escala->hora_inicio, 0, 5);
-        $fim    = substr((string) $escala->hora_fim,    0, 5);
-        $grupo  = $escala->grupo?->nome ?? '';
+        $fim = substr((string) $escala->hora_fim, 0, 5);
+        $grupo = $escala->grupo?->nome ?? '';
 
         $mail = (new MailMessage)
             ->subject("Você foi escalado: {$escala->titulo}")
@@ -66,9 +66,8 @@ class EscalaConvite extends Notification
         }
 
         return $mail
-            ->action('Ver Minhas Escalas', config('app.url') . '/admin/minhas-escalas')
+            ->action('Ver Minhas Escalas', config('app.url').'/admin/minhas-escalas')
             ->line('Acesse o sistema para confirmar ou recusar sua participação.')
-            ->salutation('Que Deus abençoe! — ' . config('app.name'));
+            ->salutation('Que Deus abençoe! — '.config('app.name'));
     }
-
 }

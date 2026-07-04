@@ -17,6 +17,89 @@
       </Link>
     </div>
 
+    <!-- BANNER: ANIVERSARIANTES DA SEMANA -->
+    <div v-if="aniversariantesSemana.length"
+         class="mb-8 rounded-2xl border border-purple-200 dark:border-purple-800/40 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/15 dark:to-pink-900/10 p-5 sm:p-6 shadow-sm">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xl shadow-sm flex-shrink-0">
+            🎉
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-gray-900 dark:text-white leading-tight">Aniversariantes da semana</h2>
+            <p class="text-xs text-gray-500 dark:text-slate-400">
+              {{ aniversariantesSemana.length }} {{ aniversariantesSemana.length === 1 ? 'aniversariante' : 'aniversariantes' }} · segunda a domingo
+            </p>
+          </div>
+        </div>
+        <button type="button" @click="abrirModal"
+                class="self-start sm:self-auto inline-flex items-center gap-2 text-sm font-semibold text-white
+                       bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600
+                       px-4 py-2.5 rounded-xl shadow-sm transition-colors">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+            <rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+          </svg>
+          Mensagem para o grupo
+        </button>
+      </div>
+
+      <div class="flex flex-wrap gap-2">
+        <div v-for="a in aniversariantesSemana" :key="a.id"
+             class="flex items-center gap-2.5 bg-white/70 dark:bg-slate-800/60 border border-white dark:border-slate-700 rounded-xl pl-2 pr-3.5 py-2 shadow-sm"
+             :class="a.hoje ? 'ring-2 ring-pink-300 dark:ring-pink-700' : ''">
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+               :style="{ background: a.color }">
+            {{ a.initials }}
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5">
+              <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">{{ primeiroNome(a.name) }}</p>
+              <span v-if="a.hoje" class="text-[10px]">🎂</span>
+            </div>
+            <p class="text-[11px] text-gray-500 dark:text-slate-400 capitalize leading-none mt-0.5">
+              {{ a.dia_semana }} · dia {{ a.dia }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: MENSAGEM PRONTA -->
+    <div v-if="modalAberta"
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+         @click.self="modalAberta = false">
+      <div class="w-full max-w-lg bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-gray-200 dark:border-slate-700 flex flex-col max-h-[85vh]">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-slate-700">
+          <h3 class="font-bold text-gray-900 dark:text-white">Mensagem para o grupo</h3>
+          <button type="button" @click="modalAberta = false"
+                  class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5"><path d="M18 6 6 18M6 6l12 12" /></svg>
+          </button>
+        </div>
+        <div class="p-5 overflow-y-auto">
+          <textarea ref="msgArea" readonly rows="12"
+                    class="w-full resize-none rounded-xl border border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-900/50
+                           text-sm text-gray-700 dark:text-slate-200 p-4 font-mono leading-relaxed focus:outline-none"
+                    :value="mensagemSemana"></textarea>
+        </div>
+        <div class="flex items-center justify-end gap-2 px-5 py-4 border-t border-gray-100 dark:border-slate-700">
+          <button type="button" @click="modalAberta = false"
+                  class="text-sm font-semibold text-gray-500 dark:text-slate-400 px-4 py-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
+            Fechar
+          </button>
+          <button type="button" @click="copiarMensagem"
+                  class="inline-flex items-center gap-2 text-sm font-semibold text-white px-4 py-2.5 rounded-xl shadow-sm transition-colors"
+                  :class="copiado ? 'bg-emerald-500' : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600'">
+            <svg v-if="!copiado" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+              <rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+            </svg>
+            <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="M20 6 9 17l-5-5" /></svg>
+            {{ copiado ? 'Copiado!' : 'Copiar mensagem' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- COM ANIVERSÁRIO -->
     <div v-if="comAniversario.length" class="mb-10">
 
@@ -139,11 +222,53 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import { Link } from '@inertiajs/vue3'
+import { ref, computed, nextTick } from 'vue'
 
-defineProps({
+const props = defineProps({
   comAniversario: Array,
   semAniversario: Array,
+  aniversariantesSemana: { type: Array, default: () => [] },
 })
+
+const modalAberta = ref(false)
+const copiado = ref(false)
+const msgArea = ref(null)
+
+const mensagemSemana = computed(() => {
+  const linhas = props.aniversariantesSemana.map(a => {
+    const dia = a.dia_semana.charAt(0).toUpperCase() + a.dia_semana.slice(1)
+    return `🎂 ${primeiroEUltimoNome(a.name)} - ${dia} (dia ${a.dia})`
+  })
+  return [
+    '🎉 *Aniversariantes da semana* 🎉',
+    '',
+    'Vamos celebrar e orar por nossos irmãos que fazem aniversário nesta semana:',
+    '',
+    ...linhas,
+    '',
+    'Que Deus abençoe grandemente a vida de cada um! 🙏🥳',
+  ].join('\n')
+})
+
+function abrirModal() {
+  copiado.value = false
+  modalAberta.value = true
+}
+
+async function copiarMensagem() {
+  const texto = mensagemSemana.value
+  try {
+    await navigator.clipboard.writeText(texto)
+  } catch {
+    if (msgArea.value) {
+      msgArea.value.select()
+      document.execCommand('copy')
+    }
+  }
+  copiado.value = true
+  await nextTick()
+  setTimeout(() => { copiado.value = false }, 2000)
+}
 
 const BIRTHDAY_MESSAGES = [
   '🎉 Feliz aniversário, {nome}! Que Deus continue te abençoando neste novo ciclo de vida. Um forte abraço da família Igreja!',
@@ -156,6 +281,12 @@ const BIRTHDAY_MESSAGES = [
 
 function primeiroNome(nome) {
   return (nome || '').trim().split(/\s+/)[0] || ''
+}
+
+function primeiroEUltimoNome(nome) {
+  const partes = (nome || '').trim().split(/\s+/).filter(Boolean)
+  if (partes.length <= 1) return partes[0] || ''
+  return `${partes[0]} ${partes[partes.length - 1]}`
 }
 
 function whatsappBirthdayUrl(pessoa) {

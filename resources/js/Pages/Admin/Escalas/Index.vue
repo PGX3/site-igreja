@@ -87,7 +87,7 @@
                   class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
               Ver
             </Link>
-            <Link :href="`/admin/escalas/${e.id}/edit`"
+            <Link v-if="e.editavel" :href="`/admin/escalas/${e.id}/edit`"
                   class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
               Editar
             </Link>
@@ -95,7 +95,11 @@
                     class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-green-600 dark:hover:text-green-400 px-3 py-1.5 rounded hover:bg-green-50 dark:hover:bg-green-900/20 transition">
               Compartilhar
             </button>
-            <button @click="confirmarExclusao(e)"
+            <button v-if="e.editavel" @click="duplicar(e)"
+                    class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
+              Duplicar
+            </button>
+            <button v-if="e.editavel" @click="confirmarExclusao(e)"
                     class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-red-600 px-3 py-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
               Excluir
             </button>
@@ -142,7 +146,7 @@
                   class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
               Ver
             </Link>
-            <Link :href="`/admin/escalas/${e.id}/edit`"
+            <Link v-if="e.editavel" :href="`/admin/escalas/${e.id}/edit`"
                   class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
               Editar
             </Link>
@@ -150,7 +154,11 @@
                     class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-green-600 dark:hover:text-green-400 px-3 py-1.5 rounded hover:bg-green-50 dark:hover:bg-green-900/20 transition">
               Compartilhar
             </button>
-            <button @click="confirmarExclusao(e)"
+            <button v-if="e.editavel" @click="duplicar(e)"
+                    class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
+              Duplicar
+            </button>
+            <button v-if="e.editavel" @click="confirmarExclusao(e)"
                     class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-red-600 px-3 py-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
               Excluir
             </button>
@@ -222,7 +230,7 @@
 
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue'
-import { Link } from '@inertiajs/vue3'
+import { Link, router } from '@inertiajs/vue3'
 import { ref, computed } from 'vue'
 
 const props = defineProps({ escalas: Array })
@@ -267,6 +275,10 @@ function statusClass(s) {
 }
 
 function confirmarExclusao(e) { escalaParaExcluir.value = e }
+
+function duplicar(e) {
+  router.post(`/admin/escalas/${e.id}/duplicar`, {}, { preserveScroll: true })
+}
 
 function abrirCompartilhar(e) {
   escalaCompartilhar.value = e

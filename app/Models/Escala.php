@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Escala extends Model
 {
     protected $fillable = [
-        'titulo', 'descricao', 'data', 'hora_inicio', 'hora_fim',
+        'titulo', 'descricao', 'restricoes', 'data', 'hora_inicio', 'hora_fim',
         'status', 'grupo_id', 'culto_id', 'evento_id',
         'created_by', 'updated_by',
     ];
@@ -51,5 +51,20 @@ class Escala extends Model
     public function escalaMembros()
     {
         return $this->hasMany(EscalaMembro::class);
+    }
+
+    public function assets()
+    {
+        return $this->belongsToMany(Asset::class, 'asset_escala')->withTimestamps();
+    }
+
+    public function notas()
+    {
+        return $this->hasMany(EscalaNota::class);
+    }
+
+    public function setlist()
+    {
+        return $this->hasMany(EscalaSetlistItem::class)->orderBy('ordem');
     }
 }
