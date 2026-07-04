@@ -9,7 +9,7 @@ class AddMembroEscalaRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        $user   = $this->user();
+        $user = $this->user();
         $escala = $this->route('escala');
 
         if (! $user || ! $escala instanceof Escala) {
@@ -23,7 +23,7 @@ class AddMembroEscalaRequest extends FormRequest
     {
         return [
             'user_id' => ['required', 'integer', 'exists:users,id'],
-            'funcao'  => ['nullable', 'string', 'max:100'],
+            'funcao' => ['nullable', 'string', 'max:100'],
         ];
     }
 }

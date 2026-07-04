@@ -147,10 +147,12 @@ class MembroController extends Controller
     public function gerarSenha(User $membro)
     {
         abort_unless($membro->tipo === 'membro', 404);
-        if ($membro->is_superadmin) abort(403);
+        if ($membro->is_superadmin) {
+            abort(403);
+        }
 
         $alfabeto = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-        $senha    = '';
+        $senha = '';
         for ($i = 0; $i < 8; $i++) {
             $senha .= $alfabeto[random_int(0, strlen($alfabeto) - 1)];
         }
@@ -161,7 +163,7 @@ class MembroController extends Controller
 
         return back()->with('senhaGerada', [
             'membro' => $membro->name,
-            'senha'  => $senha,
+            'senha' => $senha,
         ]);
     }
 

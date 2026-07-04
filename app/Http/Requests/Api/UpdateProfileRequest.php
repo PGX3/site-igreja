@@ -17,12 +17,12 @@ class UpdateProfileRequest extends FormRequest
         $userId = $this->user()->id;
 
         return [
-            'name'            => ['sometimes', 'string', 'max:150'],
-            'email'           => ['sometimes', 'email', 'max:150', Rule::unique('users', 'email')->ignore($userId)],
-            'telefone'        => ['sometimes', 'nullable', 'string', 'max:30'],
+            'name' => ['sometimes', 'string', 'max:150'],
+            'email' => ['sometimes', 'email', 'max:150', Rule::unique('users', 'email')->ignore($userId)],
+            'telefone' => ['sometimes', 'nullable', 'string', 'max:30'],
             'data_nascimento' => ['sometimes', 'nullable', 'date'],
-            'sexo'            => ['sometimes', 'nullable', Rule::in(['M', 'F'])],
-            'estado_civil'    => ['sometimes', 'nullable', 'string', 'max:30'],
+            'sexo' => ['sometimes', 'nullable', Rule::in(['M', 'F'])],
+            'estado_civil' => ['sometimes', 'nullable', 'string', 'max:30'],
         ];
     }
 }

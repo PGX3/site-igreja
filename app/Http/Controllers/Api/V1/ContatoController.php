@@ -18,7 +18,7 @@ class ContatoController extends Controller
 
         return response()->json([
             'message' => 'Sugestão enviada. Obrigado!',
-            'id'      => $sugestao->id,
+            'id' => $sugestao->id,
         ], 201);
     }
 
@@ -28,7 +28,7 @@ class ContatoController extends Controller
 
         return response()->json([
             'message' => 'Seu pedido foi recebido. Estaremos orando por você.',
-            'id'      => $pedido->id,
+            'id' => $pedido->id,
         ], 201);
     }
 }

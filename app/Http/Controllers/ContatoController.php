@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Services\ContatoService;
-use App\Models\PedidoOracao;
-use App\Models\Sugestao;
 use App\Services\HCaptchaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;

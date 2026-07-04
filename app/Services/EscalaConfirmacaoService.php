@@ -13,7 +13,7 @@ class EscalaConfirmacaoService
         $this->assertOwner($em, $actor);
 
         $em->update([
-            'status'        => 'confirmado',
+            'status' => 'confirmado',
             'confirmado_em' => now(),
         ]);
 

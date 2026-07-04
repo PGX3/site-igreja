@@ -13,12 +13,12 @@ class CultoResource extends JsonResource
         $proxima = app(CultoProximaDataResolver::class)->resolve($this->resource);
 
         return [
-            'id'           => $this->id,
-            'nome'         => $this->nome,
-            'dia_semana'   => $this->dia_semana,
-            'horario'      => $this->horario ? substr((string) $this->horario, 0, 5) : null,
-            'descricao'    => $this->descricao,
-            'ativo'        => (bool) $this->ativo,
+            'id' => $this->id,
+            'nome' => $this->nome,
+            'dia_semana' => $this->dia_semana,
+            'horario' => $this->horario ? substr((string) $this->horario, 0, 5) : null,
+            'descricao' => $this->descricao,
+            'ativo' => (bool) $this->ativo,
             'proxima_data' => $proxima->format('Y-m-d'),
         ];
     }

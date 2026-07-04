@@ -10,10 +10,10 @@ class GrupoResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'        => $this->id,
-            'nome'      => $this->nome,
+            'id' => $this->id,
+            'nome' => $this->nome,
             'descricao' => $this->descricao,
-            'lider_id'  => $this->lider_id,
+            'lider_id' => $this->lider_id,
         ];
     }
 }

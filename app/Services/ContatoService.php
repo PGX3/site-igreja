@@ -10,8 +10,8 @@ class ContatoService
     public function criarSugestao(array $data): Sugestao
     {
         return Sugestao::create([
-            'nome'     => $data['nome'],
-            'email'    => $data['email'] ?? null,
+            'nome' => $data['nome'],
+            'email' => $data['email'] ?? null,
             'mensagem' => $data['mensagem'],
         ]);
     }
@@ -21,8 +21,8 @@ class ContatoService
         $anonimo = (bool) ($data['anonimo'] ?? false);
 
         return PedidoOracao::create([
-            'nome'    => $anonimo ? 'Anônimo' : $data['nome'],
-            'pedido'  => $data['pedido'],
+            'nome' => $anonimo ? 'Anônimo' : $data['nome'],
+            'pedido' => $data['pedido'],
             'anonimo' => $anonimo,
         ]);
     }

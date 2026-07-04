@@ -36,23 +36,23 @@ class EscalaController extends Controller
 
         $escala = DB::transaction(function () use ($data, $user) {
             $escala = Escala::create([
-                'titulo'      => $data['titulo'],
-                'descricao'   => $data['descricao'] ?? null,
-                'data'        => $data['data'],
+                'titulo' => $data['titulo'],
+                'descricao' => $data['descricao'] ?? null,
+                'data' => $data['data'],
                 'hora_inicio' => $data['hora_inicio'],
-                'hora_fim'    => $data['hora_fim'],
-                'grupo_id'    => $data['grupo_id'],
-                'culto_id'    => $data['culto_id'] ?? null,
-                'evento_id'   => $data['evento_id'] ?? null,
-                'created_by'  => $user->id,
-                'status'      => 'pendente',
+                'hora_fim' => $data['hora_fim'],
+                'grupo_id' => $data['grupo_id'],
+                'culto_id' => $data['culto_id'] ?? null,
+                'evento_id' => $data['evento_id'] ?? null,
+                'created_by' => $user->id,
+                'status' => 'pendente',
             ]);
 
             foreach ($data['membros'] ?? [] as $membro) {
                 EscalaMembro::create([
                     'escala_id' => $escala->id,
-                    'user_id'   => $membro['user_id'],
-                    'funcao'    => $membro['funcao'] ?? null,
+                    'user_id' => $membro['user_id'],
+                    'funcao' => $membro['funcao'] ?? null,
                 ]);
             }
 
@@ -80,6 +80,7 @@ class EscalaController extends Controller
 
         if ($user->canManageGrupo($escala->grupo_id)) {
             $escala->load(['grupo', 'culto', 'evento', 'escalaMembros.user']);
+
             return new EscalaResource($escala);
         }
 

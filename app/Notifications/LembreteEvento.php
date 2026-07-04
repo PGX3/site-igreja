@@ -23,15 +23,15 @@ class LembreteEvento extends Notification
 
     public function toFcm(mixed $notifiable): FcmMessage
     {
-        $data    = $this->evento->data_evento?->format('d/m') ?? '';
+        $data = $this->evento->data_evento?->format('d/m') ?? '';
         $horario = $this->evento->horario ? substr((string) $this->evento->horario, 0, 5) : '';
-        $local   = $this->evento->local ? " · {$this->evento->local}" : '';
+        $local = $this->evento->local ? " · {$this->evento->local}" : '';
 
         return FcmMessage::make(
             "Amanhã: {$this->evento->nome}",
             trim("📅 {$data} {$horario}{$local}"),
         )->withData([
-            'type'      => 'evento',
+            'type' => 'evento',
             'evento_id' => $this->evento->id,
         ]);
     }

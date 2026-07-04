@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\CheckRole;
+use App\Http\Middleware\ForceJsonResponse;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
@@ -24,8 +26,8 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
         ]);
         $middleware->alias([
-            'role' => \App\Http\Middleware\CheckRole::class,
-            'force.json' => \App\Http\Middleware\ForceJsonResponse::class,
+            'role' => CheckRole::class,
+            'force.json' => ForceJsonResponse::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
@@ -62,7 +64,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (ThrottleRequestsException $e, Request $request) {
             if ($request->is('api/*')) {
                 return response()->json([
-                    'message'     => 'Muitas tentativas. Tente novamente em instantes.',
+                    'message' => 'Muitas tentativas. Tente novamente em instantes.',
                     'retry_after' => (int) $e->getHeaders()['Retry-After'] ?? null,
                 ], 429);
             }

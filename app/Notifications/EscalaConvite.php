@@ -30,7 +30,7 @@ class EscalaConvite extends Notification
     public function toFcm(mixed $notifiable): FcmMessage
     {
         $escala = $this->escala;
-        $data   = $escala->data?->format('d/m/Y') ?? '';
+        $data = $escala->data?->format('d/m/Y') ?? '';
         $inicio = substr((string) $escala->hora_inicio, 0, 5);
 
         $body = "📅 {$data} às {$inicio}";
@@ -40,7 +40,7 @@ class EscalaConvite extends Notification
 
         return FcmMessage::make("Nova escala: {$escala->titulo}", $body)
             ->withData([
-                'type'      => 'escala',
+                'type' => 'escala',
                 'escala_id' => $escala->id,
             ]);
     }

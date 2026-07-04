@@ -28,7 +28,7 @@ class FcmChannel
             return;
         }
 
-        $messaging  = Firebase::messaging();
+        $messaging = Firebase::messaging();
         $cloudMessage = CloudMessage::new()
             ->withNotification(FcmNotification::create($message->title, $message->body))
             ->withData($this->stringifyData($message->data));

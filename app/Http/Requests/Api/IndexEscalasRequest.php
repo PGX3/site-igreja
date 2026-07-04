@@ -16,8 +16,8 @@ class IndexEscalasRequest extends FormRequest
     {
         return [
             'status' => ['sometimes', 'nullable', Rule::in(['pendente', 'confirmado', 'recusado'])],
-            'from'   => ['sometimes', 'nullable', 'date_format:Y-m-d'],
-            'to'     => ['sometimes', 'nullable', 'date_format:Y-m-d'],
+            'from' => ['sometimes', 'nullable', 'date_format:Y-m-d'],
+            'to' => ['sometimes', 'nullable', 'date_format:Y-m-d'],
         ];
     }
 }

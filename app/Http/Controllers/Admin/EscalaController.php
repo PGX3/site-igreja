@@ -15,7 +15,6 @@ use App\Models\User;
 use App\Services\CallMeBot;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 use Inertia\Inertia;
 

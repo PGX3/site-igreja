@@ -15,8 +15,8 @@ class StoreDeviceTokenRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'token'       => ['required', 'string', 'max:255'],
-            'platform'    => ['required', Rule::in(['ios', 'android', 'web'])],
+            'token' => ['required', 'string', 'max:255'],
+            'platform' => ['required', Rule::in(['ios', 'android', 'web'])],
             'app_version' => ['nullable', 'string', 'max:30'],
         ];
     }

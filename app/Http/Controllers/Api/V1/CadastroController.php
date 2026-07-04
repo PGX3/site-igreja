@@ -19,30 +19,30 @@ class CadastroController extends Controller
         $user = DB::transaction(function () use ($data) {
             $familiaId = null;
 
-            if (!empty($data['endereco']) || !empty($data['cidade']) || !empty($data['cep'])) {
+            if (! empty($data['endereco']) || ! empty($data['cidade']) || ! empty($data['cep'])) {
                 $familia = Familia::create([
-                    'endereco'           => $data['endereco'] ?? '',
-                    'cidade'             => $data['cidade'] ?? '',
-                    'uf'                 => $data['uf'] ?? '',
-                    'cep'                => $data['cep'] ?? '',
+                    'endereco' => $data['endereco'] ?? '',
+                    'cidade' => $data['cidade'] ?? '',
+                    'uf' => $data['uf'] ?? '',
+                    'cep' => $data['cep'] ?? '',
                     'telefone_principal' => $data['telefone'] ?? null,
                 ]);
                 $familiaId = $familia->id;
             }
 
             $user = User::create([
-                'name'            => $data['name'],
-                'email'           => $data['email'] ?? null,
-                'telefone'        => $data['telefone'],
+                'name' => $data['name'],
+                'email' => $data['email'] ?? null,
+                'telefone' => $data['telefone'],
                 'data_nascimento' => $data['data_nascimento'] ?? null,
-                'sexo'            => $data['sexo'] ?? null,
-                'estado_civil'    => $data['estado_civil'] ?? null,
-                'cpf'             => $data['cpf'] ?? null,
-                'como_conheceu'   => $data['como_conheceu'] ?? null,
+                'sexo' => $data['sexo'] ?? null,
+                'estado_civil' => $data['estado_civil'] ?? null,
+                'cpf' => $data['cpf'] ?? null,
+                'como_conheceu' => $data['como_conheceu'] ?? null,
                 'primeira_visita' => $data['primeira_visita'] ?? null,
-                'tipo'            => $data['tipo'],
-                'batizado_aguas'  => $data['batizado_aguas'],
-                'familia_id'      => $familiaId,
+                'tipo' => $data['tipo'],
+                'batizado_aguas' => $data['batizado_aguas'],
+                'familia_id' => $familiaId,
             ]);
 
             if ($familiaId) {

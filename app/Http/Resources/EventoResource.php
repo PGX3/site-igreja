@@ -13,14 +13,14 @@ class EventoResource extends JsonResource
         $data = $this->data_evento;
 
         return [
-            'id'          => $this->id,
-            'nome'        => $this->nome,
+            'id' => $this->id,
+            'nome' => $this->nome,
             'data_evento' => $data?->format('Y-m-d'),
-            'horario'     => $this->horario ? substr((string) $this->horario, 0, 5) : null,
-            'local'       => $this->local,
-            'descricao'   => $this->descricao,
-            'ativo'       => (bool) $this->ativo,
-            'passado'     => $data ? $data->lt(Carbon::today()) : false,
+            'horario' => $this->horario ? substr((string) $this->horario, 0, 5) : null,
+            'local' => $this->local,
+            'descricao' => $this->descricao,
+            'ativo' => (bool) $this->ativo,
+            'passado' => $data ? $data->lt(Carbon::today()) : false,
         ];
     }
 }

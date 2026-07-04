@@ -17,9 +17,9 @@ class DeviceTokenController extends Controller
         DeviceToken::updateOrCreate(
             ['token' => $data['token']],
             [
-                'user_id'      => $request->user()->id,
-                'platform'     => $data['platform'],
-                'app_version'  => $data['app_version'] ?? null,
+                'user_id' => $request->user()->id,
+                'platform' => $data['platform'],
+                'app_version' => $data['app_version'] ?? null,
                 'last_used_at' => now(),
             ],
         );

@@ -18,9 +18,9 @@ class EnviarLembretesDia implements ShouldQueue
 
     public function handle(): void
     {
-        $hoje   = Carbon::today();
+        $hoje = Carbon::today();
         $amanha = $hoje->copy()->addDay();
-        $diaPt  = self::diaPt((int) $hoje->format('w'));
+        $diaPt = self::diaPt((int) $hoje->format('w'));
 
         $cultos = Culto::where('ativo', true)
             ->where('dia_semana', $diaPt)

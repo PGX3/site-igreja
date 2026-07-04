@@ -29,7 +29,7 @@ class LembreteCulto extends Notification
             "Hoje tem {$this->culto->nome}",
             $horario ? "Te esperamos às {$horario} na igreja." : 'Te esperamos hoje na igreja.',
         )->withData([
-            'type'     => 'culto',
+            'type' => 'culto',
             'culto_id' => $this->culto->id,
         ]);
     }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\EscalaMembro;
 use App\Services\EscalaConfirmacaoService;
 use App\Services\MinhasEscalasQuery;
+use Carbon\Carbon;
 use Illuminate\Auth\Access\AuthorizationException;
 use Inertia\Inertia;
 
@@ -28,7 +29,7 @@ class EscalaMembroController extends Controller
                 'status_membro' => $e->pivot->status,
                 'funcao' => $e->pivot->funcao,
                 'confirmado_em' => $e->pivot->confirmado_em
-                    ? \Carbon\Carbon::parse($e->pivot->confirmado_em)->format('d/m/Y H:i')
+                    ? Carbon::parse($e->pivot->confirmado_em)->format('d/m/Y H:i')
                     : null,
                 'pivot_id' => EscalaMembro::where('escala_id', $e->id)
                     ->where('user_id', $user->id)
