@@ -89,7 +89,7 @@ class EscalaController extends Controller
 
         $escalaComPivot = $user
             ->escalas()
-            ->with(['grupo', 'culto', 'evento', 'setlist.musica', 'notas.createdBy', 'assets'])
+            ->with(['grupo', 'culto', 'evento', 'escalaMembros.user', 'setlist.musica', 'notas.createdBy', 'assets'])
             ->where('escalas.id', $escala->id)
             ->first();
 

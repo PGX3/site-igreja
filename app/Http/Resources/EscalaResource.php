@@ -38,6 +38,7 @@ class EscalaResource extends JsonResource
                 ? Carbon::parse($pivot->confirmado_em)->toIso8601String()
                 : null,
             'pivot_id' => $pivot?->id,
+            'membros' => EscalaMembroResource::collection($this->whenLoaded('escalaMembros')),
             'setlist' => EscalaSetlistItemResource::collection($this->whenLoaded('setlist')),
             'notas' => EscalaNotaResource::collection($this->whenLoaded('notas')),
             'anexos' => EscalaAssetResource::collection($this->whenLoaded('assets')),
