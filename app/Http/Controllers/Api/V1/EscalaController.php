@@ -79,14 +79,17 @@ class EscalaController extends Controller
         $user = $request->user();
 
         if ($user->canManageGrupo($escala->grupo_id)) {
-            $escala->load(['grupo', 'culto', 'evento', 'escalaMembros.user']);
+            $escala->load([
+                'grupo', 'culto', 'evento', 'escalaMembros.user',
+                'setlist.musica', 'notas.createdBy', 'assets',
+            ]);
 
             return new EscalaResource($escala);
         }
 
         $escalaComPivot = $user
             ->escalas()
-            ->with(['grupo', 'culto', 'evento'])
+            ->with(['grupo', 'culto', 'evento', 'setlist.musica', 'notas.createdBy', 'assets'])
             ->where('escalas.id', $escala->id)
             ->first();
 
