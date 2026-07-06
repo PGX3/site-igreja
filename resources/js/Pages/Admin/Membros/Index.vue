@@ -265,7 +265,7 @@ import AdminLayout from '@/Layouts/AdminLayout.vue'
 import { Link, usePage } from '@inertiajs/vue3'
 import { ref, computed, watch } from 'vue'
 
-const isPastor = computed(() => usePage().props.auth?.role === 'pastor')
+const isPastor = computed(() => usePage().props.auth?.user?.role === 'pastor')
 
 const props = defineProps({
   membros: Array,
