@@ -38,6 +38,27 @@ class PedidoOracaoController extends Controller
         return back()->with('success', 'Pedido de oração adicionado!');
     }
 
+    public function update(Request $request, PedidoOracao $pedido)
+    {
+        $validated = $request->validate([
+            'anonimo' => ['boolean'],
+            'nome' => ['nullable', 'required_if:anonimo,false', 'string', 'max:100'],
+            'pedido' => ['required', 'string', 'max:2000'],
+            'compartilhar' => ['boolean'],
+        ]);
+
+        $anonimo = (bool) ($validated['anonimo'] ?? false);
+
+        $pedido->update([
+            'nome' => $anonimo ? 'Anônimo' : $validated['nome'],
+            'pedido' => $validated['pedido'],
+            'anonimo' => $anonimo,
+            'compartilhar' => (bool) ($validated['compartilhar'] ?? false),
+        ]);
+
+        return back()->with('success', 'Pedido de oração atualizado!');
+    }
+
     public function atualizarStatus(Request $request, PedidoOracao $pedido)
     {
         $validated = $request->validate([

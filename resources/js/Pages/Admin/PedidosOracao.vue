@@ -107,6 +107,12 @@
             {{ s.label }}
           </button>
           <button
+            @click="abrirModalEditar(p)"
+            class="text-xs font-semibold px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-300 dark:hover:border-blue-700 transition"
+          >
+            Editar
+          </button>
+          <button
             @click="excluir(p)"
             class="text-xs font-semibold px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:text-red-500 hover:border-red-300 dark:hover:border-red-700 transition"
           >
@@ -180,7 +186,9 @@
            @click.self="fecharModalNovo">
         <div class="w-full max-w-lg bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden">
           <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-700">
-            <h2 class="text-lg font-bold text-gray-900 dark:text-white">Adicionar pedido de oração</h2>
+            <h2 class="text-lg font-bold text-gray-900 dark:text-white">
+              {{ pedidoEditando ? 'Editar pedido de oração' : 'Adicionar pedido de oração' }}
+            </h2>
             <button type="button" @click="fecharModalNovo"
                     class="text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 transition-colors">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5"><path d="M18 6 6 18M6 6l12 12" /></svg>
@@ -188,7 +196,7 @@
           </div>
 
           <form @submit.prevent="salvarNovo" class="p-6 flex flex-col gap-5">
-            <p class="text-xs text-gray-500 dark:text-slate-400">
+            <p v-if="!pedidoEditando" class="text-xs text-gray-500 dark:text-slate-400">
               Use para registrar pedidos que chegaram por outros canais (grupo, presencial).
             </p>
 
@@ -239,7 +247,7 @@
               </button>
               <button type="submit" :disabled="formNovo.processing"
                       class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition disabled:opacity-50">
-                {{ formNovo.processing ? 'Salvando...' : 'Adicionar' }}
+                {{ formNovo.processing ? 'Salvando...' : (pedidoEditando ? 'Salvar' : 'Adicionar') }}
               </button>
             </div>
           </form>
@@ -258,13 +266,26 @@ import AdminLayout from '@/Layouts/AdminLayout.vue'
 const props = defineProps({ pedidos: Array })
 const filtro = ref('todos')
 
-// ─── Adicionar pedido manualmente ────────────────────────────────────────────
+// ─── Adicionar / editar pedido manualmente ───────────────────────────────────
 const modalNovoAberta = ref(false)
+const pedidoEditando = ref(null)
 const formNovo = useForm({ nome: '', pedido: '', anonimo: false, compartilhar: true })
 
 function abrirModalNovo() {
+  pedidoEditando.value = null
+  formNovo.defaults({ nome: '', pedido: '', anonimo: false, compartilhar: true })
   formNovo.reset()
   formNovo.clearErrors()
+  modalNovoAberta.value = true
+}
+
+function abrirModalEditar(p) {
+  pedidoEditando.value = p
+  formNovo.clearErrors()
+  formNovo.nome = p.anonimo ? '' : p.nome
+  formNovo.pedido = p.pedido
+  formNovo.anonimo = p.anonimo
+  formNovo.compartilhar = p.compartilhar
   modalNovoAberta.value = true
 }
 
@@ -273,10 +294,15 @@ function fecharModalNovo() {
 }
 
 function salvarNovo() {
-  formNovo.post('/admin/pedidos-oracao', {
+  const opcoes = {
     preserveScroll: true,
     onSuccess: () => { modalNovoAberta.value = false },
-  })
+  }
+  if (pedidoEditando.value) {
+    formNovo.put(`/admin/pedidos-oracao/${pedidoEditando.value.id}`, opcoes)
+  } else {
+    formNovo.post('/admin/pedidos-oracao', opcoes)
+  }
 }
 
 const statusMeta = {

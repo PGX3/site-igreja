@@ -145,6 +145,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 
         Route::get('pedidos-oracao', [PedidoOracaoController::class, 'index'])->name('pedidos-oracao.index');
         Route::post('pedidos-oracao', [PedidoOracaoController::class, 'store'])->name('pedidos-oracao.store');
+        Route::put('pedidos-oracao/{pedido}', [PedidoOracaoController::class, 'update'])->name('pedidos-oracao.update');
         Route::patch('pedidos-oracao/{pedido}/status', [PedidoOracaoController::class, 'atualizarStatus'])->name('pedidos-oracao.status');
         Route::delete('pedidos-oracao/{pedido}', [PedidoOracaoController::class, 'destroy'])->name('pedidos-oracao.destroy');
     });
