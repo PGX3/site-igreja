@@ -75,6 +75,7 @@ class ContatoController extends Controller
             'nome' => 'required|string|min:2|max:100',
             'pedido' => 'required|string|min:10|max:2000',
             'anonimo' => 'boolean',
+            'compartilhar' => 'boolean',
         ], [
             'nome.required' => 'O nome é obrigatório.',
             'nome.min' => 'O nome deve ter ao menos 2 caracteres.',

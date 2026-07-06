@@ -1,9 +1,4 @@
 <template>
-  <Head>
-    <meta name="description" content="Igreja em Charqueadas, RS: comunidade de fé enraizada na cidade. Veja nossos cultos semanais, eventos e venha nos visitar." />
-    <meta property="og:title" content="Igreja em Charqueadas" />
-    <meta property="og:description" content="Comunidade de fé enraizada em Charqueadas, no Rio Grande do Sul. Cultos semanais, eventos e uma casa aberta pra quem busca." />
-  </Head>
   <MainLayout>
  <div id="app">
     <!-- ══ HERO ══════════════════════════════════════════════════════════ -->
@@ -429,6 +424,65 @@
       </div>
     </section>
 
+    <!-- ══ PREGAÇÕES ═════════════════════════════════════════════════════ -->
+    <section v-if="pregacoes?.length" id="pregacoes"
+             class="relative px-6 sm:px-10 md:px-20 py-24 md:py-32 border-t border-[var(--blue)]/10 overflow-hidden">
+      <!-- Atmosférico -->
+      <div class="absolute inset-0 pointer-events-none"
+           style="background: radial-gradient(ellipse 600px 400px at 85% 30%, rgba(0,167,255,0.05) 0%, transparent 60%)"></div>
+
+      <div class="relative">
+        <div class="reveal mb-16 flex flex-col md:flex-row md:items-end md:justify-between gap-8">
+          <div>
+            <div class="flex items-center gap-4 mb-5">
+              <div class="w-8 h-px bg-[var(--blue)]"></div>
+              <p class="section-label !mb-0">A Palavra · Pregações</p>
+            </div>
+            <h2 class="section-title text-[clamp(38px,5vw,72px)] text-white">
+              Ouça a <span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500" class="text-white/85">mensagem</span><span class="text-[var(--blue)]">.</span>
+            </h2>
+          </div>
+          <Link href="/pregacoes"
+                class="inline-flex items-center gap-3 text-[10px] tracking-[0.35em] uppercase font-bold text-[var(--blue)] hover:gap-5 transition-all"
+                style="font-family:'Barlow Condensed',sans-serif">
+            <span>Ver todas</span>
+            <span class="w-8 h-px bg-[var(--blue)]"></span>
+            <span>→</span>
+          </Link>
+        </div>
+
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          <Link v-for="pregacao in pregacoes" :key="pregacao.id"
+                :href="`/pregacoes/${pregacao.id}`"
+                class="reveal group block border border-[var(--blue)]/15 hover:border-[var(--blue)]/50
+                       transition-all duration-500 overflow-hidden">
+            <div class="relative aspect-video bg-black overflow-hidden">
+              <img v-if="thumb(pregacao.youtube_url)" :src="thumb(pregacao.youtube_url)" :alt="pregacao.titulo"
+                   class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105
+                          transition-all duration-700" loading="lazy" />
+              <div class="absolute inset-0 flex items-center justify-center">
+                <span class="w-14 h-14 rounded-full bg-black/50 border border-white/30 backdrop-blur-sm
+                             flex items-center justify-center text-white
+                             group-hover:bg-[var(--blue)] group-hover:border-[var(--blue)] transition-all duration-300">
+                  <span class="ml-1 text-lg">▶</span>
+                </span>
+              </div>
+            </div>
+            <div class="p-6">
+              <p class="text-[10px] font-bold tracking-[0.3em] uppercase text-[var(--blue)]/70 mb-3"
+                 style="font-family:'Barlow Condensed',sans-serif">
+                {{ formatarData(pregacao.data_pregacao) }}
+              </p>
+              <h3 class="text-lg font-bold text-white leading-snug group-hover:text-[var(--blue)] transition-colors line-clamp-2">
+                {{ pregacao.titulo }}
+              </h3>
+              <p v-if="pregacao.pregador" class="text-white/40 text-[13px] mt-2">{{ pregacao.pregador }}</p>
+            </div>
+          </Link>
+        </div>
+      </div>
+    </section>
+
     <!-- ══ SUGESTÕES ═════════════════════════════════════════════════════ -->
     <section id="sugestoes" class="px-6 sm:px-10 md:px-20 py-24 md:py-32 border-t border-[var(--blue)]/10">
       <div class="grid md:grid-cols-2 gap-20 items-start">
@@ -545,6 +599,15 @@
               Enviar anonimamente
             </button>
 
+            <button type="button" @click="formOracao.compartilhar = !formOracao.compartilhar"
+                    class="flex items-start gap-3 text-[13px] text-white/40 hover:text-white/70 transition-colors group text-left">
+              <span class="w-4 h-4 border flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors"
+                    :class="formOracao.compartilhar ? 'border-[var(--blue)] bg-[var(--blue)]/15' : 'border-white/20 group-hover:border-white/40'">
+                <span v-if="formOracao.compartilhar" class="text-[var(--blue)] text-[10px] font-bold">✓</span>
+              </span>
+              Autorizo compartilhar meu pedido com a comunidade para oração
+            </button>
+
             <!-- hCaptcha -->
             <div>
               <HCaptcha ref="captchaOracao" :sitekey="hcaptchaSitekey" @verify="tokenOracao = $event" @expire="tokenOracao = 'da1a0e90-27ce-4d62-a2aa-54a26506be18'" />
@@ -584,14 +647,29 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { Head, Link, router, usePage } from '@inertiajs/vue3'
+import { Link, router, usePage } from '@inertiajs/vue3'
 import MainLayout from '@/Layouts/MainLayout.vue'
 import LogoIcon from '@/Components/LogoIcon.vue'
 import HCaptcha from '@/Components/HCaptcha.vue'
 import WhatsAppPopup from '@/Components/WhatsAppPopup.vue';
 
-const props = defineProps({ cultos: Array, eventos: Array, textos: Object })
+const props = defineProps({ cultos: Array, eventos: Array, pregacoes: Array, textos: Object, meta: Object })
 const page = usePage()
+
+function youtubeId(url) {
+  const m = (url || '').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/))([\w-]{11})/i)
+  return m ? m[1] : null
+}
+function thumb(url) {
+  const id = youtubeId(url)
+  return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : null
+}
+function formatarData(data) {
+  if (!data) return ''
+  const d = new Date(data)
+  if (isNaN(d)) return ''
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'UTC' })
+}
 
 // hCaptcha sitekey — vem do backend via shared props ou usa a chave de teste
 const hcaptchaSitekey = page.props.hcaptchaSitekey || 'da1a0e90-27ce-4d62-a2aa-54a26506be18'
@@ -634,7 +712,7 @@ function enviarSugestao() {
 }
 
 // ─── Pedido de oração ────────────────────────────────────────────────────────
-const formOracao    = ref({ nome: '', pedido: '', anonimo: false })
+const formOracao    = ref({ nome: '', pedido: '', anonimo: false, compartilhar: false })
 const errosOracao   = ref({})
 const loadingOracao = ref(false)
 const tokenOracao   = ref('')
@@ -652,7 +730,7 @@ function enviarPedido() {
   if (payload.anonimo) payload.nome = 'Anônimo'
   router.post('/pedido-oracao', payload, {
     onSuccess: () => {
-      formOracao.value = { nome: '', pedido: '', anonimo: false }
+      formOracao.value = { nome: '', pedido: '', anonimo: false, compartilhar: false }
       tokenOracao.value = ''
       captchaOracao.value?.reset()
     },

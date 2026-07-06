@@ -24,6 +24,7 @@ class ContatoService
             'nome' => $anonimo ? 'Anônimo' : $data['nome'],
             'pedido' => $data['pedido'],
             'anonimo' => $anonimo,
+            'compartilhar' => (bool) ($data['compartilhar'] ?? false),
         ]);
     }
 }

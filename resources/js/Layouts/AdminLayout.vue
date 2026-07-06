@@ -57,14 +57,61 @@
                 </template>
             </nav>
 
-            <!-- User + Logout -->
-            <div class="flex-shrink-0 border-t border-gray-100 dark:border-slate-700/50 p-3 space-y-1">
-                <div class="flex items-center gap-3 px-2 py-2">
+            <!-- User + menu popover -->
+            <div class="flex-shrink-0 border-t border-gray-100 dark:border-slate-700/50 p-3 relative">
+
+                <!-- Backdrop para fechar ao clicar fora -->
+                <div v-if="userMenuOpen" @click="userMenuOpen = false" class="fixed inset-0 z-30"></div>
+
+                <!-- Popover (abre para cima) -->
+                <Transition name="pop">
+                    <div v-if="userMenuOpen"
+                         class="absolute bottom-full left-3 right-3 mb-2 z-40
+                                bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700
+                                rounded-xl shadow-lg p-1.5 space-y-0.5">
+                        <Link href="/admin/perfil"
+                              @click="closeUserMenu"
+                              class="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-[13px] font-medium transition-colors"
+                              :class="page.url.startsWith('/admin/perfil')
+                                  ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-semibold'
+                                  : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700/50'">
+                            <AppIcon name="user" size="sm" />
+                            Meu Perfil
+                        </Link>
+
+                        <Link href="/admin/minha-senha"
+                              @click="closeUserMenu"
+                              class="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-[13px] font-medium transition-colors"
+                              :class="page.url.startsWith('/admin/minha-senha')
+                                  ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-semibold'
+                                  : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700/50'">
+                            <AppIcon name="lock" size="sm" />
+                            Alterar Senha
+                        </Link>
+
+                        <div class="my-1 border-t border-gray-100 dark:border-slate-700/50"></div>
+
+                        <Link href="/logout"
+                              method="post"
+                              as="button"
+                              @click="closeUserMenu"
+                              class="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-[13px] font-medium
+                                     text-gray-500 dark:text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                            <AppIcon name="logout" size="sm" />
+                            Sair
+                        </Link>
+                    </div>
+                </Transition>
+
+                <!-- Gatilho: linha do usuário -->
+                <button @click="userMenuOpen = !userMenuOpen"
+                        class="relative z-40 flex items-center gap-3 w-full px-2 py-2 rounded-xl transition-colors
+                               hover:bg-gray-50 dark:hover:bg-slate-800">
                     <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
                          :style="{ background: avatarColor }">
                         {{ initials }}
                     </div>
-                    <div class="flex-1 min-w-0">
+                    <div class="flex-1 min-w-0 text-left">
                         <p class="text-[13px] font-semibold text-gray-800 dark:text-slate-100 truncate leading-tight">
                             {{ user?.name }}
                         </p>
@@ -72,37 +119,12 @@
                             {{ roleLabel }}
                         </p>
                     </div>
-                </div>
-
-                <Link href="/admin/perfil"
-                      @click="sidebarOpen = false"
-                      class="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-[13px] font-medium transition-colors"
-                      :class="page.url.startsWith('/admin/perfil')
-                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-semibold'
-                          : 'text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800'">
-                    <AppIcon name="user" size="sm" />
-                    Meu Perfil
-                </Link>
-
-                <Link href="/admin/minha-senha"
-                      @click="sidebarOpen = false"
-                      class="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-[13px] font-medium transition-colors"
-                      :class="page.url.startsWith('/admin/minha-senha')
-                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-semibold'
-                          : 'text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800'">
-                    <AppIcon name="lock" size="sm" />
-                    Alterar Senha
-                </Link>
-
-                <Link href="/logout"
-                      method="post"
-                      as="button"
-                      @click="sidebarOpen = false"
-                      class="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-[13px] font-medium
-                             text-gray-400 dark:text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
-                    <AppIcon name="logout" size="sm" />
-                    Sair
-                </Link>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                         class="flex-shrink-0 text-gray-400 dark:text-slate-500 transition-transform duration-200"
+                         :class="userMenuOpen ? 'rotate-180' : ''">
+                        <path d="M6 15l6-6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
             </div>
         </aside>
 
@@ -165,6 +187,12 @@ import { useTheme } from "@/composables/useTheme.js";
 
 const { isDark, toggle: toggleTheme } = useTheme();
 const sidebarOpen = ref(false);
+const userMenuOpen = ref(false);
+
+function closeUserMenu() {
+    userMenuOpen.value = false;
+    sidebarOpen.value = false;
+}
 
 const page = usePage();
 const user = computed(() => page.props.auth?.user);
@@ -208,6 +236,7 @@ const routeTitles = {
     "/admin/grupos": "Grupos",
     "/admin/cultos": "Cultos",
     "/admin/eventos": "Eventos",
+    "/admin/pregacoes": "Pregações",
     "/admin/usuarios": "Usuários do Sistema",
     "/admin/sugestoes": "Sugestões",
     "/admin/pedidos-oracao": "Pedidos de Oração",
@@ -271,6 +300,7 @@ const navGroups = computed(() => {
             gestao.push({ href: "/admin/grupos",   label: "Grupos",   icon: "users" });
             gestao.push({ href: "/admin/cultos",   label: "Cultos",   icon: "mic" });
             gestao.push({ href: "/admin/eventos",  label: "Eventos",  icon: "calendar" });
+            gestao.push({ href: "/admin/pregacoes", label: "Pregações", icon: "mic" });
         }
         groups.push({ label: "Gestão", items: gestao });
     } else {
@@ -315,4 +345,6 @@ function isActive(href) {
 <style scoped>
 .fade-enter-active, .fade-leave-active { transition: opacity 0.2s; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
+.pop-enter-active, .pop-leave-active { transition: opacity 0.15s, transform 0.15s; }
+.pop-enter-from, .pop-leave-to { opacity: 0; transform: translateY(6px); }
 </style>

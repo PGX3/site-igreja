@@ -23,7 +23,7 @@ class DashboardController extends Controller
         $stats = [
             'totalCultos' => Culto::count(),
             'novasSugestoes' => Sugestao::where('lida', false)->count(),
-            'novosPedidos' => PedidoOracao::where('lido', false)->count(),
+            'novosPedidos' => PedidoOracao::where('status', PedidoOracao::STATUS_NOVO)->count(),
             'totalSugestoes' => Sugestao::count(),
             'totalPedidos' => PedidoOracao::count(),
             'totalMembros' => User::where('tipo', 'membro')->where('is_superadmin', false)->count(),

@@ -142,6 +142,7 @@ const links = [
   { href: '#portas',     label: 'Portas' },
   { href: '#agenda',     label: 'Agenda' },
   { href: '#eventos',    label: 'Eventos' },
+  { href: '/pregacoes',  label: 'Pregações' },
   { href: '#sugestoes',  label: 'Contato' },
   { href: '#oracao',     label: 'Oração' },
 ]

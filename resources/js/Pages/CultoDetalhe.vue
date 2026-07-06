@@ -1,9 +1,6 @@
 <template>
   <Head>
     <title>{{ culto.nome }}</title>
-    <meta name="description" :content="`${culto.nome} — toda ${culto.dia_semana.toLowerCase()} às ${culto.horario} na Igreja em Charqueadas. ${culto.descricao || 'Você é bem-vindo.'}`" />
-    <meta property="og:title" :content="`${culto.nome} · Igreja em Charqueadas`" />
-    <meta property="og:description" :content="`Toda ${culto.dia_semana.toLowerCase()} às ${culto.horario}. ${culto.descricao || 'Você é bem-vindo.'}`" />
   </Head>
   <MainLayout>
     <div>
@@ -115,5 +112,7 @@ import { Head, Link } from '@inertiajs/vue3'
 
 defineProps({
   culto: Object,
+  meta: Object,
+  jsonLd: Object,
 })
 </script>

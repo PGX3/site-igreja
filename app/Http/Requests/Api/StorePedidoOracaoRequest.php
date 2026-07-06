@@ -17,6 +17,7 @@ class StorePedidoOracaoRequest extends FormRequest
             'nome' => ['required', 'string', 'min:2', 'max:100'],
             'pedido' => ['required', 'string', 'min:10', 'max:2000'],
             'anonimo' => ['sometimes', 'boolean'],
+            'compartilhar' => ['sometimes', 'boolean'],
         ];
     }
 

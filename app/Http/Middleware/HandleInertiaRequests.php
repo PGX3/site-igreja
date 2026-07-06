@@ -33,7 +33,7 @@ class HandleInertiaRequests extends Middleware
             ],
             // Badges no menu do admin (só carrega quando autenticado)
             'novasSugestoes' => $request->user() ? Sugestao::where('lida', false)->count() : null,
-            'novosPedidos' => $request->user() ? PedidoOracao::where('lido', false)->count() : null,
+            'novosPedidos' => $request->user() ? PedidoOracao::where('status', PedidoOracao::STATUS_NOVO)->count() : null,
             'totalVisitantes' => $request->user() ? Cache::remember('sidebar_total_visitantes', 300, fn () => User::where('tipo', 'visitante')->where('is_superadmin', false)->count()
             ) : null,
             'novosVisitantesMes' => $request->user() ? Cache::remember('sidebar_novos_visitantes_mes', 300, fn () => User::where('tipo', 'visitante')->where('is_superadmin', false)

@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\MusicaController;
 use App\Http\Controllers\Admin\PedidoOracaoController;
 use App\Http\Controllers\Admin\PerfilController;
 use App\Http\Controllers\Admin\PlanejadorController;
+use App\Http\Controllers\Admin\PregacaoController;
 use App\Http\Controllers\Admin\SugestaoController;
 use App\Http\Controllers\Admin\TextoController;
 use App\Http\Controllers\Admin\UserController;
@@ -30,11 +31,17 @@ use App\Http\Controllers\CadastroController;
 use App\Http\Controllers\ConfirmacaoEscalaController;
 use App\Http\Controllers\ContatoController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\SeoController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
+Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/cultos/{culto}', [HomeController::class, 'showCulto'])->name('cultos.show');
 Route::get('/eventos/{evento}', [HomeController::class, 'showEvento'])->name('eventos.show');
+Route::get('/pregacoes', [HomeController::class, 'pregacoes'])->name('pregacoes.index');
+Route::get('/pregacoes/{pregacao}', [HomeController::class, 'showPregacao'])->name('pregacoes.show');
 
 Route::post('/sugestao', [ContatoController::class, 'sugestao'])->name('sugestao.store');
 Route::post('/pedido-oracao', [ContatoController::class, 'pedidoOracao'])->name('pedido-oracao.store');
@@ -129,6 +136,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
         Route::post('usuarios/{usuario}/senha', [UserController::class, 'alterarSenha'])->name('usuarios.senha');
         Route::resource('cultos', CultoController::class);
         Route::resource('eventos', EventoController::class);
+        Route::resource('pregacoes', PregacaoController::class)->parameters(['pregacoes' => 'pregacao']);
         Route::resource('textos', TextoController::class);
 
         Route::get('sugestoes', [SugestaoController::class, 'index'])->name('sugestoes.index');
@@ -136,7 +144,8 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
         Route::delete('sugestoes/{sugestao}', [SugestaoController::class, 'destroy'])->name('sugestoes.destroy');
 
         Route::get('pedidos-oracao', [PedidoOracaoController::class, 'index'])->name('pedidos-oracao.index');
-        Route::patch('pedidos-oracao/{pedido}/lido', [PedidoOracaoController::class, 'marcarLido'])->name('pedidos-oracao.lido');
+        Route::post('pedidos-oracao', [PedidoOracaoController::class, 'store'])->name('pedidos-oracao.store');
+        Route::patch('pedidos-oracao/{pedido}/status', [PedidoOracaoController::class, 'atualizarStatus'])->name('pedidos-oracao.status');
         Route::delete('pedidos-oracao/{pedido}', [PedidoOracaoController::class, 'destroy'])->name('pedidos-oracao.destroy');
     });
 });
