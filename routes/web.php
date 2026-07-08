@@ -1,10 +1,15 @@
 <?php
 
 use App\Http\Controllers\Admin\AniversarioController;
+use App\Http\Controllers\Admin\AprenderController;
 use App\Http\Controllers\Admin\AssetController;
+use App\Http\Controllers\Admin\AulaController;
 use App\Http\Controllers\Admin\CalendarioController;
 use App\Http\Controllers\Admin\CultoController;
+use App\Http\Controllers\Admin\CursoController;
+use App\Http\Controllers\Admin\CursoModuloController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\EditorImagemController;
 use App\Http\Controllers\Admin\EscalaAssetController;
 use App\Http\Controllers\Admin\EscalaController;
 use App\Http\Controllers\Admin\EscalaMembroController;
@@ -43,6 +48,11 @@ Route::get('/eventos/{evento}', [HomeController::class, 'showEvento'])->name('ev
 Route::get('/pregacoes', [HomeController::class, 'pregacoes'])->name('pregacoes.index');
 Route::get('/pregacoes/{pregacao}', [HomeController::class, 'showPregacao'])->name('pregacoes.show');
 
+// Cursos / Escola bíblica via link compartilhado (sem login)
+Route::get('/c/{token}', [HomeController::class, 'cursoPublico'])->name('cursos.publico');
+Route::get('/c/{token}/aula/{aula}', [HomeController::class, 'aulaNoCurso'])->name('cursos.publico.aula');
+Route::get('/a/{token}', [HomeController::class, 'aulaPublica'])->name('aulas.publica');
+
 Route::post('/sugestao', [ContatoController::class, 'sugestao'])->name('sugestao.store');
 Route::post('/pedido-oracao', [ContatoController::class, 'pedidoOracao'])->name('pedido-oracao.store');
 
@@ -73,6 +83,14 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('grupos/{grupo}/mural', [GrupoMuralController::class, 'show'])->name('grupos.mural.show');
     Route::post('grupos/{grupo}/avisos', [GrupoMuralController::class, 'storeAviso'])->name('grupos.avisos.store');
     Route::delete('grupos/{grupo}/avisos/{aviso}', [GrupoMuralController::class, 'destroyAviso'])->name('grupos.avisos.destroy');
+
+    // Escola bíblica: todos os autenticados podem ler os cursos ativos
+    Route::get('aprender', [AprenderController::class, 'index'])->name('aprender.index');
+    Route::get('aprender/aulas/{aula}', [AprenderController::class, 'aula'])->name('aprender.aula');
+    Route::get('aprender/aulas/{aula}/pdf', [AprenderController::class, 'pdfAula'])->name('aprender.aula.pdf');
+    Route::get('aprender/modulos/{modulo}/pdf', [AprenderController::class, 'pdfModulo'])->name('aprender.modulo.pdf');
+    Route::get('aprender/{curso}/pdf', [AprenderController::class, 'pdfCurso'])->name('aprender.curso.pdf');
+    Route::get('aprender/{curso}', [AprenderController::class, 'curso'])->name('aprender.curso');
 
     // Todas as roles: ver suas próprias escalas e confirmar/recusar
     Route::get('minhas-escalas', [EscalaMembroController::class, 'index'])->name('minhas-escalas.index');
@@ -113,6 +131,27 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 
         Route::resource('assets', AssetController::class)->except(['show']);
         Route::get('assets/{asset}/download', [AssetController::class, 'download'])->name('assets.download');
+
+        // Escola bíblica / Cursos (gestão)
+        Route::get('cursos/{curso}/conteudo', [CursoController::class, 'conteudo'])->name('cursos.conteudo');
+        Route::post('cursos/{curso}/compartilhar', [CursoController::class, 'compartilhar'])->name('cursos.compartilhar');
+        Route::delete('cursos/{curso}/compartilhar', [CursoController::class, 'revogar'])->name('cursos.revogar');
+        Route::resource('cursos', CursoController::class)->except(['show']);
+
+        Route::post('cursos/{curso}/modulos', [CursoModuloController::class, 'store'])->name('cursos.modulos.store');
+        Route::patch('cursos/{curso}/modulos/reordenar', [CursoModuloController::class, 'reordenar'])->name('cursos.modulos.reordenar');
+        Route::put('modulos/{modulo}', [CursoModuloController::class, 'update'])->name('modulos.update');
+        Route::delete('modulos/{modulo}', [CursoModuloController::class, 'destroy'])->name('modulos.destroy');
+
+        Route::post('modulos/{modulo}/aulas', [AulaController::class, 'store'])->name('modulos.aulas.store');
+        Route::patch('modulos/{modulo}/aulas/reordenar', [AulaController::class, 'reordenar'])->name('modulos.aulas.reordenar');
+        Route::get('aulas/{aula}/edit', [AulaController::class, 'edit'])->name('aulas.edit');
+        Route::put('aulas/{aula}', [AulaController::class, 'update'])->name('aulas.update');
+        Route::delete('aulas/{aula}', [AulaController::class, 'destroy'])->name('aulas.destroy');
+        Route::post('aulas/{aula}/compartilhar', [AulaController::class, 'compartilhar'])->name('aulas.compartilhar');
+        Route::delete('aulas/{aula}/compartilhar', [AulaController::class, 'revogar'])->name('aulas.revogar');
+
+        Route::post('editor/imagem', [EditorImagemController::class, 'store'])->name('editor.imagem.store');
 
         Route::resource('membros', MembroController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
         Route::post('membros/{membro}/gerar-senha', [MembroController::class, 'gerarSenha'])

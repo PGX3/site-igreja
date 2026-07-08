@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Aula;
 use App\Models\Culto;
+use App\Models\Curso;
 use App\Models\Evento;
 use App\Models\Pregacao;
 use App\Models\Texto;
@@ -110,6 +112,50 @@ class HomeController extends Controller
                 'description' => trim("{$pregacao->titulo}".($pregacao->pregador ? ", por {$pregacao->pregador}" : '').'. Pregação da Igreja em Charqueadas, RS.'),
                 'og_title' => $pregacao->titulo.' · Igreja em Charqueadas',
                 'og_description' => trim(($pregacao->pregador ? "Por {$pregacao->pregador}. " : '').($pregacao->versiculo ?: 'Pregação da Igreja em Charqueadas.')),
+            ],
+        ]);
+    }
+
+    // ─────────────── Cursos / Escola bíblica via link compartilhado ───────────────
+
+    public function cursoPublico(string $token)
+    {
+        $curso = Curso::where('share_token', $token)->where('ativo', true)->firstOrFail();
+
+        return Inertia::render('Curso/Publico', [
+            'curso' => $curso->paraLeitura(fn (Aula $a) => url("/c/{$token}/aula/{$a->id}")),
+            'meta' => [
+                'title' => $curso->titulo.' · Igreja em Charqueadas',
+                'description' => 'Curso da Igreja em Charqueadas.',
+            ],
+        ]);
+    }
+
+    public function aulaNoCurso(string $token, Aula $aula)
+    {
+        $curso = Curso::where('share_token', $token)->where('ativo', true)->firstOrFail();
+        abort_unless($aula->modulo->curso_id === $curso->id && $aula->ativo, 404);
+
+        return $this->renderAula($aula, $curso->titulo, url("/c/{$token}"));
+    }
+
+    public function aulaPublica(string $token)
+    {
+        $aula = Aula::where('share_token', $token)->where('ativo', true)->firstOrFail();
+        $aula->load('modulo.curso');
+
+        return $this->renderAula($aula, $aula->modulo->curso->titulo, null);
+    }
+
+    private function renderAula(Aula $aula, string $cursoTitulo, ?string $voltarUrl)
+    {
+        return Inertia::render('Aula/Publica', [
+            'aula' => $aula->paraLeitura(),
+            'cursoTitulo' => $cursoTitulo,
+            'voltarUrl' => $voltarUrl,
+            'meta' => [
+                'title' => $aula->titulo.' · Igreja em Charqueadas',
+                'description' => "Aula \"{$aula->titulo}\" do curso {$cursoTitulo}, da Igreja em Charqueadas.",
             ],
         ]);
     }

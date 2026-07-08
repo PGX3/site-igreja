@@ -237,6 +237,8 @@ const routeTitles = {
     "/admin/cultos": "Cultos",
     "/admin/eventos": "Eventos",
     "/admin/pregacoes": "Pregações",
+    "/admin/cursos": "Cursos",
+    "/admin/aprender": "Meus Cursos",
     "/admin/usuarios": "Usuários do Sistema",
     "/admin/sugestoes": "Sugestões",
     "/admin/pedidos-oracao": "Pedidos de Oração",
@@ -266,6 +268,7 @@ const navGroups = computed(() => {
         items: [
             { href: "/admin",             label: "Painel",         icon: "dashboard" },
             { href: "/admin/minhas-escalas", label: "Minhas Escalas", icon: "clock" },
+            { href: "/admin/aprender",    label: "Meus Cursos",    icon: "book-open" },
         ],
     });
 
@@ -291,16 +294,17 @@ const navGroups = computed(() => {
 
         const gestao = [
             { href: "/admin/calendario", label: "Calendário", icon: "calendar" },
-            { href: "/admin/planejador", label: "Planejador", icon: "dashboard" },
-            { href: "/admin/escalas", label: "Escalas", icon: "calendar" },
-            { href: "/admin/musicas", label: "Músicas", icon: "mic" },
-            { href: "/admin/assets", label: "Anexos", icon: "file-text" },
+            { href: "/admin/planejador", label: "Planejador", icon: "clipboard" },
+            { href: "/admin/escalas", label: "Escalas", icon: "list-checks" },
+            { href: "/admin/musicas", label: "Músicas", icon: "music" },
+            { href: "/admin/assets", label: "Anexos", icon: "paperclip" },
+            { href: "/admin/cursos", label: "Cursos", icon: "graduation-cap" },
         ];
         if (isPastor) {
             gestao.push({ href: "/admin/grupos",   label: "Grupos",   icon: "users" });
-            gestao.push({ href: "/admin/cultos",   label: "Cultos",   icon: "mic" });
-            gestao.push({ href: "/admin/eventos",  label: "Eventos",  icon: "calendar" });
-            gestao.push({ href: "/admin/pregacoes", label: "Pregações", icon: "mic" });
+            gestao.push({ href: "/admin/cultos",   label: "Cultos",   icon: "church" });
+            gestao.push({ href: "/admin/eventos",  label: "Eventos",  icon: "star" });
+            gestao.push({ href: "/admin/pregacoes", label: "Pregações", icon: "megaphone" });
         }
         groups.push({ label: "Gestão", items: gestao });
     } else {
