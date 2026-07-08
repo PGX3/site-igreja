@@ -22,7 +22,11 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-2 self-start">
+      <div class="flex items-center gap-2 self-start flex-wrap">
+        <button @click="compartilharEscala"
+                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition shadow-sm">
+          📲 Compartilhar no WhatsApp
+        </button>
         <button v-if="can_manage && escala.grupo?.tem_whatsapp" @click="enviarWhatsapp" :disabled="enviandoWhatsapp"
                 class="border border-green-300 dark:border-green-800 text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 disabled:opacity-50 px-4 py-2.5 rounded-lg text-sm font-semibold transition">
           {{ enviandoWhatsapp ? 'Enviando…' : '📲 Enviar no grupo' }}
@@ -435,6 +439,88 @@ function compartilharSetlist() {
     if (s.observacao) linhas.push(`   (${s.observacao})`)
     if (s.musica.link) linhas.push(`   ${s.musica.link}`)
   })
+  window.open(`https://wa.me/?text=${encodeURIComponent(linhas.join('\n'))}`, '_blank', 'noopener')
+}
+
+// ── Compartilhar escala completa (WhatsApp / grupo) ─────────
+function compartilharEscala() {
+  const e = props.escala
+  const origin = window.location.origin
+  const linhas = []
+
+  // Cabeçalho
+  linhas.push(`*${e.titulo}*`)
+  linhas.push(`_${statusLabel(e.status)}_`)
+  if (e.data) linhas.push(`📅 ${formatarData(e.data)}`)
+  if (e.hora_inicio || e.hora_fim) linhas.push(`⏰ ${e.hora_inicio || ''}${e.hora_fim ? ` - ${e.hora_fim}` : ''}`)
+  if (e.grupo?.nome) linhas.push(`👥 ${e.grupo.nome}`)
+
+  // Vínculo (culto / evento)
+  if (e.culto) {
+    let l = `📌 Culto: ${e.culto.nome}`
+    if (e.culto.dia_semana) l += ` · Toda ${e.culto.dia_semana.toLowerCase()}`
+    if (e.culto.horario) l += ` · ${e.culto.horario}`
+    linhas.push(l)
+  } else if (e.evento) {
+    let l = `📌 Evento: ${e.evento.nome}`
+    if (e.evento.data_evento) l += ` · ${formatarData(e.evento.data_evento)}`
+    if (e.evento.horario) l += ` · ${e.evento.horario}`
+    if (e.evento.local) l += ` · ${e.evento.local}`
+    linhas.push(l)
+  }
+
+  // Descrição
+  if (e.descricao) {
+    linhas.push('')
+    linhas.push(e.descricao)
+  }
+
+  // Equipe
+  if (e.membros?.length) {
+    linhas.push('')
+    linhas.push('*👥 Equipe*')
+    e.membros.forEach(m => {
+      let l = `• ${m.user?.name || ''}`
+      if (m.funcao) l += ` — ${m.funcao}`
+      l += ` (${membroStatusLabel(m.status)})`
+      linhas.push(l)
+      if (m.observacao) linhas.push(`   _${m.observacao}_`)
+    })
+  }
+
+  // Setlist
+  const setlist = (e.setlist ?? []).filter(s => s.musica)
+  if (setlist.length) {
+    linhas.push('')
+    linhas.push('*🎵 Setlist*')
+    setlist.forEach((s, i) => {
+      const tom = tomExibido(s)
+      linhas.push(`${i + 1}. ${s.musica.nome}${tom ? ` — Tom: ${tom}` : ''}`)
+      if (s.observacao) linhas.push(`   (${s.observacao})`)
+      if (s.musica.link) linhas.push(`   ${s.musica.link}`)
+    })
+  }
+
+  // Anexos
+  if (e.assets?.length) {
+    linhas.push('')
+    linhas.push('*📎 Anexos*')
+    e.assets.forEach(a => {
+      linhas.push(`• ${a.titulo || a.arquivo_nome}`)
+      if (a.arquivo_path) linhas.push(`   ${origin}/storage/${a.arquivo_path}`)
+    })
+  }
+
+  // Notas
+  if (e.notas?.length) {
+    linhas.push('')
+    linhas.push('*📝 Notas*')
+    e.notas.forEach(n => {
+      if (n.titulo) linhas.push(`▸ ${n.titulo}`)
+      if (n.corpo) linhas.push(n.corpo)
+    })
+  }
+
   window.open(`https://wa.me/?text=${encodeURIComponent(linhas.join('\n'))}`, '_blank', 'noopener')
 }
 
