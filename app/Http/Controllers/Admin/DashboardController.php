@@ -34,18 +34,38 @@ class DashboardController extends Controller
                 ->where('created_at', '>=', $inicioMes)->count(),
         ];
 
-        // ── Próximo culto (calcula próxima data pelo dia_semana)
+        // ── Próximo culto (escolhe o culto ativo cuja próxima ocorrência é a mais próxima)
         $proximoCulto = null;
-        $culto = Culto::where('ativo', true)->orderBy('id')->first();
-        if ($culto) {
-            $diasPt = [
-                'Domingo' => 0, 'Segunda' => 1, 'Terça' => 2,
-                'Quarta' => 3, 'Quinta' => 4, 'Sexta' => 5, 'Sábado' => 6,
-            ];
-            $diaAlvo = $diasPt[$culto->dia_semana] ?? 0;
-            $hoje = Carbon::today();
-            $diff = ($diaAlvo - (int) $hoje->format('w') + 7) % 7;
-            $proxData = $hoje->copy()->addDays($diff ?: 7);
+        $diasPt = [
+            'Domingo' => 0, 'Segunda' => 1, 'Terça' => 2,
+            'Quarta' => 3, 'Quinta' => 4, 'Sexta' => 5, 'Sábado' => 6,
+        ];
+        $agora = Carbon::now();
+        $hoje = Carbon::today();
+
+        $proximo = Culto::where('ativo', true)->get()
+            ->map(function ($culto) use ($diasPt, $agora, $hoje) {
+                $diaAlvo = $diasPt[$culto->dia_semana] ?? 0;
+                $diff = ($diaAlvo - (int) $hoje->format('w') + 7) % 7;
+                $proxData = $hoje->copy()->addDays($diff);
+
+                // Se é hoje mas o horário já passou, joga para a próxima semana
+                if ($diff === 0) {
+                    [$h, $m] = array_pad(explode(':', (string) $culto->horario), 2, 0);
+                    $inicio = $hoje->copy()->setTime((int) $h, (int) $m);
+                    if ($inicio->lt($agora)) {
+                        $proxData->addDays(7);
+                    }
+                }
+
+                return ['culto' => $culto, 'data' => $proxData];
+            })
+            ->sortBy('data')
+            ->first();
+
+        if ($proximo) {
+            $culto = $proximo['culto'];
+            $proxData = $proximo['data'];
 
             $proximoCulto = [
                 'id' => $culto->id,

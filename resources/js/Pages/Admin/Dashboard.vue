@@ -238,15 +238,6 @@
                 </div>
               </div>
             </div>
-
-            <!-- Stats row -->
-            <div class="grid grid-cols-3 gap-2 sm:gap-3">
-              <div v-for="s in cultoStats" :key="s.label"
-                   class="bg-white/10 rounded-xl p-2 sm:p-3 text-center backdrop-blur-sm">
-                <p class="text-lg sm:text-xl font-black">{{ s.value }}</p>
-                <p class="text-[9px] sm:text-[10px] text-blue-300 uppercase tracking-wider mt-0.5">{{ s.label }}</p>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -450,10 +441,4 @@ const novosMembrosMes = computed(() => props.novosMembrosMes ?? 0)
 const novosVisitantesMes = computed(() => props.novosVisitantesMes ?? 0)
 const novasSugestoes = computed(() => props.novasSugestoes ?? 0)
 const novosPedidos   = computed(() => props.novosPedidos ?? 0)
-
-const cultoStats = computed(() => [
-  { label: 'Cultos',   value: props.totalCultos ?? 0 },
-  { label: 'Membros',  value: totalMembros.value },
-  { label: 'Escalas',  value: props.escalasProximas?.length ?? 0 },
-])
 </script>

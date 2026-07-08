@@ -6,7 +6,7 @@
       <div>
         <p class="text-xs tracking-widest uppercase text-gray-400 dark:text-slate-500 mb-1">Gestão</p>
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Escalas</h1>
-        <p class="text-gray-500 dark:text-slate-400 text-sm mt-1">{{ escalas.length }} escala(s) encontrada(s)</p>
+        <p class="text-gray-500 dark:text-slate-400 text-sm mt-1">{{ escalasDaAba.length }} escala(s) encontrada(s)</p>
       </div>
       <Link href="/admin/escalas/create"
             class="self-start sm:self-auto bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition">
@@ -18,6 +18,24 @@
     <div v-if="$page.props.flash?.success"
          class="mb-6 p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 text-sm font-medium">
       {{ $page.props.flash.success }}
+    </div>
+
+    <!-- ABAS PRÓXIMAS / PASSADAS -->
+    <div class="flex gap-1 mb-6 border-b border-gray-200 dark:border-slate-700">
+      <button v-for="t in abas" :key="t.value"
+              @click="aba = t.value"
+              class="relative px-4 py-2.5 text-sm font-semibold transition -mb-px border-b-2"
+              :class="aba === t.value
+                ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400'
+                : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200'">
+        {{ t.label }}
+        <span class="ml-1.5 text-xs font-bold px-1.5 py-0.5 rounded-full"
+              :class="aba === t.value
+                ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'
+                : 'bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400'">
+          {{ t.count }}
+        </span>
+      </button>
     </div>
 
     <!-- FILTRO STATUS -->
@@ -236,6 +254,7 @@ import { ref, computed } from 'vue'
 const props = defineProps({ escalas: Array })
 
 const filtroStatus = ref(null)
+const aba = ref('proximas')
 const escalaParaExcluir = ref(null)
 const escalaCompartilhar = ref(null)
 const copiado = ref(false)
@@ -249,10 +268,32 @@ const statusOptions = [
   { value: 'cancelada',    label: 'Cancelada',     activeClass: 'border-red-400 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400' },
 ]
 
+const hojeStr = new Date().toLocaleDateString('en-CA') // YYYY-MM-DD no fuso local
+
+function isPassada(e) {
+  return e.data && e.data < hojeStr
+}
+
+const escalasProximas = computed(() =>
+  props.escalas.filter(e => !isPassada(e)).sort((a, b) => (a.data ?? '').localeCompare(b.data ?? ''))
+)
+const escalasPassadas = computed(() =>
+  props.escalas.filter(e => isPassada(e)).sort((a, b) => (b.data ?? '').localeCompare(a.data ?? ''))
+)
+
+const abas = computed(() => [
+  { value: 'proximas', label: 'Próximas', count: escalasProximas.value.length },
+  { value: 'passadas', label: 'Passadas', count: escalasPassadas.value.length },
+])
+
+const escalasDaAba = computed(() =>
+  aba.value === 'passadas' ? escalasPassadas.value : escalasProximas.value
+)
+
 const escalasFiltered = computed(() =>
   filtroStatus.value
-    ? props.escalas.filter(e => e.status === filtroStatus.value)
-    : props.escalas
+    ? escalasDaAba.value.filter(e => e.status === filtroStatus.value)
+    : escalasDaAba.value
 )
 
 function diaDoMes(data) { return data ? new Date(data + 'T12:00:00').getDate() : '—' }
