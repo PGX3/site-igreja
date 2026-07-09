@@ -15,6 +15,12 @@ defineProps({
   line-height: 1.8;
   word-break: break-word;
 }
+/* Limpa floats de imagens alinhadas (texto ao lado) */
+.conteudo-rico::after {
+  content: '';
+  display: block;
+  clear: both;
+}
 .conteudo-rico :deep(p) { margin: 0 0 0.9rem; }
 .conteudo-rico :deep(p:last-child) { margin-bottom: 0; }
 .conteudo-rico :deep(h2) {

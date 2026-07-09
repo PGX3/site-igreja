@@ -42,13 +42,22 @@ class AprenderController extends Controller
     {
         $gestor = $this->ehGestor();
         abort_unless($aula->ativo || $gestor, 404);
-        $aula->load('modulo.curso');
+        $aula->load('modulo.curso', 'anexos', 'comentarios.user:id,name');
+
+        $userId = auth()->id();
 
         return Inertia::render('Admin/Cursos/AprenderAula', [
             'aula' => $aula->paraLeitura(),
             'cursoTitulo' => $aula->modulo->curso->titulo,
             'voltarUrl' => route('admin.aprender.curso', $aula->modulo->curso_id),
             'preview' => $gestor && ! $aula->ativo,
+            'comentarios' => $aula->comentarios->map(fn ($c) => [
+                'id' => $c->id,
+                'corpo' => $c->corpo,
+                'autor' => $c->user?->name ?? 'Usuário',
+                'data' => $c->created_at->format('d/m/Y H:i'),
+                'pode_excluir' => $c->user_id === $userId || $gestor,
+            ]),
         ]);
     }
 
@@ -58,7 +67,7 @@ class AprenderController extends Controller
     {
         $gestor = $this->ehGestor();
         abort_unless($aula->ativo || $gestor, 404);
-        $aula->load('modulo.curso');
+        $aula->load('modulo.curso', 'anexos');
 
         return view('print.aula', ['aula' => $aula]);
     }
@@ -66,7 +75,7 @@ class AprenderController extends Controller
     public function pdfModulo(CursoModulo $modulo)
     {
         $gestor = $this->ehGestor();
-        $modulo->load(['curso', 'aulas' => fn ($q) => $gestor ? $q : $q->where('ativo', true)]);
+        $modulo->load(['curso', 'aulas' => fn ($q) => $gestor ? $q : $q->where('ativo', true), 'aulas.anexos']);
         abort_unless($modulo->curso->ativo || $gestor, 404);
 
         return view('print.modulo', ['modulo' => $modulo]);
@@ -76,7 +85,7 @@ class AprenderController extends Controller
     {
         $gestor = $this->ehGestor();
         abort_unless($curso->ativo || $gestor, 404);
-        $curso->load(['modulos.aulas' => fn ($q) => $gestor ? $q : $q->where('ativo', true)]);
+        $curso->load(['modulos.aulas' => fn ($q) => $gestor ? $q : $q->where('ativo', true), 'modulos.aulas.anexos']);
 
         return view('print.curso', ['curso' => $curso]);
     }

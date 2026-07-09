@@ -1,13 +1,14 @@
 <template>
-  <div>
+  <div :style="{ '--cor': curso.cor || '#2563eb' }">
     <!-- BANNER (estilo Classroom) -->
-    <div class="relative rounded-2xl overflow-hidden h-44 sm:h-52 flex items-end">
+    <div class="relative rounded-2xl overflow-hidden h-44 sm:h-52 flex items-end"
+         :style="!curso.capa_url ? { backgroundColor: curso.cor || '#2563eb' } : {}">
       <img v-if="curso.capa_url" :src="curso.capa_url" :alt="curso.titulo"
            class="absolute inset-0 w-full h-full object-cover" />
       <div class="absolute inset-0"
            :class="curso.capa_url
              ? 'bg-gradient-to-t from-black/75 via-black/30 to-black/10'
-             : 'bg-gradient-to-br from-blue-600 to-indigo-700'"></div>
+             : 'bg-gradient-to-t from-black/45 via-black/10 to-transparent'"></div>
       <div class="relative p-6 sm:p-8">
         <p class="text-xs font-bold uppercase tracking-[0.25em] text-white/70 mb-1">Curso</p>
         <h1 class="text-2xl sm:text-4xl font-bold text-white leading-tight">{{ curso.titulo }}</h1>
@@ -31,7 +32,7 @@
         <!-- Cabeçalho do tópico -->
         <div class="flex items-baseline justify-between gap-3 pb-2.5 border-b border-gray-200 dark:border-slate-700">
           <h2 class="text-xl font-bold text-gray-900 dark:text-white">{{ modulo.titulo }}</h2>
-          <span class="text-xs font-semibold text-gray-400 dark:text-slate-500 flex-shrink-0">Módulo {{ mi + 1 }}</span>
+          <span class="text-xs font-bold uppercase tracking-widest flex-shrink-0" :style="{ color: 'var(--cor)' }">Módulo {{ mi + 1 }}</span>
         </div>
         <p v-if="modulo.descricao" class="text-sm text-gray-500 dark:text-slate-400 mt-2">{{ modulo.descricao }}</p>
 

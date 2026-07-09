@@ -26,7 +26,7 @@ class AulaController extends Controller
 
     public function edit(Aula $aula)
     {
-        $aula->load('modulo.curso');
+        $aula->load('modulo.curso', 'anexos');
 
         return Inertia::render('Admin/Cursos/AulaForm', [
             'aula' => [
@@ -35,7 +35,15 @@ class AulaController extends Controller
                 'tipo' => $aula->tipo,
                 'conteudo' => $aula->conteudo,
                 'youtube_url' => $aula->youtube_url,
+                'data_entrega' => $aula->data_entrega?->format('Y-m-d'),
+                'pontos' => $aula->pontos,
                 'ativo' => $aula->ativo,
+                'anexos' => $aula->anexos->map(fn ($a) => [
+                    'id' => $a->id,
+                    'tipo' => $a->tipo,
+                    'titulo' => $a->rotulo(),
+                    'url' => $a->link(),
+                ]),
             ],
             'curso' => [
                 'id' => $aula->modulo->curso->id,
@@ -55,8 +63,16 @@ class AulaController extends Controller
             'tipo' => 'required|in:'.implode(',', Aula::TIPOS),
             'conteudo' => 'nullable|string',
             'youtube_url' => 'nullable|url|max:255',
+            'data_entrega' => 'nullable|date',
+            'pontos' => 'nullable|integer|min:0|max:1000',
             'ativo' => 'boolean',
         ]);
+
+        // Prazo e pontos só fazem sentido em atividade
+        if ($data['tipo'] !== 'atividade') {
+            $data['data_entrega'] = null;
+            $data['pontos'] = null;
+        }
 
         $aula->update($data);
 

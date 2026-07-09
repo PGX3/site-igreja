@@ -45,6 +45,24 @@
           <p v-if="form.errors.capa" class="text-red-500 text-xs mt-1">{{ form.errors.capa }}</p>
         </div>
 
+        <!-- COR DO TEMA -->
+        <div>
+          <label class="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider block mb-2">
+            Cor do tema
+          </label>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button v-for="c in cores" :key="c" type="button" @click="form.cor = c"
+                    class="w-8 h-8 rounded-full transition hover:scale-110"
+                    :style="{ backgroundColor: c }"
+                    :class="form.cor === c ? 'ring-2 ring-offset-2 ring-gray-400 dark:ring-offset-slate-800' : ''"></button>
+            <label class="w-8 h-8 rounded-full overflow-hidden border border-gray-300 dark:border-slate-600 cursor-pointer relative" title="Cor personalizada">
+              <span class="absolute inset-0 flex items-center justify-center text-xs text-gray-500 dark:text-slate-300 pointer-events-none">+</span>
+              <input type="color" v-model="form.cor" class="absolute -inset-2 cursor-pointer opacity-0" />
+            </label>
+            <span class="text-xs text-gray-400 dark:text-slate-500 ml-1">{{ form.cor }}</span>
+          </div>
+        </div>
+
         <!-- DESCRIÇÃO -->
         <div>
           <label class="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider block mb-2">
@@ -88,9 +106,12 @@ import { ref } from 'vue'
 
 const props = defineProps({ curso: Object })
 
+const cores = ['#2563eb', '#dc2626', '#16a34a', '#9333ea', '#ea580c', '#0891b2', '#db2777', '#475569']
+
 const form = useForm({
   titulo: props.curso?.titulo ?? '',
   descricao: props.curso?.descricao ?? '',
+  cor: props.curso?.cor ?? '#2563eb',
   ativo: props.curso?.ativo ?? true,
   capa: null,
 })

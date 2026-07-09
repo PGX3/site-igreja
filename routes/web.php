@@ -3,6 +3,8 @@
 use App\Http\Controllers\Admin\AniversarioController;
 use App\Http\Controllers\Admin\AprenderController;
 use App\Http\Controllers\Admin\AssetController;
+use App\Http\Controllers\Admin\AulaAnexoController;
+use App\Http\Controllers\Admin\AulaComentarioController;
 use App\Http\Controllers\Admin\AulaController;
 use App\Http\Controllers\Admin\CalendarioController;
 use App\Http\Controllers\Admin\CultoController;
@@ -92,6 +94,10 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('aprender/{curso}/pdf', [AprenderController::class, 'pdfCurso'])->name('aprender.curso.pdf');
     Route::get('aprender/{curso}', [AprenderController::class, 'curso'])->name('aprender.curso');
 
+    // Comentários nas aulas (qualquer autenticado)
+    Route::post('aprender/aulas/{aula}/comentarios', [AulaComentarioController::class, 'store'])->name('aprender.comentarios.store');
+    Route::delete('aprender/comentarios/{comentario}', [AulaComentarioController::class, 'destroy'])->name('aprender.comentarios.destroy');
+
     // Todas as roles: ver suas próprias escalas e confirmar/recusar
     Route::get('minhas-escalas', [EscalaMembroController::class, 'index'])->name('minhas-escalas.index');
     Route::get('minha-senha', [MinhaSenhaController::class, 'edit'])->name('minha-senha.edit');
@@ -150,6 +156,9 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
         Route::delete('aulas/{aula}', [AulaController::class, 'destroy'])->name('aulas.destroy');
         Route::post('aulas/{aula}/compartilhar', [AulaController::class, 'compartilhar'])->name('aulas.compartilhar');
         Route::delete('aulas/{aula}/compartilhar', [AulaController::class, 'revogar'])->name('aulas.revogar');
+
+        Route::post('aulas/{aula}/anexos', [AulaAnexoController::class, 'store'])->name('aulas.anexos.store');
+        Route::delete('anexos/{anexo}', [AulaAnexoController::class, 'destroy'])->name('anexos.destroy');
 
         Route::post('editor/imagem', [EditorImagemController::class, 'store'])->name('editor.imagem.store');
 

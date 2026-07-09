@@ -40,6 +40,7 @@ class CursoController extends Controller
         $curso = new Curso([
             'titulo' => $data['titulo'],
             'descricao' => $data['descricao'] ?? null,
+            'cor' => $data['cor'] ?? '#2563eb',
             'ativo' => $data['ativo'] ?? true,
             'created_by' => auth()->id(),
         ]);
@@ -60,6 +61,7 @@ class CursoController extends Controller
                 'id' => $curso->id,
                 'titulo' => $curso->titulo,
                 'descricao' => $curso->descricao,
+                'cor' => $curso->cor,
                 'ativo' => $curso->ativo,
                 'capa_url' => $curso->capa_path ? Storage::url($curso->capa_path) : null,
             ],
@@ -72,6 +74,7 @@ class CursoController extends Controller
 
         $curso->titulo = $data['titulo'];
         $curso->descricao = $data['descricao'] ?? null;
+        $curso->cor = $data['cor'] ?? $curso->cor;
         $curso->ativo = $data['ativo'] ?? false;
 
         if ($request->hasFile('capa')) {
@@ -147,6 +150,7 @@ class CursoController extends Controller
         return $request->validate([
             'titulo' => 'required|string|max:150',
             'descricao' => 'nullable|string',
+            'cor' => 'nullable|string|max:7',
             'ativo' => 'boolean',
             'capa' => 'nullable|file|mimes:jpg,jpeg,png,webp|max:20480',
         ], [], ['capa' => 'capa']);

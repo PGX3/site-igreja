@@ -28,32 +28,53 @@
             <!-- Nav -->
             <nav class="flex-1 px-3 py-4 overflow-y-auto">
                 <template v-for="(grupo, gIdx) in navGroups" :key="grupo.label || `g-${gIdx}`">
-                    <p v-if="grupo.label"
+                    <!-- Header colapsável -->
+                    <button v-if="grupo.label && grupo.collapsible !== false"
+                            @click="toggleGroup(grupo.label)"
+                            class="w-full flex items-center gap-1.5 px-3 mb-2 text-[10px] font-bold tracking-[0.3em] uppercase
+                                   text-gray-400 dark:text-slate-500 select-none transition-colors
+                                   hover:text-gray-600 dark:hover:text-slate-300"
+                            :class="gIdx > 0 ? 'mt-5' : ''">
+                        <span class="flex-1 text-left">{{ grupo.label }}</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                             class="flex-shrink-0 transition-transform duration-200"
+                             :class="isExpanded(grupo) ? 'rotate-90' : ''">
+                            <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+
+                    <!-- Header estático (Início) -->
+                    <p v-else-if="grupo.label"
                        class="px-3 mb-2 text-[10px] font-bold tracking-[0.3em] uppercase text-gray-400 dark:text-slate-500 select-none"
                        :class="gIdx > 0 ? 'mt-5' : ''">
                         {{ grupo.label }}
                     </p>
+
+                    <!-- Divisória (Ver Site) -->
                     <div v-else-if="gIdx > 0"
                          class="my-3 mx-3 border-t border-gray-100 dark:border-slate-700/50"></div>
 
-                    <Link v-for="item in grupo.items" :key="item.href"
-                          :href="item.href"
-                          @click="sidebarOpen = false"
-                          class="flex items-center gap-3 px-3 py-[9px] rounded-xl text-[13px] font-medium transition-all duration-150 mb-0.5"
-                          :class="isActive(item.href)
-                              ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-semibold'
-                              : 'text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-slate-800'">
-                        <span class="flex-shrink-0"
-                              :class="isActive(item.href) ? 'text-blue-600' : 'text-gray-400 dark:text-slate-500'">
-                            <AppIcon :name="item.icon" size="sm" />
-                        </span>
-                        <span class="flex-1 leading-none">{{ item.label }}</span>
-                        <span v-if="item.badge && item.badge > 0"
-                              class="text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight"
-                              :class="item.badgeColor ?? 'bg-blue-600 text-white'">
-                            {{ item.badge }}
-                        </span>
-                    </Link>
+                    <!-- Itens -->
+                    <div v-show="grupo.label ? isExpanded(grupo) : true">
+                        <Link v-for="item in grupo.items" :key="item.href"
+                              :href="item.href"
+                              @click="sidebarOpen = false"
+                              class="flex items-center gap-3 px-3 py-[9px] rounded-xl text-[13px] font-medium transition-all duration-150 mb-0.5"
+                              :class="isActive(item.href)
+                                  ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-semibold'
+                                  : 'text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-slate-800'">
+                            <span class="flex-shrink-0"
+                                  :class="isActive(item.href) ? 'text-blue-600' : 'text-gray-400 dark:text-slate-500'">
+                                <AppIcon :name="item.icon" size="sm" />
+                            </span>
+                            <span class="flex-1 leading-none">{{ item.label }}</span>
+                            <span v-if="item.badge && item.badge > 0"
+                                  class="text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-tight"
+                                  :class="item.badgeColor ?? 'bg-blue-600 text-white'">
+                                {{ item.badge }}
+                            </span>
+                        </Link>
+                    </div>
                 </template>
             </nav>
 
@@ -265,6 +286,7 @@ const navGroups = computed(() => {
 
     groups.push({
         label: "Início",
+        collapsible: false,
         items: [
             { href: "/admin",             label: "Painel",         icon: "dashboard" },
             { href: "/admin/minhas-escalas", label: "Minhas Escalas", icon: "clock" },
@@ -274,39 +296,49 @@ const navGroups = computed(() => {
 
     if (isPastor || isLider) {
         const anivBadge = page.props.aniversariantesHoje || 0;
-        groups.push({
-            label: "Pastoral",
-            items: [
-                { href: "/admin/familias",   label: "Famílias",    icon: "users" },
-                { href: "/admin/membros",    label: "Membros",     icon: "user" },
-                {
-                    href: "/admin/visitantes", label: "Visitantes", icon: "user",
-                    badge: page.props.novosVisitantesMes || 0,
-                    badgeColor: "bg-amber-500 text-white",
-                },
-                {
-                    href: "/admin/aniversarios", label: "Aniversários", icon: "gift",
-                    badge: anivBadge > 0 ? anivBadge : 0,
-                    badgeColor: "bg-purple-500 text-white",
-                },
-            ],
-        });
 
-        const gestao = [
-            { href: "/admin/calendario", label: "Calendário", icon: "calendar" },
-            { href: "/admin/planejador", label: "Planejador", icon: "clipboard" },
-            { href: "/admin/escalas", label: "Escalas", icon: "list-checks" },
-            { href: "/admin/musicas", label: "Músicas", icon: "music" },
-            { href: "/admin/assets", label: "Anexos", icon: "paperclip" },
-            { href: "/admin/cursos", label: "Cursos", icon: "graduation-cap" },
+        // Pessoas
+        const pessoas = [
+            { href: "/admin/familias",   label: "Famílias",    icon: "users" },
+            { href: "/admin/membros",    label: "Membros",     icon: "user" },
+            {
+                href: "/admin/visitantes", label: "Visitantes", icon: "user",
+                badge: page.props.novosVisitantesMes || 0,
+                badgeColor: "bg-amber-500 text-white",
+            },
+            {
+                href: "/admin/aniversarios", label: "Aniversários", icon: "gift",
+                badge: anivBadge > 0 ? anivBadge : 0,
+                badgeColor: "bg-purple-500 text-white",
+            },
         ];
         if (isPastor) {
-            gestao.push({ href: "/admin/grupos",   label: "Grupos",   icon: "users" });
-            gestao.push({ href: "/admin/cultos",   label: "Cultos",   icon: "church" });
-            gestao.push({ href: "/admin/eventos",  label: "Eventos",  icon: "star" });
-            gestao.push({ href: "/admin/pregacoes", label: "Pregações", icon: "megaphone" });
+            pessoas.push({ href: "/admin/grupos", label: "Grupos", icon: "users" });
         }
-        groups.push({ label: "Gestão", items: gestao });
+        groups.push({ label: "Pessoas", items: pessoas });
+
+        // Cultos & Agenda
+        const agenda = [
+            { href: "/admin/calendario", label: "Calendário", icon: "calendar" },
+            { href: "/admin/escalas",    label: "Escalas",    icon: "list-checks" },
+            { href: "/admin/planejador", label: "Planejador", icon: "clipboard" },
+            { href: "/admin/musicas",    label: "Músicas",    icon: "music" },
+        ];
+        if (isPastor) {
+            agenda.push({ href: "/admin/cultos",  label: "Cultos",  icon: "church" });
+            agenda.push({ href: "/admin/eventos", label: "Eventos", icon: "star" });
+        }
+        groups.push({ label: "Cultos & Agenda", items: agenda });
+
+        // Conteúdo
+        const conteudo = [
+            { href: "/admin/cursos", label: "Cursos", icon: "graduation-cap" },
+            { href: "/admin/assets", label: "Anexos", icon: "paperclip" },
+        ];
+        if (isPastor) {
+            conteudo.push({ href: "/admin/pregacoes", label: "Pregações", icon: "megaphone" });
+        }
+        groups.push({ label: "Conteúdo", items: conteudo });
     } else {
         // Membros: apenas seus grupos
         groups.push({
@@ -317,9 +349,8 @@ const navGroups = computed(() => {
 
     if (isPastor) {
         groups.push({
-            label: "Administração",
+            label: "Comunidade",
             items: [
-                { href: "/admin/usuarios", label: "Usuários do Sistema", icon: "user" },
                 {
                     href: "/admin/sugestoes", label: "Sugestões", icon: "lightbulb",
                     badge: page.props.novasSugestoes || 0,
@@ -328,6 +359,13 @@ const navGroups = computed(() => {
                     href: "/admin/pedidos-oracao", label: "Pedidos de Oração", icon: "heart",
                     badge: page.props.novosPedidos || 0,
                 },
+            ],
+        });
+
+        groups.push({
+            label: "Administração",
+            items: [
+                { href: "/admin/usuarios", label: "Usuários do Sistema", icon: "user" },
             ],
         });
     }
@@ -343,6 +381,48 @@ const navGroups = computed(() => {
 function isActive(href) {
     if (href === "/admin") return page.url === "/admin" || page.url === "/admin/";
     return page.url.startsWith(href);
+}
+
+// ─── Colapso dos grupos do menu ───
+const NAV_COLLAPSE_KEY = "admin-nav-collapsed";
+
+const activeGroupLabel = computed(() => {
+    const grupo = navGroups.value.find(
+        (g) => g.label && g.items.some((i) => isActive(i.href)),
+    );
+    return grupo?.label ?? null;
+});
+
+function loadCollapsed() {
+    try {
+        const raw = localStorage.getItem(NAV_COLLAPSE_KEY);
+        if (raw) return new Set(JSON.parse(raw));
+    } catch (e) { /* ignora storage inválido */ }
+    return null;
+}
+
+// Primeira visita: todos os grupos abertos (Set vazio). O usuário pode
+// recolher manualmente, e a escolha fica salva no localStorage.
+const collapsed = ref(loadCollapsed() ?? new Set());
+
+function persistCollapsed() {
+    try {
+        localStorage.setItem(NAV_COLLAPSE_KEY, JSON.stringify([...collapsed.value]));
+    } catch (e) { /* ignora falha de storage */ }
+}
+
+function isExpanded(grupo) {
+    if (grupo.collapsible === false) return true;
+    if (grupo.label === activeGroupLabel.value) return true;
+    return !collapsed.value.has(grupo.label);
+}
+
+function toggleGroup(label) {
+    const next = new Set(collapsed.value);
+    if (next.has(label)) next.delete(label);
+    else next.add(label);
+    collapsed.value = next;
+    persistCollapsed();
 }
 </script>
 

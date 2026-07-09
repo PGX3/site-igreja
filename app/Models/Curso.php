@@ -11,7 +11,7 @@ class Curso extends Model
     protected $table = 'cursos';
 
     protected $fillable = [
-        'titulo', 'slug', 'descricao', 'capa_path', 'share_token', 'ativo', 'ordem', 'created_by',
+        'titulo', 'slug', 'descricao', 'capa_path', 'cor', 'share_token', 'ativo', 'ordem', 'created_by',
     ];
 
     protected $casts = [
@@ -88,6 +88,7 @@ class Curso extends Model
             'titulo' => $this->titulo,
             'descricao' => $this->descricao,
             'capa_url' => $this->capaUrl(),
+            'cor' => $this->cor,
             'modulos' => $this->modulos->map(fn ($m) => [
                 'id' => $m->id,
                 'titulo' => $m->titulo,

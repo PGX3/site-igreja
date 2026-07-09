@@ -33,6 +33,20 @@
         </div>
       </div>
 
+      <!-- ATIVIDADE: prazo e pontos -->
+      <div v-if="form.tipo === 'atividade'" class="grid grid-cols-2 gap-4 rounded-lg bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-800/30 p-4">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Data de entrega (opcional)</label>
+          <input v-model="form.data_entrega" type="date"
+                 class="w-full border border-gray-200 dark:border-slate-600 rounded-lg px-4 py-2.5 text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Pontos (opcional)</label>
+          <input v-model="form.pontos" type="number" min="0" max="1000" placeholder="Ex: 10"
+                 class="w-full border border-gray-200 dark:border-slate-600 rounded-lg px-4 py-2.5 text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+      </div>
+
       <!-- VÍDEO -->
       <div>
         <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Vídeo (YouTube, opcional)</label>
@@ -47,11 +61,60 @@
 
       <!-- CONTEÚDO (editor rico com imagem) -->
       <div>
-        <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Conteúdo da aula</label>
+        <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">{{ conteudoLabel }}</label>
         <RichTextEditor v-model="form.conteudo" permite-imagem permite-blocos upload-url="/admin/editor/imagem" />
         <p class="mt-1.5 text-xs text-gray-400 dark:text-slate-500">
           Formate o texto e insira imagens pelo botão da barra ou colando/arrastando direto no editor.
         </p>
+      </div>
+
+      <!-- MATERIAIS / ANEXOS -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Materiais / Anexos</label>
+        <p v-if="form.tipo === 'material'" class="text-xs text-gray-500 dark:text-slate-400 -mt-1 mb-2">
+          Neste tipo, os arquivos e links abaixo são o foco. O texto acima é só uma descrição.
+        </p>
+
+        <!-- Lista -->
+        <div v-if="aula.anexos.length" class="space-y-2 mb-3">
+          <div v-for="anexo in aula.anexos" :key="anexo.id"
+               class="flex items-center gap-3 border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2.5 bg-white dark:bg-slate-700">
+            <span class="text-lg">{{ anexo.tipo === 'link' ? '🔗' : '📄' }}</span>
+            <a :href="anexo.url" target="_blank" rel="noopener"
+               class="flex-1 text-sm text-gray-800 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 truncate">
+              {{ anexo.titulo }}
+            </a>
+            <button type="button" @click="removerAnexo(anexo.id)"
+                    class="text-xs text-gray-400 hover:text-red-500 transition">Remover</button>
+          </div>
+        </div>
+
+        <!-- Adicionar arquivo / link -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <form @submit.prevent="enviarArquivo" class="border border-dashed border-gray-300 dark:border-slate-600 rounded-lg p-3 space-y-2">
+            <p class="text-xs font-semibold text-gray-500 dark:text-slate-400">Enviar arquivo (PDF, doc, imagem...)</p>
+            <input type="file" @change="onArquivo" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,image/*"
+                   class="block w-full text-xs text-gray-600 dark:text-slate-300 file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 dark:file:bg-blue-900/30 dark:file:text-blue-300 cursor-pointer" />
+            <input v-model="fileForm.titulo" type="text" placeholder="Nome de exibição (opcional)"
+                   class="w-full border border-gray-200 dark:border-slate-600 rounded px-3 py-1.5 text-xs bg-white dark:bg-slate-700 text-gray-900 dark:text-white" />
+            <button type="submit" :disabled="!fileForm.arquivo || fileForm.processing" class="text-xs font-semibold bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-3 py-1.5 rounded transition">
+              {{ fileForm.processing ? 'Enviando...' : 'Adicionar arquivo' }}
+            </button>
+            <p v-if="fileForm.errors.arquivo" class="text-xs text-red-500">{{ fileForm.errors.arquivo }}</p>
+          </form>
+
+          <form @submit.prevent="enviarLink" class="border border-dashed border-gray-300 dark:border-slate-600 rounded-lg p-3 space-y-2">
+            <p class="text-xs font-semibold text-gray-500 dark:text-slate-400">Adicionar link</p>
+            <input v-model="linkForm.url" type="url" placeholder="https://..."
+                   class="w-full border border-gray-200 dark:border-slate-600 rounded px-3 py-1.5 text-xs bg-white dark:bg-slate-700 text-gray-900 dark:text-white" />
+            <input v-model="linkForm.titulo" type="text" placeholder="Nome de exibição (opcional)"
+                   class="w-full border border-gray-200 dark:border-slate-600 rounded px-3 py-1.5 text-xs bg-white dark:bg-slate-700 text-gray-900 dark:text-white" />
+            <button type="submit" :disabled="!linkForm.url || linkForm.processing" class="text-xs font-semibold bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-3 py-1.5 rounded transition">
+              Adicionar link
+            </button>
+            <p v-if="linkForm.errors.url" class="text-xs text-red-500">{{ linkForm.errors.url }}</p>
+          </form>
+        </div>
       </div>
 
       <!-- ATIVO -->
@@ -81,10 +144,11 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import RichTextEditor from '@/Components/RichTextEditor.vue'
 import MediaEmbed from '@/Components/MediaEmbed.vue'
-import { Link, useForm } from '@inertiajs/vue3'
+import { Link, router, useForm } from '@inertiajs/vue3'
 
 const props = defineProps({
   aula: { type: Object, required: true },
@@ -97,8 +161,44 @@ const form = useForm({
   tipo: props.aula.tipo ?? 'aula',
   conteudo: props.aula.conteudo ?? '',
   youtube_url: props.aula.youtube_url ?? '',
+  data_entrega: props.aula.data_entrega ?? '',
+  pontos: props.aula.pontos ?? '',
   ativo: props.aula.ativo ?? true,
 })
+
+const conteudoLabel = computed(() => ({
+  aula: 'Conteúdo da aula',
+  material: 'Descrição (opcional)',
+  atividade: 'Instruções da atividade',
+}[form.tipo] ?? 'Conteúdo da aula'))
+
+const fileForm = useForm({ tipo: 'arquivo', arquivo: null, titulo: '' })
+const linkForm = useForm({ tipo: 'link', url: '', titulo: '' })
+
+// preserveState mantém o conteúdo em edição no editor ao anexar/remover
+const anexoOpts = { preserveState: true, preserveScroll: true }
+
+function onArquivo(e) {
+  fileForm.arquivo = e.target.files?.[0] ?? null
+}
+
+function enviarArquivo() {
+  fileForm.post(`/admin/aulas/${props.aula.id}/anexos`, {
+    ...anexoOpts,
+    onSuccess: () => fileForm.reset(),
+  })
+}
+
+function enviarLink() {
+  linkForm.post(`/admin/aulas/${props.aula.id}/anexos`, {
+    ...anexoOpts,
+    onSuccess: () => linkForm.reset(),
+  })
+}
+
+function removerAnexo(id) {
+  router.delete(`/admin/anexos/${id}`, anexoOpts)
+}
 
 function submit() {
   form.put(`/admin/aulas/${props.aula.id}`)

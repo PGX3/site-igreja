@@ -73,6 +73,7 @@
               {{ aula.titulo }}
               <span v-if="!aula.ativo" class="text-xs text-gray-400 dark:text-slate-500">(oculta)</span>
             </Link>
+            <Link :href="`/admin/aulas/${aula.id}/edit`" class="btn-link-sm" title="Editar a aula">editar</Link>
             <a :href="`/admin/aprender/aulas/${aula.id}`" target="_blank" rel="noopener" class="btn-link-sm" title="Pré-visualizar a aula">ver</a>
             <button v-if="aula.share_url" @click="copiar(aula.share_url)" class="btn-link-sm" title="Copiar link da aula">
               {{ copiado === aula.share_url ? 'Copiado!' : '🔗 link' }}

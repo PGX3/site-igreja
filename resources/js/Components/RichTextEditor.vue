@@ -99,7 +99,7 @@ import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import { TextStyle, Color } from '@tiptap/extension-text-style'
 import TextAlign from '@tiptap/extension-text-align'
-import Image from '@tiptap/extension-image'
+import { ImagemRedimensionavel } from '@/imagemRedimensionavel.js'
 
 const props = defineProps({
   modelValue:    { type: String, default: '' },
@@ -128,7 +128,7 @@ if (props.permiteBlocos) {
   extensions.push(TextAlign.configure({ types: ['heading', 'paragraph'] }))
 }
 if (props.permiteImagem) {
-  extensions.push(Image.configure({ inline: false, allowBase64: false }))
+  extensions.push(ImagemRedimensionavel.configure({ inline: false, allowBase64: false }))
 }
 
 const editor = useEditor({
@@ -216,6 +216,12 @@ onBeforeUnmount(() => editor.value?.destroy())
 :deep(.ProseMirror) {
   outline: none;
   min-height: 200px;
+}
+/* Limpa floats das imagens alinhadas para não vazarem do editor */
+:deep(.ProseMirror)::after {
+  content: '';
+  display: block;
+  clear: both;
 }
 /* Cada linha é um parágrafo: sem margem extra, para que linhas em branco
    valham exatamente uma linha (igual ao que se digita). */
