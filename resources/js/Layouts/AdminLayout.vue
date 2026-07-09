@@ -339,6 +339,16 @@ const navGroups = computed(() => {
             conteudo.push({ href: "/admin/pregacoes", label: "Pregações", icon: "megaphone" });
         }
         groups.push({ label: "Conteúdo", items: conteudo });
+
+        // Documentos oficiais
+        groups.push({
+            label: "Documentos",
+            items: [
+                { href: "/admin/documentos",          label: "Documentos",     icon: "file-text" },
+                { href: "/admin/documento-templates", label: "Modelos",        icon: "clipboard" },
+                { href: "/admin/igreja",              label: "Dados da Igreja", icon: "church" },
+            ],
+        });
     } else {
         // Membros: apenas seus grupos
         groups.push({

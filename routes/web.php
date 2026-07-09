@@ -11,6 +11,8 @@ use App\Http\Controllers\Admin\CultoController;
 use App\Http\Controllers\Admin\CursoController;
 use App\Http\Controllers\Admin\CursoModuloController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\DocumentoController;
+use App\Http\Controllers\Admin\DocumentoTemplateController;
 use App\Http\Controllers\Admin\EditorImagemController;
 use App\Http\Controllers\Admin\EscalaAssetController;
 use App\Http\Controllers\Admin\EscalaController;
@@ -22,6 +24,7 @@ use App\Http\Controllers\Admin\FamiliaController;
 use App\Http\Controllers\Admin\GrupoController;
 use App\Http\Controllers\Admin\GrupoFuncaoController;
 use App\Http\Controllers\Admin\GrupoMuralController;
+use App\Http\Controllers\Admin\IgrejaController;
 use App\Http\Controllers\Admin\MembroController;
 use App\Http\Controllers\Admin\MinhaSenhaController;
 use App\Http\Controllers\Admin\MusicaController;
@@ -161,6 +164,17 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
         Route::delete('anexos/{anexo}', [AulaAnexoController::class, 'destroy'])->name('anexos.destroy');
 
         Route::post('editor/imagem', [EditorImagemController::class, 'store'])->name('editor.imagem.store');
+
+        // Documentos oficiais: dados da igreja, modelos e documentos gerados
+        Route::get('igreja', [IgrejaController::class, 'edit'])->name('igreja.edit');
+        Route::put('igreja', [IgrejaController::class, 'update'])->name('igreja.update');
+        Route::resource('documento-templates', DocumentoTemplateController::class)
+            ->except(['show'])
+            ->parameters(['documento-templates' => 'documentoTemplate']);
+        Route::get('documentos/{documento}/imprimir', [DocumentoController::class, 'imprimir'])->name('documentos.imprimir');
+        Route::resource('documentos', DocumentoController::class)
+            ->except(['show'])
+            ->parameters(['documentos' => 'documento']);
 
         Route::resource('membros', MembroController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
         Route::post('membros/{membro}/gerar-senha', [MembroController::class, 'gerarSenha'])

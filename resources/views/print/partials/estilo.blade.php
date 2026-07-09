@@ -20,7 +20,7 @@
     .video a { color: #2563eb; }
 
     /* Conteúdo rico das aulas */
-    .conteudo { font-size: 16px; }
+    .conteudo { font-size: var(--print-fs, 16px); line-height: var(--print-lh, 1.7); }
     .conteudo p { margin: 0 0 12px; }
     .conteudo p:empty::before { content: "\00a0"; }
     .conteudo h1 { font-size: 22px; margin: 20px 0 8px; }
@@ -65,8 +65,6 @@
     /* ─── Layout configurável (controles de impressão) ─── */
     .conteudo { column-gap: 28px; }
     body.cols-2 .conteudo { column-count: 2; }
-    body.fs-sm .conteudo { font-size: 14px; }
-    body.fs-lg .conteudo { font-size: 18px; }
     body.mar-narrow { margin: 12mm; }        /* margem só na pré-visualização; o PDF usa o @page */
 
     @media print {
