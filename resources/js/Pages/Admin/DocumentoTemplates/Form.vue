@@ -46,7 +46,7 @@
           <div>
             <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Variáveis</h2>
             <p class="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
-              Use no texto como <code>&#123;&#123;chave&#125;&#125;</code>. Ao criar um documento, cada variável vira um campo.
+              Detectadas automaticamente ao escrever <code>&#123;&#123;chave&#125;&#125;</code> no texto abaixo. Ajuste o rótulo e o tipo de cada uma.
             </p>
           </div>
           <button type="button" @click="addVariavel"
@@ -59,20 +59,25 @@
           Nenhuma variável. O modelo será um texto fixo.
         </div>
 
-        <div v-for="(v, i) in form.variaveis" :key="i"
-             class="grid grid-cols-1 sm:grid-cols-[1fr_1fr_140px_auto] gap-2 items-start mb-3">
-          <input v-model="v.chave" type="text" placeholder="chave (ex: destinatario)"
-                 @input="v.chave = normalizar(v.chave)" :class="inputClass" />
-          <input v-model="v.label" type="text" placeholder="Rótulo (ex: Destinatário)" :class="inputClass" />
-          <select v-model="v.tipo" :class="inputClass">
-            <option value="texto">Texto</option>
-            <option value="multilinha">Texto longo</option>
-            <option value="data">Data</option>
-          </select>
-          <button type="button" @click="removeVariavel(i)"
-                  class="text-gray-400 hover:text-red-500 px-3 py-3 transition" title="Remover">
-            ✕
-          </button>
+        <div v-for="(v, i) in form.variaveis" :key="i" class="mb-3">
+          <div class="grid grid-cols-1 sm:grid-cols-[1fr_1fr_140px_auto] gap-2 items-start">
+            <input v-model="v.chave" type="text" placeholder="chave (ex: destinatario)"
+                   @input="v.chave = normalizar(v.chave)" :class="inputClass" />
+            <input v-model="v.label" type="text" placeholder="Rótulo (ex: Destinatário)" :class="inputClass" />
+            <select v-model="v.tipo" :class="inputClass">
+              <option value="texto">Texto</option>
+              <option value="multilinha">Texto longo</option>
+              <option value="data">Data</option>
+            </select>
+            <button type="button" @click="removeVariavel(i)"
+                    class="text-gray-400 hover:text-red-500 px-3 py-3 transition" title="Remover">
+              ✕
+            </button>
+          </div>
+          <p v-if="v.chave && !chavesNoTexto.includes(v.chave)"
+             class="text-xs text-amber-600 dark:text-amber-400 mt-1">
+            ⚠ Não aparece no texto. Insira <code>{{ marcador(v.chave) }}</code> no corpo ou remova esta variável.
+          </p>
         </div>
         <p v-if="form.errors.variaveis" class="text-red-500 text-xs mt-1">{{ form.errors.variaveis }}</p>
       </div>
@@ -116,6 +121,7 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import RichTextEditor from '@/Components/RichTextEditor.vue'
+import { computed, watch } from 'vue'
 import { Link, useForm } from '@inertiajs/vue3'
 
 const props = defineProps({ template: Object })
@@ -148,6 +154,38 @@ function addVariavel() {
 function removeVariavel(i) {
   form.variaveis.splice(i, 1)
 }
+
+// Extrai as chaves dos marcadores {{chave}} presentes no texto (HTML do corpo)
+function extrairChaves(html) {
+  const chaves = []
+  const re = /\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g
+  let m
+  while ((m = re.exec(html || '')) !== null) {
+    if (!chaves.includes(m[1])) chaves.push(m[1])
+  }
+  return chaves
+}
+
+// Sugere um rótulo legível a partir da chave (ex.: data_evento -> "Data evento")
+function humanizar(chave) {
+  const texto = (chave || '').replace(/_/g, ' ').trim()
+  return texto ? texto.charAt(0).toUpperCase() + texto.slice(1) : ''
+}
+
+// Ao escrever o texto, detecta os marcadores novos e monta as variáveis em cima
+function sincronizarVariaveis() {
+  const existentes = new Set(form.variaveis.map((v) => v.chave))
+  extrairChaves(form.corpo).forEach((chave) => {
+    if (!existentes.has(chave)) {
+      form.variaveis.push({ chave, label: humanizar(chave), tipo: 'texto' })
+      existentes.add(chave)
+    }
+  })
+}
+
+watch(() => form.corpo, sincronizarVariaveis)
+
+const chavesNoTexto = computed(() => extrairChaves(form.corpo))
 
 function marcador(chave) {
   return '{{' + chave + '}}'

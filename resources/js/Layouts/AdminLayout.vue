@@ -344,9 +344,8 @@ const navGroups = computed(() => {
         groups.push({
             label: "Documentos",
             items: [
-                { href: "/admin/documentos",          label: "Documentos",     icon: "file-text" },
-                { href: "/admin/documento-templates", label: "Modelos",        icon: "clipboard" },
-                { href: "/admin/igreja",              label: "Dados da Igreja", icon: "church" },
+                { href: "/admin/documentos",          label: "Documentos", icon: "file-text" },
+                { href: "/admin/documento-templates", label: "Modelos",    icon: "clipboard" },
             ],
         });
     } else {
@@ -375,6 +374,7 @@ const navGroups = computed(() => {
         groups.push({
             label: "Administração",
             items: [
+                { href: "/admin/igreja",   label: "Dados da Igreja",   icon: "church" },
                 { href: "/admin/usuarios", label: "Usuários do Sistema", icon: "user" },
             ],
         });

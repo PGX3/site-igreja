@@ -165,9 +165,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 
         Route::post('editor/imagem', [EditorImagemController::class, 'store'])->name('editor.imagem.store');
 
-        // Documentos oficiais: dados da igreja, modelos e documentos gerados
-        Route::get('igreja', [IgrejaController::class, 'edit'])->name('igreja.edit');
-        Route::put('igreja', [IgrejaController::class, 'update'])->name('igreja.update');
+        // Documentos oficiais: modelos e documentos gerados (dados da igreja ficam no grupo pastor)
         Route::resource('documento-templates', DocumentoTemplateController::class)
             ->except(['show'])
             ->parameters(['documento-templates' => 'documentoTemplate']);
@@ -193,6 +191,10 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 
     // Apenas Pastor: grupos, cultos, textos, sugestões, pedidos, usuários
     Route::middleware('role:pastor')->group(function () {
+        // Dados da igreja (usados no timbrado dos documentos)
+        Route::get('igreja', [IgrejaController::class, 'edit'])->name('igreja.edit');
+        Route::put('igreja', [IgrejaController::class, 'update'])->name('igreja.update');
+
         Route::resource('grupos', GrupoController::class)->except(['index']);
         Route::resource('usuarios', UserController::class)->except(['show']);
         Route::post('usuarios/{usuario}/senha', [UserController::class, 'alterarSenha'])->name('usuarios.senha');
