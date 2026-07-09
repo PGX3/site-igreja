@@ -51,7 +51,7 @@ class Aula extends Model
 
     public function paraLeitura(): array
     {
-        $this->loadMissing('anexos');
+        $this->loadMissing('anexos.asset');
 
         return [
             'id' => $this->id,

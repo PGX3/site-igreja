@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Asset;
 use App\Models\Aula;
 use App\Models\CursoModulo;
 use Illuminate\Http\Request;
@@ -26,9 +27,16 @@ class AulaController extends Controller
 
     public function edit(Aula $aula)
     {
-        $aula->load('modulo.curso', 'anexos');
+        $aula->load('modulo.curso', 'anexos.asset');
+
+        $biblioteca = Asset::orderByDesc('id')->get()->map(fn ($a) => [
+            'id' => $a->id,
+            'titulo' => $a->titulo ?: $a->arquivo_nome,
+            'tipo' => $a->tipo,
+        ]);
 
         return Inertia::render('Admin/Cursos/AulaForm', [
+            'biblioteca' => $biblioteca,
             'aula' => [
                 'id' => $aula->id,
                 'titulo' => $aula->titulo,

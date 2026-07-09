@@ -89,8 +89,8 @@
           </div>
         </div>
 
-        <!-- Adicionar arquivo / link -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <!-- Adicionar: upload / biblioteca / link -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <form @submit.prevent="enviarArquivo" class="border border-dashed border-gray-300 dark:border-slate-600 rounded-lg p-3 space-y-2">
             <p class="text-xs font-semibold text-gray-500 dark:text-slate-400">Enviar arquivo (PDF, doc, imagem...)</p>
             <input type="file" @change="onArquivo" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,image/*"
@@ -101,6 +101,22 @@
               {{ fileForm.processing ? 'Enviando...' : 'Adicionar arquivo' }}
             </button>
             <p v-if="fileForm.errors.arquivo" class="text-xs text-red-500">{{ fileForm.errors.arquivo }}</p>
+            <p class="text-[11px] text-gray-400 dark:text-slate-500">O arquivo também fica salvo na biblioteca de Anexos.</p>
+          </form>
+
+          <form @submit.prevent="enviarBiblioteca" class="border border-dashed border-gray-300 dark:border-slate-600 rounded-lg p-3 space-y-2">
+            <p class="text-xs font-semibold text-gray-500 dark:text-slate-400">Da biblioteca</p>
+            <select v-model="bibForm.asset_id"
+                    class="w-full border border-gray-200 dark:border-slate-600 rounded px-3 py-1.5 text-xs bg-white dark:bg-slate-700 text-gray-900 dark:text-white">
+              <option value="">Escolher arquivo salvo...</option>
+              <option v-for="item in biblioteca" :key="item.id" :value="item.id">
+                {{ item.tipo === 'imagem' ? '🖼' : '📄' }} {{ item.titulo }}
+              </option>
+            </select>
+            <button type="submit" :disabled="!bibForm.asset_id || bibForm.processing" class="text-xs font-semibold bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-3 py-1.5 rounded transition">
+              Adicionar da biblioteca
+            </button>
+            <p v-if="!biblioteca.length" class="text-[11px] text-gray-400 dark:text-slate-500">Nada salvo ainda. Envie um arquivo ou use os Anexos.</p>
           </form>
 
           <form @submit.prevent="enviarLink" class="border border-dashed border-gray-300 dark:border-slate-600 rounded-lg p-3 space-y-2">
@@ -154,6 +170,7 @@ const props = defineProps({
   aula: { type: Object, required: true },
   curso: { type: Object, required: true },
   modulo: { type: Object, required: true },
+  biblioteca: { type: Array, default: () => [] },
 })
 
 const form = useForm({
@@ -174,6 +191,7 @@ const conteudoLabel = computed(() => ({
 
 const fileForm = useForm({ tipo: 'arquivo', arquivo: null, titulo: '' })
 const linkForm = useForm({ tipo: 'link', url: '', titulo: '' })
+const bibForm = useForm({ tipo: 'biblioteca', asset_id: '', titulo: '' })
 
 // preserveState mantém o conteúdo em edição no editor ao anexar/remover
 const anexoOpts = { preserveState: true, preserveScroll: true }
@@ -193,6 +211,13 @@ function enviarLink() {
   linkForm.post(`/admin/aulas/${props.aula.id}/anexos`, {
     ...anexoOpts,
     onSuccess: () => linkForm.reset(),
+  })
+}
+
+function enviarBiblioteca() {
+  bibForm.post(`/admin/aulas/${props.aula.id}/anexos`, {
+    ...anexoOpts,
+    onSuccess: () => bibForm.reset(),
   })
 }
 

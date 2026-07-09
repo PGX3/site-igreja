@@ -42,7 +42,7 @@ class AprenderController extends Controller
     {
         $gestor = $this->ehGestor();
         abort_unless($aula->ativo || $gestor, 404);
-        $aula->load('modulo.curso', 'anexos', 'comentarios.user:id,name');
+        $aula->load('modulo.curso', 'anexos.asset', 'comentarios.user:id,name');
 
         $userId = auth()->id();
 
@@ -67,7 +67,7 @@ class AprenderController extends Controller
     {
         $gestor = $this->ehGestor();
         abort_unless($aula->ativo || $gestor, 404);
-        $aula->load('modulo.curso', 'anexos');
+        $aula->load('modulo.curso', 'anexos.asset');
 
         return view('print.aula', ['aula' => $aula]);
     }
@@ -75,7 +75,7 @@ class AprenderController extends Controller
     public function pdfModulo(CursoModulo $modulo)
     {
         $gestor = $this->ehGestor();
-        $modulo->load(['curso', 'aulas' => fn ($q) => $gestor ? $q : $q->where('ativo', true), 'aulas.anexos']);
+        $modulo->load(['curso', 'aulas' => fn ($q) => $gestor ? $q : $q->where('ativo', true), 'aulas.anexos.asset']);
         abort_unless($modulo->curso->ativo || $gestor, 404);
 
         return view('print.modulo', ['modulo' => $modulo]);
@@ -85,7 +85,7 @@ class AprenderController extends Controller
     {
         $gestor = $this->ehGestor();
         abort_unless($curso->ativo || $gestor, 404);
-        $curso->load(['modulos.aulas' => fn ($q) => $gestor ? $q : $q->where('ativo', true), 'modulos.aulas.anexos']);
+        $curso->load(['modulos.aulas' => fn ($q) => $gestor ? $q : $q->where('ativo', true), 'modulos.aulas.anexos.asset']);
 
         return view('print.curso', ['curso' => $curso]);
     }
