@@ -35,12 +35,13 @@ return [
         ],
     ],
 
-    'hcaptcha' => [
-        'sitekey' => env('HCAPTCHA_SITEKEY', '10000000-ffff-ffff-ffff-000000000001'),
-        'secret' => env('HCAPTCHA_SECRET', '0x0000000000000000000000000000000000000000'),
+    'recaptcha' => [
+        'sitekey' => env('RECAPTCHA_SITEKEY'),
+        'secret' => env('RECAPTCHA_SECRET'),
+        'score_threshold' => env('RECAPTCHA_SCORE_THRESHOLD', 0.5),
     ],
 
 ];
 
-// hCaptcha — adicione suas chaves no .env
-// Chaves de teste: sitekey 10000000-ffff-ffff-ffff-000000000001 / secret 0x0000...
+// reCAPTCHA v3 — crie as chaves em https://www.google.com/recaptcha/admin (tipo v3)
+// e defina RECAPTCHA_SITEKEY / RECAPTCHA_SECRET no .env.

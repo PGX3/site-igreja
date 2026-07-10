@@ -63,7 +63,7 @@ class HandleInertiaRequests extends Middleware
                     })
                     ->count();
             })()) : null,
-            'hcaptchaSitekey' => config('services.hcaptcha.sitekey'),
+            'recaptchaSitekey' => config('services.recaptcha.sitekey'),
         ]);
     }
 }

@@ -3,14 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Services\ContatoService;
-use App\Services\HCaptchaService;
+use App\Services\RecaptchaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 
 class ContatoController extends Controller
 {
     public function __construct(
-        private HCaptchaService $captcha,
+        private RecaptchaService $captcha,
         private ContatoService $contatos,
     ) {}
 
@@ -26,9 +26,9 @@ class ContatoController extends Controller
             ]);
         }
 
-        // Verificar hCaptcha ANTES de validar os outros campos
-        if (! $this->captcha->verify($request->input('h-captcha-response'), $request->ip())) {
-            return back()->withErrors(['captcha' => 'Confirme que você não é um robô.'])
+        // Verificar reCAPTCHA ANTES de validar os outros campos
+        if (! $this->captcha->verify($request->input('g-recaptcha-response'), $request->ip(), 'sugestao')) {
+            return back()->withErrors(['captcha' => 'Não foi possível confirmar que você não é um robô. Tente novamente.'])
                 ->withInput();
         }
 
@@ -63,9 +63,9 @@ class ContatoController extends Controller
             ]);
         }
 
-        // Verificar hCaptcha
-        if (! $this->captcha->verify($request->input('h-captcha-response'), $request->ip())) {
-            return back()->withErrors(['captcha_oracao' => 'Confirme que você não é um robô.'])
+        // Verificar reCAPTCHA
+        if (! $this->captcha->verify($request->input('g-recaptcha-response'), $request->ip(), 'pedido_oracao')) {
+            return back()->withErrors(['captcha_oracao' => 'Não foi possível confirmar que você não é um robô. Tente novamente.'])
                 ->withInput();
         }
 

@@ -528,15 +528,11 @@
               <p v-if="errosSugestao.mensagem" class="text-red-400 text-xs mt-1">{{ errosSugestao.mensagem }}</p>
             </div>
 
-            <!-- hCaptcha -->
-            <div>
-              <HCaptcha ref="captchaSugestao" :sitekey="hcaptchaSitekey" @verify="tokenSugestao = $event" @expire="tokenSugestao = 'da1a0e90-27ce-4d62-a2aa-54a26506be18'" />
-              <p v-if="errosSugestao.captcha" class="text-red-400 text-xs mt-1">{{ errosSugestao.captcha }}</p>
-            </div>
+            <p v-if="errosSugestao.captcha" class="text-red-400 text-xs">{{ errosSugestao.captcha }}</p>
 
             <div class="flex items-center justify-between pt-2">
               <p class="text-[10px] text-white/20 tracking-wide">* campos obrigatórios</p>
-              <button type="submit" :disabled="loadingSugestao || !tokenSugestao"
+              <button type="submit" :disabled="loadingSugestao"
                       class="btn-primary disabled:opacity-40 disabled:cursor-not-allowed">
                 {{ loadingSugestao ? 'Enviando...' : '→ Enviar' }}
               </button>
@@ -608,15 +604,11 @@
               Autorizo compartilhar meu pedido com a comunidade para oração
             </button>
 
-            <!-- hCaptcha -->
-            <div>
-              <HCaptcha ref="captchaOracao" :sitekey="hcaptchaSitekey" @verify="tokenOracao = $event" @expire="tokenOracao = 'da1a0e90-27ce-4d62-a2aa-54a26506be18'" />
-              <p v-if="errosOracao.captcha_oracao" class="text-red-400 text-xs mt-1">{{ errosOracao.captcha_oracao }}</p>
-            </div>
+            <p v-if="errosOracao.captcha_oracao" class="text-red-400 text-xs">{{ errosOracao.captcha_oracao }}</p>
 
             <div class="flex items-center justify-between pt-2">
               <p class="text-[10px] text-white/20 tracking-wide">* campos obrigatórios</p>
-              <button type="submit" :disabled="loadingOracao || !tokenOracao"
+              <button type="submit" :disabled="loadingOracao"
                       class="btn-primary disabled:opacity-40 disabled:cursor-not-allowed">
                 {{ loadingOracao ? 'Enviando...' : '→ Enviar Pedido' }}
               </button>
@@ -650,8 +642,8 @@ import { ref, onMounted } from 'vue'
 import { Link, router, usePage } from '@inertiajs/vue3'
 import MainLayout from '@/Layouts/MainLayout.vue'
 import LogoIcon from '@/Components/LogoIcon.vue'
-import HCaptcha from '@/Components/HCaptcha.vue'
 import WhatsAppPopup from '@/Components/WhatsAppPopup.vue';
+import { useRecaptcha } from '@/composables/useRecaptcha'
 
 const props = defineProps({ cultos: Array, eventos: Array, pregacoes: Array, textos: Object, meta: Object })
 const page = usePage()
@@ -671,8 +663,9 @@ function formatarData(data) {
   return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'UTC' })
 }
 
-// hCaptcha sitekey — vem do backend via shared props ou usa a chave de teste
-const hcaptchaSitekey = page.props.hcaptchaSitekey || 'da1a0e90-27ce-4d62-a2aa-54a26506be18'
+// reCAPTCHA v3 — sitekey vem do backend via shared props
+const recaptchaSitekey = page.props.recaptchaSitekey || ''
+const { execute: executarCaptcha } = useRecaptcha(recaptchaSitekey)
 
 function t(key, fallback = '') { return props.textos?.[key] || fallback }
 
@@ -693,17 +686,21 @@ const identCards = [
 const formSugestao    = ref({ nome: '', email: '', mensagem: '' })
 const errosSugestao   = ref({})
 const loadingSugestao = ref(false)
-const tokenSugestao   = ref('')
-const captchaSugestao = ref(null)
 
-function enviarSugestao() {
+async function enviarSugestao() {
   errosSugestao.value = {}
   loadingSugestao.value = true
-  router.post('/sugestao', { ...formSugestao.value, 'h-captcha-response': tokenSugestao.value }, {
+  let token = ''
+  try {
+    token = await executarCaptcha('sugestao')
+  } catch {
+    errosSugestao.value = { captcha: 'Não foi possível carregar a verificação. Tente novamente.' }
+    loadingSugestao.value = false
+    return
+  }
+  router.post('/sugestao', { ...formSugestao.value, 'g-recaptcha-response': token }, {
     onSuccess: () => {
       formSugestao.value = { nome: '', email: '', mensagem: '' }
-      tokenSugestao.value = ''
-      captchaSugestao.value?.reset()
     },
     onError: (e) => { errosSugestao.value = e },
     onFinish: () => { loadingSugestao.value = false },
@@ -715,24 +712,28 @@ function enviarSugestao() {
 const formOracao    = ref({ nome: '', pedido: '', anonimo: false, compartilhar: false })
 const errosOracao   = ref({})
 const loadingOracao = ref(false)
-const tokenOracao   = ref('')
-const captchaOracao = ref(null)
 
 function toggleAnonimo() {
   formOracao.value.anonimo = !formOracao.value.anonimo
   if (formOracao.value.anonimo) formOracao.value.nome = ''
 }
 
-function enviarPedido() {
+async function enviarPedido() {
   errosOracao.value = {}
   loadingOracao.value = true
-  const payload = { ...formOracao.value, 'h-captcha-response': tokenOracao.value }
+  let token = ''
+  try {
+    token = await executarCaptcha('pedido_oracao')
+  } catch {
+    errosOracao.value = { captcha_oracao: 'Não foi possível carregar a verificação. Tente novamente.' }
+    loadingOracao.value = false
+    return
+  }
+  const payload = { ...formOracao.value, 'g-recaptcha-response': token }
   if (payload.anonimo) payload.nome = 'Anônimo'
   router.post('/pedido-oracao', payload, {
     onSuccess: () => {
       formOracao.value = { nome: '', pedido: '', anonimo: false, compartilhar: false }
-      tokenOracao.value = ''
-      captchaOracao.value?.reset()
     },
     onError: (e) => { errosOracao.value = e },
     onFinish: () => { loadingOracao.value = false },
