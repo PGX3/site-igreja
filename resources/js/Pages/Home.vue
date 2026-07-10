@@ -537,6 +537,8 @@
                 {{ loadingSugestao ? 'Enviando...' : '→ Enviar' }}
               </button>
             </div>
+
+            <p class="text-[10px] text-white/20 leading-relaxed" v-html="avisoRecaptcha"></p>
           </form>
         </div>
       </div>
@@ -613,6 +615,8 @@
                 {{ loadingOracao ? 'Enviando...' : '→ Enviar Pedido' }}
               </button>
             </div>
+
+            <p class="text-[10px] text-white/20 leading-relaxed" v-html="avisoRecaptcha"></p>
           </form>
         </div>
       </div>
@@ -666,6 +670,12 @@ function formatarData(data) {
 // reCAPTCHA v3 — sitekey vem do backend via shared props
 const recaptchaSitekey = page.props.recaptchaSitekey || ''
 const { execute: executarCaptcha } = useRecaptcha(recaptchaSitekey)
+
+// Aviso legal exigido pelo Google quando o badge do reCAPTCHA fica escondido.
+const avisoRecaptcha =
+  'Protegido por reCAPTCHA. Aplicam-se a ' +
+  '<a href="https://policies.google.com/privacy" target="_blank" rel="noopener" class="underline hover:text-white/40">Política de Privacidade</a> e os ' +
+  '<a href="https://policies.google.com/terms" target="_blank" rel="noopener" class="underline hover:text-white/40">Termos de Serviço</a> do Google.'
 
 function t(key, fallback = '') { return props.textos?.[key] || fallback }
 

@@ -32,6 +32,9 @@
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: var(--dark); }
   ::-webkit-scrollbar-thumb { background: var(--blue); border-radius: 2px; }
+
+  /* Badge do reCAPTCHA escondido — o aviso legal fica junto aos formulários. */
+  .grecaptcha-badge { visibility: hidden; }
 }
 
 @layer components {
