@@ -150,6 +150,9 @@ class MembroController extends Controller
         if ($membro->is_superadmin) {
             abort(403);
         }
+        if (! request()->user()?->isPastor()) {
+            abort(403);
+        }
 
         $alfabeto = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
         $senha = '';

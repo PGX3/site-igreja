@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Documento;
 use App\Models\DocumentoTemplate;
 use App\Models\Igreja;
+use App\Services\HtmlSanitizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -112,6 +113,7 @@ class DocumentoController extends Controller
         ]);
 
         $data['valores'] = $data['valores'] ?? [];
+        $data['corpo'] = HtmlSanitizer::clean($data['corpo'] ?? null);
 
         return $data;
     }

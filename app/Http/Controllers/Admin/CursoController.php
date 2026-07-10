@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Curso;
+use App\Services\HtmlSanitizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -147,12 +148,16 @@ class CursoController extends Controller
 
     private function validateData(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'titulo' => 'required|string|max:150',
             'descricao' => 'nullable|string',
             'cor' => 'nullable|string|max:7',
             'ativo' => 'boolean',
             'capa' => 'nullable|file|mimes:jpg,jpeg,png,webp|max:20480',
         ], [], ['capa' => 'capa']);
+
+        $data['descricao'] = HtmlSanitizer::clean($data['descricao'] ?? null);
+
+        return $data;
     }
 }

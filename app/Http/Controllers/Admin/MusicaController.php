@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\EscalaSetlistItem;
 use App\Models\Musica;
+use App\Services\HtmlSanitizer;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -123,7 +124,7 @@ class MusicaController extends Controller
 
     private function validateData(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'nome' => 'required|string|max:200',
             'tom' => 'nullable|string|max:10',
             'letra' => 'required|string',
@@ -133,5 +134,9 @@ class MusicaController extends Controller
             'letra' => 'letra',
             'link' => 'link',
         ]);
+
+        $data['letra'] = HtmlSanitizer::clean($data['letra']);
+
+        return $data;
     }
 }

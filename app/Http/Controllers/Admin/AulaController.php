@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Asset;
 use App\Models\Aula;
 use App\Models\CursoModulo;
+use App\Services\HtmlSanitizer;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -75,6 +76,8 @@ class AulaController extends Controller
             'pontos' => 'nullable|integer|min:0|max:1000',
             'ativo' => 'boolean',
         ]);
+
+        $data['conteudo'] = HtmlSanitizer::clean($data['conteudo'] ?? null);
 
         // Prazo e pontos só fazem sentido em atividade
         if ($data['tipo'] !== 'atividade') {

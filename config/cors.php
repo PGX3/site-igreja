@@ -19,7 +19,11 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    // Em produção defina CORS_ALLOWED_ORIGINS com os domínios reais (app/site),
+    // separados por vírgula. Sem a variável, libera tudo (conveniente em dev).
+    'allowed_origins' => array_filter(
+        explode(',', env('CORS_ALLOWED_ORIGINS', '*'))
+    ),
 
     'allowed_origins_patterns' => [],
 

@@ -18,21 +18,35 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
-        // ── Stats
+        // ── Stats (só o que cada papel realmente enxerga no dashboard)
         $inicioMes = Carbon::today()->startOfMonth();
+
+        // Total de cultos é público-de-painel: aparece até para membro.
         $stats = [
             'totalCultos' => Culto::count(),
-            'novasSugestoes' => Sugestao::where('lida', false)->count(),
-            'novosPedidos' => PedidoOracao::where('status', PedidoOracao::STATUS_NOVO)->count(),
-            'totalSugestoes' => Sugestao::count(),
-            'totalPedidos' => PedidoOracao::count(),
-            'totalMembros' => User::where('tipo', 'membro')->where('is_superadmin', false)->count(),
-            'totalVisitantes' => User::where('tipo', 'visitante')->where('is_superadmin', false)->count(),
-            'novosMembrosMes' => User::where('tipo', 'membro')->where('is_superadmin', false)
-                ->where('created_at', '>=', $inicioMes)->count(),
-            'novosVisitantesMes' => User::where('tipo', 'visitante')->where('is_superadmin', false)
-                ->where('created_at', '>=', $inicioMes)->count(),
         ];
+
+        // Contagens de pessoas: pastor e líder.
+        if ($user->isPastor() || $user->isLider()) {
+            $stats += [
+                'totalMembros' => User::where('tipo', 'membro')->where('is_superadmin', false)->count(),
+                'totalVisitantes' => User::where('tipo', 'visitante')->where('is_superadmin', false)->count(),
+                'novosMembrosMes' => User::where('tipo', 'membro')->where('is_superadmin', false)
+                    ->where('created_at', '>=', $inicioMes)->count(),
+                'novosVisitantesMes' => User::where('tipo', 'visitante')->where('is_superadmin', false)
+                    ->where('created_at', '>=', $inicioMes)->count(),
+            ];
+        }
+
+        // Sugestões e pedidos de oração: só pastor.
+        if ($user->isPastor()) {
+            $stats += [
+                'novasSugestoes' => Sugestao::where('lida', false)->count(),
+                'novosPedidos' => PedidoOracao::where('status', PedidoOracao::STATUS_NOVO)->count(),
+                'totalSugestoes' => Sugestao::count(),
+                'totalPedidos' => PedidoOracao::count(),
+            ];
+        }
 
         // ── Próximo culto (escolhe o culto ativo cuja próxima ocorrência é a mais próxima)
         $proximoCulto = null;

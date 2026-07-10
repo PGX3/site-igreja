@@ -73,7 +73,9 @@ Route::post('/convite/{escalaMembro}/{acao}', [ConfirmacaoEscalaController::clas
     ->name('convite.responder')->middleware('signed')->whereIn('acao', ['confirmar', 'recusar']);
 
 Route::get('/login', fn () => inertia('Auth/Login'))->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::post('/login', [AuthController::class, 'login'])
+    ->middleware('throttle:login')
+    ->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {

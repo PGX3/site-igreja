@@ -16,12 +16,19 @@ class HandleInertiaRequests extends Middleware
 
     public function share(Request $request): array
     {
+        $user = $request->user();
+
+        // Badges de pessoas (visitantes/aniversários): pastor e líder.
+        $verPessoas = $user && ($user->isPastor() || $user->isLider());
+        // Badges de comunidade (sugestões/pedidos de oração): só pastor.
+        $verComunidade = $user && $user->isPastor();
+
         return array_merge(parent::share($request), [
             'auth' => [
-                'user' => $request->user()
+                'user' => $user
                     ? array_merge(
-                        $request->user()->only('id', 'name', 'email'),
-                        ['role' => $request->user()->role?->name]
+                        $user->only('id', 'name', 'email'),
+                        ['role' => $user->role?->name]
                     )
                     : null,
             ],
@@ -31,15 +38,15 @@ class HandleInertiaRequests extends Middleware
                 'sucesso_sugestao' => $request->session()->get('sucesso_sugestao'),
                 'sucesso_oracao' => $request->session()->get('sucesso_oracao'),
             ],
-            // Badges no menu do admin (só carrega quando autenticado)
-            'novasSugestoes' => $request->user() ? Sugestao::where('lida', false)->count() : null,
-            'novosPedidos' => $request->user() ? PedidoOracao::where('status', PedidoOracao::STATUS_NOVO)->count() : null,
-            'totalVisitantes' => $request->user() ? Cache::remember('sidebar_total_visitantes', 300, fn () => User::where('tipo', 'visitante')->where('is_superadmin', false)->count()
+            // Badges no menu do admin (só para os papéis que enxergam cada seção)
+            'novasSugestoes' => $verComunidade ? Sugestao::where('lida', false)->count() : null,
+            'novosPedidos' => $verComunidade ? PedidoOracao::where('status', PedidoOracao::STATUS_NOVO)->count() : null,
+            'totalVisitantes' => $verPessoas ? Cache::remember('sidebar_total_visitantes', 300, fn () => User::where('tipo', 'visitante')->where('is_superadmin', false)->count()
             ) : null,
-            'novosVisitantesMes' => $request->user() ? Cache::remember('sidebar_novos_visitantes_mes', 300, fn () => User::where('tipo', 'visitante')->where('is_superadmin', false)
+            'novosVisitantesMes' => $verPessoas ? Cache::remember('sidebar_novos_visitantes_mes', 300, fn () => User::where('tipo', 'visitante')->where('is_superadmin', false)
                 ->where('created_at', '>=', Carbon::today()->startOfMonth())->count()
             ) : null,
-            'aniversariantesHoje' => $request->user() ? Cache::remember('sidebar_aniversariantes', 600, fn () => (function () {
+            'aniversariantesHoje' => $verPessoas ? Cache::remember('sidebar_aniversariantes', 600, fn () => (function () {
                 $hoje = Carbon::today();
 
                 return User::whereNotNull('data_nascimento')
