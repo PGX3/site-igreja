@@ -1,8 +1,9 @@
 <template>
-  <div ref="root" class="fixed inset-0 z-[60] bg-black text-white flex flex-col"
+  <div ref="root" class="fixed inset-0 z-[60] bg-black text-white flex flex-col overflow-hidden"
+       :style="{ height: '100dvh' }"
        @touchstart="onTouchStart" @touchend="onTouchEnd">
     <!-- BARRA SUPERIOR -->
-    <div class="flex items-center justify-between gap-3 px-4 py-3 border-b border-white/10 flex-shrink-0">
+    <div class="flex items-center justify-between gap-2 px-2 py-2 border-b border-white/10 flex-shrink-0">
       <div class="flex items-center gap-2 min-w-0">
         <button v-if="varias" @click="anterior" :disabled="idx === 0"
                 class="w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30 text-2xl leading-none flex-shrink-0" title="Anterior">‹</button>
@@ -30,26 +31,13 @@
     </div>
 
     <!-- CONTEÚDO -->
-    <div class="flex-1 overflow-y-auto px-6 py-8" ref="scroll">
+    <div class="flex-1 overflow-y-auto px-3 py-3" ref="scroll">
       <div class="mx-auto max-w-3xl">
         <div v-if="temPlayer && mostrarPlayer" class="mb-6">
           <MediaEmbed :url="atual.link" />
         </div>
         <div class="letra-apresentacao" :style="{ fontSize: fonte + 'px', lineHeight: 1.5 }" v-html="atual?.letra"></div>
       </div>
-    </div>
-
-    <!-- NAVEGAÇÃO INFERIOR -->
-    <div v-if="varias" class="flex items-center justify-between gap-3 px-4 py-3 border-t border-white/10 flex-shrink-0">
-      <button @click="anterior" :disabled="idx === 0"
-              class="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30 text-sm font-semibold transition">‹ Anterior</button>
-      <div class="flex gap-1.5">
-        <button v-for="(m, i) in musicas" :key="i" @click="ir(i)"
-                class="w-2.5 h-2.5 rounded-full transition"
-                :class="i === idx ? 'bg-amber-400' : 'bg-white/25 hover:bg-white/50'" :title="m.nome"></button>
-      </div>
-      <button @click="proxima" :disabled="idx === musicas.length - 1"
-              class="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30 text-sm font-semibold transition">Próxima ›</button>
     </div>
   </div>
 </template>
@@ -67,7 +55,7 @@ defineEmits(['close'])
 const root   = ref(null)
 const scroll = ref(null)
 const idx    = ref(props.start)
-const fonte  = ref(28)
+const fonte  = ref(22)
 const mostrarPlayer = ref(false)
 
 const varias = computed(() => props.musicas.length > 1)
@@ -83,8 +71,8 @@ function ir(i) {
 function anterior() { ir(idx.value - 1) }
 function proxima()  { ir(idx.value + 1) }
 
-function maior() { fonte.value = Math.min(fonte.value + 4, 72) }
-function menor() { fonte.value = Math.max(fonte.value - 4, 16) }
+function maior() { fonte.value = Math.min(fonte.value + 2, 72) }
+function menor() { fonte.value = Math.max(fonte.value - 2, 12) }
 
 // Ao trocar de música: volta o scroll ao topo e esconde o player.
 watch(idx, () => {
