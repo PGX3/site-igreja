@@ -30,11 +30,20 @@ class HtmlSanitizer
 
         $config = HTMLPurifier_Config::createDefault();
 
+        // Cache de definição em disco: só usa se o diretório existir e for gravável.
+        // Em produção o usuário do webserver pode não conseguir criar/escrever a pasta,
+        // o que faria o purifier lançar exceção ao montar a definição customizada.
+        // Nesse caso, desliga o cache em disco (definição montada em memória a cada request).
         $cacheDir = storage_path('framework/cache/htmlpurifier');
         if (! is_dir($cacheDir)) {
             @mkdir($cacheDir, 0775, true);
         }
-        $config->set('Cache.SerializerPath', $cacheDir);
+
+        if (is_dir($cacheDir) && is_writable($cacheDir)) {
+            $config->set('Cache.SerializerPath', $cacheDir);
+        } else {
+            $config->set('Cache.DefinitionImpl', null);
+        }
 
         // Tags que o RichTextEditor gera (StarterKit + underline, cor, alinhamento, imagem).
         $config->set('HTML.Allowed', implode(',', [
