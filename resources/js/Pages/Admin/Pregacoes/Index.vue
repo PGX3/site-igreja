@@ -9,10 +9,30 @@
           Publique as pregações do YouTube exibidas no site.
         </p>
       </div>
-      <Link href="/admin/pregacoes/create"
-            class="self-start sm:self-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-sm transition">
-        + Nova Pregação
-      </Link>
+      <div class="flex flex-wrap gap-2 self-start sm:self-auto">
+        <button type="button" @click="importarYoutube" :disabled="importando"
+                class="border border-red-200 dark:border-red-900/60 bg-red-50 hover:bg-red-100 dark:bg-red-950/30 dark:hover:bg-red-900/30 text-red-700 dark:text-red-300 px-4 py-2 rounded-lg text-sm font-semibold transition disabled:opacity-50">
+          {{ importando ? 'Importando...' : '↻ Importar do YouTube' }}
+        </button>
+        <Link href="/admin/pregacoes/create"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-sm transition">
+          + Nova Pregação
+        </Link>
+      </div>
+    </div>
+
+    <div v-if="$page.props.flash?.error"
+         class="mb-6 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm font-medium">
+      {{ $page.props.flash.error }}
+    </div>
+
+    <div v-if="$page.props.flash?.success"
+         class="mb-6 p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 text-sm font-medium">
+      {{ $page.props.flash.success }}
+    </div>
+
+    <div v-if="!youtubeConfigurado" class="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-200">
+      Cadastre o canal do YouTube em <Link href="/admin/igreja" class="font-semibold underline">Dados da Igreja</Link> para habilitar a importação.
     </div>
 
     <!-- EMPTY STATE -->
@@ -99,8 +119,14 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import { Link, router } from '@inertiajs/vue3'
+import { ref } from 'vue'
 
-defineProps({ pregacoes: Array })
+const props = defineProps({
+  pregacoes: { type: Array, default: () => [] },
+  youtubeConfigurado: { type: Boolean, default: false },
+})
+
+const importando = ref(false)
 
 function formatarData(data) {
   if (!data) return ''
@@ -115,5 +141,19 @@ function destroy(id) {
   if (confirm('Remover esta pregação?')) {
     router.delete(`/admin/pregacoes/${id}`)
   }
+}
+
+function importarYoutube() {
+  if (!props.youtubeConfigurado) {
+    alert('Cadastre o canal do YouTube nos Dados da Igreja antes de importar.')
+    return
+  }
+  if (!confirm('Importar todos os vídeos ainda não cadastrados como pregações?')) return
+
+  importando.value = true
+  router.post('/admin/pregacoes/importar-youtube', {}, {
+    preserveScroll: true,
+    onFinish: () => { importando.value = false },
+  })
 }
 </script>

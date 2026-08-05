@@ -46,16 +46,29 @@
           </select>
         </div>
 
-        <!-- HORÁRIO -->
+        <!-- HORÁRIOS -->
         <div>
-          <label class="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider block mb-2">
-            Horário
-          </label>
-          <input v-model="form.horario" type="text" placeholder="Ex: 19h30"
-                 class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-4 py-3 text-sm
-                        bg-white dark:bg-slate-700 text-gray-900 dark:text-white
-                        placeholder-gray-400 dark:placeholder-slate-400
-                        focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" />
+          <p class="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider block mb-2">
+            Horário do culto
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="hora_inicio" class="text-xs text-gray-500 dark:text-slate-400 block mb-1.5">Início</label>
+              <input id="hora_inicio" v-model="form.hora_inicio" type="time"
+                     class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-4 py-3 text-sm
+                            bg-white dark:bg-slate-700 text-gray-900 dark:text-white
+                            focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" />
+              <p v-if="form.errors.hora_inicio" class="text-red-500 text-xs mt-1">{{ form.errors.hora_inicio }}</p>
+            </div>
+            <div>
+              <label for="hora_fim" class="text-xs text-gray-500 dark:text-slate-400 block mb-1.5">Fim</label>
+              <input id="hora_fim" v-model="form.hora_fim" type="time"
+                     class="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-4 py-3 text-sm
+                            bg-white dark:bg-slate-700 text-gray-900 dark:text-white
+                            focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" />
+              <p v-if="form.errors.hora_fim" class="text-red-500 text-xs mt-1">{{ form.errors.hora_fim }}</p>
+            </div>
+          </div>
         </div>
 
         <!-- DESCRIÇÃO -->
@@ -109,15 +122,29 @@ const form = useForm({
   nome:       props.culto?.nome       ?? '',
   dia_semana: props.culto?.dia_semana ?? 'Domingo',
   horario:    props.culto?.horario    ?? '',
+  hora_inicio: props.culto?.hora_inicio ?? horarioParaTime(props.culto?.horario),
+  hora_fim:    props.culto?.hora_fim    ?? '',
   descricao:  props.culto?.descricao  ?? '',
   ativo:      props.culto?.ativo      ?? false,
 })
 
 function submit() {
+  form.transform((data) => ({
+    ...data,
+    // Mantém o campo legado usado nas áreas públicas com o horário de início.
+    horario: data.hora_inicio,
+  }))
+
   if (props.culto) {
     form.put(`/admin/cultos/${props.culto.id}`)
   } else {
     form.post('/admin/cultos')
   }
+}
+
+function horarioParaTime(horario) {
+  const partes = String(horario || '').trim().match(/^(\d{1,2})[:h](\d{2})$/i)
+  if (!partes) return ''
+  return `${partes[1].padStart(2, '0')}:${partes[2]}`
 }
 </script>

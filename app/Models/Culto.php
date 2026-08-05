@@ -9,7 +9,7 @@ class Culto extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nome', 'dia_semana', 'horario', 'descricao', 'ativo'];
+    protected $fillable = ['nome', 'dia_semana', 'horario', 'hora_inicio', 'hora_fim', 'descricao', 'ativo'];
 
     protected $casts = ['ativo' => 'boolean'];
 }

@@ -11,7 +11,7 @@ class EventoController extends Controller
 {
     public function index()
     {
-        $eventos = Evento::orderBy('data_evento')->get()->map(fn ($e) => [
+        $formatarEvento = fn (Evento $e) => [
             'id' => $e->id,
             'nome' => $e->nome,
             'data_evento' => $e->data_evento->format('Y-m-d'),
@@ -19,10 +19,23 @@ class EventoController extends Controller
             'local' => $e->local,
             'descricao' => $e->descricao,
             'ativo' => $e->ativo,
-        ]);
+        ];
+
+        $hoje = now()->toDateString();
+
+        $proximosEventos = Evento::whereDate('data_evento', '>=', $hoje)
+            ->orderBy('data_evento')
+            ->get()
+            ->map($formatarEvento);
+
+        $eventosPassados = Evento::whereDate('data_evento', '<', $hoje)
+            ->orderByDesc('data_evento')
+            ->get()
+            ->map($formatarEvento);
 
         return Inertia::render('Admin/Eventos/Index', [
-            'eventos' => $eventos,
+            'proximosEventos' => $proximosEventos,
+            'eventosPassados' => $eventosPassados,
         ]);
     }
 

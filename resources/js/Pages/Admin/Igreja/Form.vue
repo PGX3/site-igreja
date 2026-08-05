@@ -98,6 +98,16 @@
           <input v-model="form.site" type="text" placeholder="www.igreja.org" :class="inputClass" />
         </div>
 
+        <!-- YOUTUBE -->
+        <div>
+          <label class="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider block mb-2">
+            Canal do YouTube
+          </label>
+          <input v-model="form.youtube_channel_id" type="text" placeholder="https://youtube.com/channel/UC..." :class="inputClass" />
+          <p class="mt-1 text-xs text-gray-400 dark:text-slate-500">Use a URL do canal ou o ID que começa com UC. Ele é usado para importar as pregações.</p>
+          <p v-if="form.errors.youtube_channel_id" class="text-red-500 text-xs mt-1">{{ form.errors.youtube_channel_id }}</p>
+        </div>
+
         <!-- BOTÕES -->
         <div class="flex items-center gap-3 pt-4">
           <button type="submit" :disabled="form.processing"
@@ -136,6 +146,7 @@ const form = useForm({
   telefone: props.igreja?.telefone ?? '',
   email:    props.igreja?.email    ?? '',
   site:     props.igreja?.site     ?? '',
+  youtube_channel_id: props.igreja?.youtube_channel_id ?? '',
   logo:     null,
   remover_logo: false,
 })

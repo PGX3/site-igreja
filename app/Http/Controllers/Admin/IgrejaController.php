@@ -33,11 +33,20 @@ class IgrejaController extends Controller
             'telefone' => 'nullable|string|max:40',
             'email' => 'nullable|email|max:150',
             'site' => 'nullable|string|max:150',
+            'youtube_channel_id' => 'nullable|string|max:255',
             'logo' => 'nullable|file|mimes:jpg,jpeg,png,webp,svg|max:5120',
             'remover_logo' => 'boolean',
         ], [], ['logo' => 'logo']);
 
-        $update = collect($data)->only(['nome', 'cnpj', 'endereco', 'cidade', 'telefone', 'email', 'site'])->all();
+        $canalId = $this->normalizarCanalYoutube($data['youtube_channel_id'] ?? null);
+        if (! empty($data['youtube_channel_id']) && ! $canalId) {
+            return back()->withErrors([
+                'youtube_channel_id' => 'Informe o ID do canal ou uma URL no formato youtube.com/channel/UC...',
+            ])->withInput();
+        }
+
+        $data['youtube_channel_id'] = $canalId;
+        $update = collect($data)->only(['nome', 'cnpj', 'endereco', 'cidade', 'telefone', 'email', 'site', 'youtube_channel_id'])->all();
 
         if ($request->boolean('remover_logo') && $igreja->logo_path) {
             Storage::disk('public')->delete($igreja->logo_path);
@@ -54,5 +63,19 @@ class IgrejaController extends Controller
         $igreja->update($update);
 
         return back()->with('success', 'Dados da igreja atualizados!');
+    }
+
+    private function normalizarCanalYoutube(?string $valor): ?string
+    {
+        $valor = trim((string) $valor);
+        if (! $valor) {
+            return null;
+        }
+
+        if (preg_match('/(?:youtube\.com\/channel\/)?(UC[\w-]{22})/i', $valor, $matches)) {
+            return $matches[1];
+        }
+
+        return null;
     }
 }

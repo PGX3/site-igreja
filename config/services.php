@@ -41,6 +41,10 @@ return [
         'score_threshold' => env('RECAPTCHA_SCORE_THRESHOLD', 0.5),
     ],
 
+    'youtube' => [
+        'api_key' => env('YOUTUBE_API_KEY'),
+    ],
+
 ];
 
 // reCAPTCHA v3 — crie as chaves em https://www.google.com/recaptcha/admin (tipo v3)
