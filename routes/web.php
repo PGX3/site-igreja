@@ -202,6 +202,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
         Route::post('usuarios/{usuario}/senha', [UserController::class, 'alterarSenha'])->name('usuarios.senha');
         Route::resource('cultos', CultoController::class);
         Route::resource('eventos', EventoController::class);
+        Route::post('pregacoes/importar-youtube', [PregacaoController::class, 'importarYoutube'])->name('pregacoes.importar-youtube');
         Route::resource('pregacoes', PregacaoController::class)->parameters(['pregacoes' => 'pregacao']);
         Route::resource('textos', TextoController::class);
 

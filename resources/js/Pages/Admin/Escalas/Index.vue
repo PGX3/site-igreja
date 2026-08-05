@@ -49,7 +49,7 @@
     </div>
 
     <!-- LISTA -->
-    <div class="space-y-3">
+    <div class="space-y-8">
 
       <!-- VAZIO -->
       <div v-if="!escalasFiltered.length" class="py-20 text-center text-gray-400 dark:text-slate-500 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl">
@@ -61,8 +61,22 @@
         </Link>
       </div>
 
-      <div v-for="e in escalasFiltered" :key="e.id"
-           class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden">
+      <section v-for="grupoDia in escalasAgrupadas" :key="grupoDia.data" class="space-y-3">
+        <div class="flex items-center gap-3 px-1" :aria-label="formatarDiaGrupo(grupoDia.data)">
+          <div class="h-px flex-1 bg-gray-200 dark:bg-slate-700"></div>
+          <div class="flex items-center gap-2 text-center">
+            <p class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-slate-400">
+              {{ formatarDiaGrupo(grupoDia.data) }}
+            </p>
+            <span class="rounded-full bg-gray-100 dark:bg-slate-700 px-2 py-0.5 text-[10px] font-bold text-gray-500 dark:text-slate-400">
+              {{ grupoDia.escalas.length }} {{ grupoDia.escalas.length === 1 ? 'escala' : 'escalas' }}
+            </span>
+          </div>
+          <div class="h-px flex-1 bg-gray-200 dark:bg-slate-700"></div>
+        </div>
+
+        <div v-for="e in grupoDia.escalas" :key="e.id"
+             class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden">
 
         <!-- MOBILE -->
         <div class="sm:hidden">
@@ -183,7 +197,8 @@
           </div>
         </div>
 
-      </div>
+        </div>
+      </section>
     </div>
 
     <!-- MODAL COMPARTILHAR -->
@@ -296,10 +311,29 @@ const escalasFiltered = computed(() =>
     : escalasDaAba.value
 )
 
+const escalasAgrupadas = computed(() => {
+  const grupos = new Map()
+
+  for (const escala of escalasFiltered.value) {
+    const data = escala.data || 'sem-data'
+    if (!grupos.has(data)) grupos.set(data, { data: escala.data, escalas: [] })
+    grupos.get(data).escalas.push(escala)
+  }
+
+  return [...grupos.values()]
+})
+
 function diaDoMes(data) { return data ? new Date(data + 'T12:00:00').getDate() : '—' }
 function mesAbrev(data) {
   if (!data) return ''
   return new Date(data + 'T12:00:00').toLocaleString('pt-BR', { month: 'short' }).replace('.', '')
+}
+function formatarDiaGrupo(data) {
+  if (!data) return 'Data não informada'
+  const dia = new Date(data + 'T12:00:00').toLocaleDateString('pt-BR', {
+    weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
+  })
+  return dia.charAt(0).toUpperCase() + dia.slice(1)
 }
 
 function statusLabel(s) {

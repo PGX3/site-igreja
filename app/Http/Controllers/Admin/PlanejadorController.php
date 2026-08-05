@@ -141,11 +141,16 @@ class PlanejadorController extends Controller
                 if (! $temConteudo) {
                     continue; // não cria linha vazia
                 }
+
+                $culto = ! empty($row['culto_id'])
+                    ? Culto::find($row['culto_id'])
+                    : null;
+
                 $escala = Escala::create([
                     'titulo' => $row['vinculo'] ?: ('Escala '.Carbon::parse($row['data'])->format('d/m/Y')),
                     'data' => $row['data'],
-                    'hora_inicio' => $row['hora_inicio'] ?? '00:00',
-                    'hora_fim' => $row['hora_fim'] ?? '00:00',
+                    'hora_inicio' => $this->horaInicioDoCulto($culto) ?? '00:00',
+                    'hora_fim' => $this->horaFimDoCulto($culto) ?? '00:00',
                     'grupo_id' => $grupoId,
                     'culto_id' => $row['culto_id'] ?? null,
                     'evento_id' => $row['evento_id'] ?? null,
@@ -221,5 +226,40 @@ class PlanejadorController extends Controller
             'restricoes' => '',
             'cells' => (object) [],
         ];
+    }
+
+    private function horaInicioDoCulto(?Culto $culto): ?string
+    {
+        if (! $culto) {
+            return null;
+        }
+
+        return $culto->hora_inicio ?: $this->normalizarHorario($culto->horario);
+    }
+
+    private function horaFimDoCulto(?Culto $culto): ?string
+    {
+        if (! $culto) {
+            return null;
+        }
+
+        // Cultos antigos só têm um horário. Até serem atualizados, evita 00:00.
+        return $culto->hora_fim ?: $this->horaInicioDoCulto($culto);
+    }
+
+    private function normalizarHorario(?string $horario): ?string
+    {
+        if (! $horario || ! preg_match('/^(\d{1,2})[:h](\d{2})$/i', trim($horario), $partes)) {
+            return null;
+        }
+
+        $hora = (int) $partes[1];
+        $minuto = (int) $partes[2];
+
+        if ($hora > 23 || $minuto > 59) {
+            return null;
+        }
+
+        return sprintf('%02d:%02d', $hora, $minuto);
     }
 }

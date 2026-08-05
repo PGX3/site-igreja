@@ -26,7 +26,9 @@ class CultoController extends Controller
         $data = $request->validate([
             'nome' => 'required|string|max:100',
             'dia_semana' => 'required|string',
-            'horario' => 'required|string',
+            'horario' => 'required|string|max:20',
+            'hora_inicio' => 'required|date_format:H:i',
+            'hora_fim' => 'required|date_format:H:i|after:hora_inicio',
             'descricao' => 'nullable|string',
             'ativo' => 'boolean',
         ]);
@@ -46,7 +48,9 @@ class CultoController extends Controller
         $data = $request->validate([
             'nome' => 'required|string|max:100',
             'dia_semana' => 'required|string',
-            'horario' => 'required|string',
+            'horario' => 'required|string|max:20',
+            'hora_inicio' => 'required|date_format:H:i',
+            'hora_fim' => 'required|date_format:H:i|after:hora_inicio',
             'descricao' => 'nullable|string',
             'ativo' => 'boolean',
         ]);

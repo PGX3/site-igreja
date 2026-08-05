@@ -31,7 +31,7 @@
           <div class="p-4 flex items-start justify-between gap-2">
             <div>
               <p class="font-semibold text-gray-900 dark:text-white">{{ culto.nome }}</p>
-              <p class="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{{ culto.dia_semana }} · {{ culto.horario }}</p>
+              <p class="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{{ culto.dia_semana }} · {{ horarioDoCulto(culto) }}</p>
             </div>
             <span class="text-xs font-semibold px-2.5 py-1 rounded-full flex-shrink-0"
                   :class="culto.ativo
@@ -67,7 +67,7 @@
                class="grid grid-cols-4 items-center px-6 py-4 border-t border-gray-100 dark:border-slate-700/50 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition min-w-[420px]">
             <div>
               <p class="font-semibold text-gray-900 dark:text-white">{{ culto.nome }}</p>
-              <p class="text-xs text-gray-500 dark:text-slate-400">{{ culto.horario }}</p>
+              <p class="text-xs text-gray-500 dark:text-slate-400">{{ horarioDoCulto(culto) }}</p>
             </div>
             <div class="text-sm text-gray-600 dark:text-slate-300">{{ culto.dia_semana }}</div>
             <div>
@@ -102,6 +102,11 @@ import AdminLayout from '@/Layouts/AdminLayout.vue'
 import { Link, router } from '@inertiajs/vue3'
 
 defineProps({ cultos: Array })
+
+function horarioDoCulto(culto) {
+  if (culto.hora_inicio && culto.hora_fim) return `${culto.hora_inicio.slice(0, 5)} — ${culto.hora_fim.slice(0, 5)}`
+  return culto.horario || 'Horário não informado'
+}
 
 function destroy(id) {
   if (confirm('Remover este culto?')) {

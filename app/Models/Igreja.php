@@ -8,7 +8,7 @@ class Igreja extends Model
 {
     protected $table = 'igreja';
 
-    protected $fillable = ['nome', 'cnpj', 'endereco', 'cidade', 'telefone', 'email', 'site', 'logo_path'];
+    protected $fillable = ['nome', 'cnpj', 'endereco', 'cidade', 'telefone', 'email', 'site', 'youtube_channel_id', 'logo_path'];
 
     /**
      * Retorna a linha única de configuração da igreja, criando-a com os

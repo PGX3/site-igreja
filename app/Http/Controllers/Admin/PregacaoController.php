@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Igreja;
 use App\Models\Pregacao;
+use App\Services\YouTubePregacoesImporter;
 use Illuminate\Http\Request;
+use RuntimeException;
 use Inertia\Inertia;
 
 class PregacaoController extends Controller
@@ -24,7 +27,28 @@ class PregacaoController extends Controller
 
         return Inertia::render('Admin/Pregacoes/Index', [
             'pregacoes' => $pregacoes,
+            'youtubeConfigurado' => (bool) Igreja::atual()->youtube_channel_id,
         ]);
+    }
+
+    public function importarYoutube(YouTubePregacoesImporter $importador)
+    {
+        $canalId = Igreja::atual()->youtube_channel_id;
+        if (! $canalId) {
+            return back()->with('error', 'Cadastre o canal do YouTube nos Dados da Igreja antes de importar.');
+        }
+
+        try {
+            $quantidade = $importador->importar($canalId);
+        } catch (RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        $mensagem = $quantidade
+            ? "{$quantidade} ".($quantidade === 1 ? 'pregação importada!' : 'pregações importadas!')
+            : 'Nenhum vídeo novo para importar.';
+
+        return back()->with('success', $mensagem);
     }
 
     public function create()

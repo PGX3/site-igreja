@@ -15,16 +15,34 @@
       </Link>
     </div>
 
+    <!-- ABAS -->
+    <div class="mb-6 border-b border-gray-200 dark:border-slate-700">
+      <div class="flex gap-6" role="tablist" aria-label="Eventos por período">
+        <button type="button" role="tab" :aria-selected="abaAtiva === 'proximos'"
+                @click="abaAtiva = 'proximos'"
+                :class="classeAba('proximos')">
+          Próximos
+          <span :class="classeContadorAba('proximos')">{{ proximosEventos.length }}</span>
+        </button>
+        <button type="button" role="tab" :aria-selected="abaAtiva === 'passados'"
+                @click="abaAtiva = 'passados'"
+                :class="classeAba('passados')">
+          Passados
+          <span :class="classeContadorAba('passados')">{{ eventosPassados.length }}</span>
+        </button>
+      </div>
+    </div>
+
     <!-- EMPTY STATE -->
-    <div v-if="eventos.length === 0"
+    <div v-if="eventosVisiveis.length === 0"
          class="text-center py-16 text-gray-400 dark:text-slate-500 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl">
       <p class="text-4xl mb-3">📅</p>
-      <p class="font-medium">Nenhum evento cadastrado.</p>
+      <p class="font-medium">{{ mensagemVazia }}</p>
     </div>
 
     <!-- CARDS (mobile) -->
-    <div class="sm:hidden space-y-3">
-      <div v-for="evento in eventos" :key="evento.id"
+    <div v-else class="sm:hidden space-y-3">
+      <div v-for="evento in eventosVisiveis" :key="evento.id"
            class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden">
         <div class="p-4">
           <div class="flex items-start justify-between gap-2 mb-1">
@@ -55,7 +73,7 @@
     </div>
 
     <!-- TABELA (desktop) -->
-    <div class="hidden sm:block bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden">
+    <div v-if="eventosVisiveis.length" class="hidden sm:block bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden">
       <div class="overflow-x-auto">
         <!-- HEAD -->
         <div class="grid grid-cols-5 px-6 py-3 bg-gray-50 dark:bg-slate-700/50 text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider min-w-[480px]">
@@ -66,7 +84,7 @@
           <span class="text-right">Ações</span>
         </div>
         <!-- ROWS -->
-        <div v-for="evento in eventos" :key="evento.id"
+        <div v-for="evento in eventosVisiveis" :key="evento.id"
              class="grid grid-cols-5 items-center px-6 py-4 border-t border-gray-100 dark:border-slate-700/50 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition min-w-[480px]">
           <div>
             <p class="font-semibold text-gray-900 dark:text-white">{{ evento.nome }}</p>
@@ -100,10 +118,44 @@
 </template>
 
 <script setup>
+import { computed, ref } from 'vue'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import { Link, router } from '@inertiajs/vue3'
 
-defineProps({ eventos: Array })
+const props = defineProps({
+  proximosEventos: { type: Array, default: () => [] },
+  eventosPassados: { type: Array, default: () => [] },
+})
+
+const abaAtiva = ref('proximos')
+
+const eventosVisiveis = computed(() => (
+  abaAtiva.value === 'proximos' ? props.proximosEventos : props.eventosPassados
+))
+
+const mensagemVazia = computed(() => (
+  abaAtiva.value === 'proximos'
+    ? 'Nenhum próximo evento cadastrado.'
+    : 'Nenhum evento passado cadastrado.'
+))
+
+function classeAba(aba) {
+  return [
+    'inline-flex items-center gap-2 border-b-2 px-1 pb-3 text-sm font-semibold transition',
+    abaAtiva.value === aba
+      ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
+      : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-slate-400 dark:hover:text-slate-200',
+  ]
+}
+
+function classeContadorAba(aba) {
+  return [
+    'rounded-full px-2 py-0.5 text-xs',
+    abaAtiva.value === aba
+      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+      : 'bg-gray-100 text-gray-500 dark:bg-slate-800 dark:text-slate-400',
+  ]
+}
 
 function formatarData(data) {
   if (!data) return ''
