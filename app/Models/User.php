@@ -13,6 +13,16 @@ class User extends Authenticatable
 
     // role  = nível de acesso administrativo (pastor/lider/membro)
     // tipo  = classificação pastoral (membro/visitante)
+
+    /** Opções oferecidas no cadastro público de visitante (/sou-novo). */
+    public const COMO_CONHECEU_OPCOES = [
+        'Convite de um amigo',
+        'Redes sociais',
+        'Passei em frente',
+        'Evento da igreja',
+        'Outro',
+    ];
+
     protected $fillable = [
         'name', 'email', 'password',
         'role_id', 'telefone', 'data_nascimento', 'disponibilidade', 'callmebot_apikey', 'is_superadmin',

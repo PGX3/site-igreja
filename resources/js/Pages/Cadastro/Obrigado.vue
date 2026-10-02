@@ -10,15 +10,16 @@
         </div>
 
         <p class="text-[10px] font-bold tracking-[0.3em] uppercase text-[var(--blue)] mb-3">
-          Recebido
+          {{ rotulo }}
         </p>
         <h1 style="font-family:'Barlow Condensed',sans-serif"
             class="text-5xl md:text-6xl font-black tracking-tight leading-none mb-6">
-          Obrigado por se<br />cadastrar.
+          <template v-for="(linha, i) in linhasTitulo" :key="linha">
+            {{ linha }}<br v-if="i < linhasTitulo.length - 1" />
+          </template>
         </h1>
         <p class="text-white/50 text-sm leading-relaxed mb-10">
-          Seus dados foram enviados para a equipe pastoral. Em breve entraremos em contato.
-          Que Deus abençoe sua caminhada conosco.
+          {{ mensagem }}
         </p>
 
         <Link href="/"
@@ -34,4 +35,18 @@
 <script setup>
 import MainLayout from '@/Layouts/MainLayout.vue'
 import { Link } from '@inertiajs/vue3'
+import { computed } from 'vue'
+
+// O cadastro curto (/sou-novo) reaproveita esta tela com outro texto.
+const props = defineProps({
+  rotulo: { type: String, default: 'Recebido' },
+  titulo: { type: Array, default: () => ['Obrigado por se', 'cadastrar.'] },
+  mensagem: {
+    type: String,
+    default: 'Seus dados foram enviados para a equipe pastoral. Em breve entraremos em contato. '
+      + 'Que Deus abençoe sua caminhada conosco.',
+  },
+})
+
+const linhasTitulo = computed(() => props.titulo)
 </script>

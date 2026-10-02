@@ -67,6 +67,15 @@ Route::post('/cadastro', [CadastroController::class, 'store'])
     ->name('cadastro.store');
 Route::get('/cadastro/obrigado', [CadastroController::class, 'obrigado'])->name('cadastro.obrigado');
 
+// Cadastro curto para quem visitou pela primeira vez (só nome, telefone,
+// nascimento e como conheceu). O /cadastro completo segue para membresia.
+Route::get('/sou-novo', [CadastroController::class, 'createVisitante'])->name('cadastro.visitante.create');
+Route::post('/sou-novo', [CadastroController::class, 'storeVisitante'])
+    ->middleware('throttle:6,1')
+    ->name('cadastro.visitante.store');
+Route::get('/sou-novo/obrigado', [CadastroController::class, 'obrigadoVisitante'])
+    ->name('cadastro.visitante.obrigado');
+
 Route::get('/convite/{escalaMembro}', [ConfirmacaoEscalaController::class, 'show'])
     ->name('convite.show')->middleware('signed');
 Route::post('/convite/{escalaMembro}/{acao}', [ConfirmacaoEscalaController::class, 'responder'])
