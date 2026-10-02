@@ -60,6 +60,39 @@ class HomeController extends Controller
         ]);
     }
 
+    public function primeiraVez()
+    {
+        $perguntas = [
+            ['Preciso pagar alguma coisa?', 'Não. A visita é gratuita. A contribuição é voluntária e só para quem quiser.'],
+            ['Posso levar crianças?', 'Sim! Durante a mensagem as crianças vão para o cultinho com as professoras. Ao final do culto, busque seu filho na sala, temos uma tolerância de 5 minutos.'],
+            ['Onde estaciono?', 'Na rua e no estacionamento compartilhado com a igreja em frente.'],
+            ['Posso ir sozinho?', 'Pode, sim. Você vai ser bem recebido.'],
+            ['Quanto tempo dura?', 'No máximo 1h50.'],
+            ['Posso assistir online antes?', 'Sim, as pregações ficam no nosso YouTube.'],
+            ['Posso pedir oração?', 'Claro. Use o formulário de oração e a gente ora por você.'],
+        ];
+
+        $descricao = 'Vai visitar a Igreja em Charqueadas? Veja horários, como é o culto, onde estacionar e o que esperar. Domingo 19h, Quarta 20h e Sábado 19h30.';
+
+        return Inertia::render('PrimeiraVez', [
+            'meta' => [
+                'title' => 'Primeira vez? | Igreja em Charqueadas',
+                'description' => $descricao,
+                'og_title' => 'Primeira vez? | Igreja em Charqueadas',
+                'og_description' => $descricao,
+            ],
+            'jsonLd' => [
+                '@context' => 'https://schema.org',
+                '@type' => 'FAQPage',
+                'mainEntity' => array_map(fn ($p) => [
+                    '@type' => 'Question',
+                    'name' => $p[0],
+                    'acceptedAnswer' => ['@type' => 'Answer', 'text' => $p[1]],
+                ], $perguntas),
+            ],
+        ]);
+    }
+
     public function pregacoes()
     {
         $pregacoes = Pregacao::where('ativo', true)

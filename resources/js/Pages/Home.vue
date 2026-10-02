@@ -63,6 +63,15 @@
           {{ t('hero_subtitulo', 'Charqueadas · Rio Grande do Sul · Brasil') }}
         </p>
 
+        <Link href="/primeira-vez"
+              class="mt-6 inline-flex items-center gap-3 text-[10px] tracking-[0.35em] uppercase font-bold
+                     text-[var(--blue)] hover:gap-5 transition-all animate-fade-up"
+              style="font-family:'Barlow Condensed',sans-serif; animation-delay:0.6s">
+          <span>Primeira vez?</span>
+          <span class="w-8 h-px bg-[var(--blue)]"></span>
+          <span>→</span>
+        </Link>
+
         <div class="mt-10 sm:mt-14 flex flex-col sm:flex-row gap-3 sm:gap-4 animate-fade-up" style="animation-delay:0.7s">
           <a href="#sobre" class="btn-primary text-center">Conheça a Igreja</a>
           <a href="#agenda" class="btn-ghost text-center">Ver Agenda</a>

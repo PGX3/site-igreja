@@ -140,6 +140,7 @@ const links = [
   { href: '#sobre',      label: 'A Igreja' },
   { href: '#identidade', label: 'Identidade' },
   { href: '#portas',     label: 'Portas' },
+  { href: '/primeira-vez', label: 'Primeira vez?' },
   { href: '#agenda',     label: 'Agenda' },
   { href: '#eventos',    label: 'Eventos' },
   { href: '/pregacoes',  label: 'Pregações' },

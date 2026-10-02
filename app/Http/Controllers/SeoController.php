@@ -16,6 +16,7 @@ class SeoController extends Controller
 
         // Páginas fixas
         $urls[] = ['loc' => route('home'), 'changefreq' => 'weekly', 'priority' => '1.0'];
+        $urls[] = ['loc' => route('primeira-vez'), 'changefreq' => 'monthly', 'priority' => '0.9'];
         $urls[] = ['loc' => route('pregacoes.index'), 'changefreq' => 'weekly', 'priority' => '0.8'];
         $urls[] = ['loc' => route('cadastro.visitante.create'), 'changefreq' => 'yearly', 'priority' => '0.7'];
         $urls[] = ['loc' => route('cadastro.create'), 'changefreq' => 'yearly', 'priority' => '0.5'];

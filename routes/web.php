@@ -48,6 +48,7 @@ Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/primeira-vez', [HomeController::class, 'primeiraVez'])->name('primeira-vez');
 Route::get('/cultos/{culto}', [HomeController::class, 'showCulto'])->name('cultos.show');
 Route::get('/eventos/{evento}', [HomeController::class, 'showEvento'])->name('eventos.show');
 Route::get('/pregacoes', [HomeController::class, 'pregacoes'])->name('pregacoes.index');
