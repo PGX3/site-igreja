@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /admin
+Disallow: /login
+Disallow: /convite
+Disallow: /cadastro/obrigado
+
+Sitemap: https://www.igrejaemcharqueadas.com.br/sitemap.xml
