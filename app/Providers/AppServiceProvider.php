@@ -49,5 +49,10 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('cadastro', function (Request $request) {
             return Limit::perMinute(20)->by($request->user()?->id ?: $request->ip());
         });
+
+        // Agentes de IA fazem várias chamadas por resposta (tools/list + N tools/call).
+        RateLimiter::for('mcp', function (Request $request) {
+            return Limit::perMinute(60)->by($request->ip());
+        });
     }
 }

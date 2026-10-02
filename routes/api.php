@@ -10,7 +10,14 @@ use App\Http\Controllers\Api\V1\EventoController;
 use App\Http\Controllers\Api\V1\GrupoController;
 use App\Http\Controllers\Api\V1\MembroController;
 use App\Http\Controllers\Api\V1\ProfileController;
+use App\Http\Controllers\Mcp\McpController;
 use Illuminate\Support\Facades\Route;
+
+// Servidor MCP para agentes de IA (somente leitura de conteúdo público).
+// Desligado enquanto MCP_ENABLED não estiver true.
+Route::post('mcp', [McpController::class, 'handle'])
+    ->middleware(['force.json', 'mcp.token', 'throttle:mcp'])
+    ->name('api.mcp');
 
 Route::prefix('v1')->middleware('force.json')->group(function () {
     Route::post('auth/login', [AuthController::class, 'login'])
