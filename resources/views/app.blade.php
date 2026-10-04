@@ -3,7 +3,7 @@
     // Os controllers passam a prop `meta`; sem ela, caem nos defaults abaixo.
     $siteName = config('app.name', 'Igreja em Charqueadas');
     $meta = $page['props']['meta'] ?? [];
-    $defaultDesc = 'Uma igreja simples em Charqueadas/RS, vivendo o que Cristo ensinou.';
+    $defaultDesc = 'Igreja em Charqueadas/RS. Cristo no centro de tudo. Cultos domingo 19h, quarta 20h e sábado 19h30.';
 
     $metaTitle = $meta['title'] ?? $siteName;
     $metaDesc = $meta['description'] ?? $defaultDesc;

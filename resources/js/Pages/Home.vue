@@ -55,7 +55,7 @@
         <!-- Subtítulo editorial -->
         <p class="mt-6 sm:mt-8 italic text-[20px] sm:text-[26px] md:text-[32px] text-white/50 leading-[1.3] max-w-md animate-fade-up"
            style="font-family:'Cormorant Garamond',serif; font-weight:400; animation-delay:0.4s">
-          {{ t('hero_lead', 'Uma igreja simples, vivendo o que Cristo ensinou.') }}
+          {{ t('hero_lead', 'Cristo no centro de tudo.') }}
         </p>
 
         <p class="mt-8 sm:mt-10 text-[10px] sm:text-[11px] tracking-[0.3em] uppercase text-white/30 animate-fade-up"
