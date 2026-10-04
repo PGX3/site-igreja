@@ -102,7 +102,7 @@
           </h2>
           <div class="blue-line"></div>
           <p class="text-white/45 text-[15px] leading-[1.85] max-w-md">
-            {{ t('sobre_texto', 'Uma comunidade evangélica em Charqueadas, conduzida em torno do evangelho de Jesus Cristo. Vivendo o que ele ensinou, sem rodeios e sem pirotecnia.') }}
+            {{ t('sobre_texto', 'Uma comunidade cristã em Charqueadas, conduzida em torno do evangelho de Jesus Cristo. Vivendo o que ele ensinou, sem rodeios e sem pirotecnia.') }}
           </p>
         </div>
         <div class="reveal hidden md:flex justify-center items-center relative h-80">
