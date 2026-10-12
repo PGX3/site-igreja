@@ -21,10 +21,17 @@ Route::post('mcp', [McpController::class, 'handle'])
     ->name('api.mcp');
 
 Route::prefix('v1')->middleware('force.json')->group(function () {
-    // Automações internas (token estático AUTOMACAO_TOKEN)
-    Route::get('automacao/aniversariantes-semana', [AutomacaoController::class, 'aniversariantesSemana'])
+    // Automações internas (token estático AUTOMACAO_TOKEN): agenda e aniversariantes no WhatsApp
+    Route::prefix('automacao')->name('api.v1.automacao.')
         ->middleware(['automacao.token', 'throttle:api'])
-        ->name('api.v1.automacao.aniversariantes-semana');
+        ->group(function () {
+            Route::get('aniversariantes-semana', [AutomacaoController::class, 'aniversariantesSemana'])->name('aniversariantes-semana');
+            Route::get('agenda-semana', [AutomacaoController::class, 'agendaSemana'])->name('agenda-semana');
+            Route::get('cultos', [AutomacaoController::class, 'cultos'])->name('cultos');
+            Route::get('culto-excecoes', [AutomacaoController::class, 'excecoes'])->name('culto-excecoes.index');
+            Route::post('culto-excecoes', [AutomacaoController::class, 'salvarExcecao'])->name('culto-excecoes.store');
+            Route::delete('culto-excecoes/{excecao}', [AutomacaoController::class, 'removerExcecao'])->name('culto-excecoes.destroy');
+        });
 
     Route::post('auth/login', [AuthController::class, 'login'])
         ->middleware('throttle:login')
