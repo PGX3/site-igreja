@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\AutomacaoToken;
 use App\Http\Middleware\CheckRole;
 use App\Http\Middleware\ForceJsonResponse;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -35,6 +36,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => CheckRole::class,
             'force.json' => ForceJsonResponse::class,
             'mcp.token' => McpToken::class,
+            'automacao.token' => AutomacaoToken::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

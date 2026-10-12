@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\AutomacaoController;
 use App\Http\Controllers\Api\V1\CadastroController;
 use App\Http\Controllers\Api\V1\ContatoController;
 use App\Http\Controllers\Api\V1\CultoController;
@@ -20,6 +21,11 @@ Route::post('mcp', [McpController::class, 'handle'])
     ->name('api.mcp');
 
 Route::prefix('v1')->middleware('force.json')->group(function () {
+    // Automações internas (token estático AUTOMACAO_TOKEN)
+    Route::get('automacao/aniversariantes-semana', [AutomacaoController::class, 'aniversariantesSemana'])
+        ->middleware(['automacao.token', 'throttle:api'])
+        ->name('api.v1.automacao.aniversariantes-semana');
+
     Route::post('auth/login', [AuthController::class, 'login'])
         ->middleware('throttle:login')
         ->name('api.v1.auth.login');

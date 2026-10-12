@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\AniversariantesSemana;
 use Carbon\Carbon;
 use Inertia\Inertia;
 
@@ -18,24 +19,14 @@ class AniversarioController extends Controller
             7 => 'julho', 8 => 'agosto', 9 => 'setembro', 10 => 'outubro', 11 => 'novembro', 12 => 'dezembro',
         ];
 
-        $diasSemanaNome = [
-            0 => 'domingo', 1 => 'segunda-feira', 2 => 'terça-feira', 3 => 'quarta-feira',
-            4 => 'quinta-feira', 5 => 'sexta-feira', 6 => 'sábado',
-        ];
+        $diasSemanaNome = AniversariantesSemana::DIAS_SEMANA;
 
-        // Datas da semana atual (segunda a domingo)
-        $inicioSemana = $hoje->copy()->startOfWeek(Carbon::MONDAY);
-        $diasDaSemana = collect(range(0, 6))->map(fn ($i) => $inicioSemana->copy()->addDays($i));
-
-        $aniversariantesSemana = User::whereNotNull('data_nascimento')
-            ->where('is_superadmin', false)
-            ->get()
-            ->map(function ($u) use ($diasDaSemana, $meses, $diasSemanaNome, $hoje) {
+        // Semana atual (segunda a domingo) — mesma regra da automação do WhatsApp
+        $aniversariantesSemana = AniversariantesSemana::listar($hoje)
+            ->map(function ($a) use ($meses, $diasSemanaNome, $hoje) {
+                $u = $a['user'];
                 $nasc = $u->data_nascimento;
-                $match = $diasDaSemana->first(fn ($d) => $d->month === $nasc->month && $d->day === $nasc->day);
-                if (! $match) {
-                    return null;
-                }
+                $match = $a['data'];
 
                 return [
                     'id' => $u->id,
@@ -52,8 +43,6 @@ class AniversarioController extends Controller
                     'ja_passou' => $match->lt($hoje),
                 ];
             })
-            ->filter()
-            ->sortBy('dia_semana_ordem')
             ->values();
 
         $comAniversario = User::whereNotNull('data_nascimento')

@@ -45,7 +45,9 @@ return [
         'api_key' => env('YOUTUBE_API_KEY'),
     ],
 
-];
+    // Token Bearer das automações internas (ex.: aniversariantes da semana no WhatsApp)
+    'automacao' => [
+        'token' => env('AUTOMACAO_TOKEN'),
+    ],
 
-// reCAPTCHA v3 — crie as chaves em https://www.google.com/recaptcha/admin (tipo v3)
-// e defina RECAPTCHA_SITEKEY / RECAPTCHA_SECRET no .env.
+];
