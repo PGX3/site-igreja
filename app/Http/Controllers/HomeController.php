@@ -98,12 +98,15 @@ class HomeController extends Controller
         // Pastores que atendem pelo WhatsApp. Só aparecem os que têm número preenchido
         // (formato internacional, só dígitos: 5551999999999). Foto opcional em public/images/pastores/<slug>.jpg.
         $pastores = collect([
-            ['slug' => 'leandro', 'nome' => 'Leandro Silva', 'papel' => 'Pastor', 'whatsapp' => ''],
-            ['slug' => 'pastor-2', 'nome' => '', 'papel' => 'Pastor', 'whatsapp' => ''],
-            ['slug' => 'pastor-3', 'nome' => '', 'papel' => 'Pastor', 'whatsapp' => ''],
+            ['slug' => 'leandro', 'nome' => 'Leandro Silva', 'papel' => 'Pastor', 'whatsapp' => '5551992824071'],
+            ['slug' => 'elias', 'nome' => 'Elias Adam', 'papel' => 'Pastor', 'whatsapp' => '5551997327290'],
+            ['slug' => 'felipe', 'nome' => 'Felipe Leites', 'papel' => 'Pastor', 'whatsapp' => '5551995409534'],
         ])
-            ->filter(fn ($p) => $p['nome'] !== '' && preg_match('/^\d{12,13}$/', $p['whatsapp']))
             ->map(function ($p) {
+                // Sem número próprio ainda: usa o WhatsApp geral da igreja (a mensagem já cita o pastor).
+                if (! preg_match('/^\d{12,13}$/', $p['whatsapp'])) {
+                    $p['whatsapp'] = '5551992824071';
+                }
                 $primeiro = explode(' ', $p['nome'])[0];
                 $msg = rawurlencode("Oi, {$primeiro}! Vi o Instagram da Igreja em Charqueadas e queria conversar.");
                 $foto = "images/pastores/{$p['slug']}.jpg";

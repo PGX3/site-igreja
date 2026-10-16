@@ -15,22 +15,23 @@
           um pedido de oração ou só vontade de conversar antes de vir.
         </p>
 
-        <div v-if="pastores.length" class="mt-12 sm:mt-16 grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-[var(--blue)]/10">
+        <div v-if="pastores.length" class="mt-12 sm:mt-16 grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
           <a v-for="p in pastores" :key="p.nome" :href="p.link" target="_blank" rel="noopener"
-             class="group bg-[#0a0a0a] p-8 sm:p-10 flex flex-col items-start gap-6 transition-colors duration-500 hover:bg-[#0f0f0f] relative overflow-hidden">
-            <div class="absolute bottom-0 left-0 h-px w-0 bg-gradient-to-r from-[var(--blue)] to-transparent group-hover:w-full transition-all duration-700"></div>
+             class="group bg-white/[0.03] border border-[rgba(0,167,255,0.25)] rounded-2xl p-5 sm:p-8 flex flex-col gap-5 sm:gap-6
+                    transition-colors duration-500 hover:bg-white/[0.05] hover:border-[rgba(0,167,255,0.6)] relative overflow-hidden">
+            <div class="flex items-center gap-4 sm:flex-col sm:items-start sm:gap-6">
+              <img v-if="p.foto" :src="p.foto" :alt="p.nome"
+                   class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-full object-cover ring-2 ring-[var(--blue)]/50" />
+              <div v-else
+                   class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-full flex items-center justify-center ring-2 ring-[var(--blue)]/50 text-[var(--blue)] text-3xl font-black">
+                {{ p.iniciais }}
+              </div>
 
-            <img v-if="p.foto" :src="p.foto" :alt="p.nome"
-                 class="w-24 h-24 rounded-full object-cover ring-2 ring-[var(--blue)]/40" />
-            <div v-else
-                 class="w-24 h-24 rounded-full flex items-center justify-center ring-2 ring-[var(--blue)]/40 text-[var(--blue)] text-3xl font-black">
-              {{ p.iniciais }}
-            </div>
-
-            <div>
-              <p class="text-[10px] tracking-[0.3em] uppercase text-[var(--blue)]/70"
-                 style="font-family:'Barlow Condensed',sans-serif">{{ p.papel }}</p>
-              <p class="mt-1 text-[28px] sm:text-[32px] font-black text-white leading-tight">{{ p.nome }}</p>
+              <div>
+                <p class="text-[10px] tracking-[0.3em] uppercase text-[var(--blue)]/80"
+                   style="font-family:'Barlow Condensed',sans-serif">{{ p.papel }}</p>
+                <p class="mt-1 text-[24px] sm:text-[32px] font-black text-white leading-tight">{{ p.nome }}</p>
+              </div>
             </div>
 
             <span class="btn-primary text-center w-full">→ Chamar no WhatsApp</span>
