@@ -11,6 +11,7 @@
     $ogDesc = $meta['og_description'] ?? $metaDesc;
     $ogImage = $meta['og_image'] ?? url('/apple-touch-icon.png');
     $canonical = url()->current();
+    $robots = $meta['robots'] ?? null;
 
     $jsonLd = $page['props']['jsonLd'] ?? null;
 
@@ -43,6 +44,9 @@
     <title>{{ $metaTitle }}</title>
     <meta name="description" content="{{ $metaDesc }}" />
     <link rel="canonical" href="{{ $canonical }}" />
+    @if ($robots)
+    <meta name="robots" content="{{ $robots }}" />
+    @endif
 
     {{-- Open Graph --}}
     <meta property="og:type" content="website" />

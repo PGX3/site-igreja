@@ -49,6 +49,8 @@ Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/primeira-vez', [HomeController::class, 'primeiraVez'])->name('primeira-vez');
+// Página fora do menu e do sitemap (noindex): link usado no destaque "1ª vez" do Instagram.
+Route::get('/fale-com-a-gente', [HomeController::class, 'faleConosco'])->name('fale-conosco');
 Route::get('/cultos/{culto}', [HomeController::class, 'showCulto'])->name('cultos.show');
 Route::get('/eventos/{evento}', [HomeController::class, 'showEvento'])->name('eventos.show');
 Route::get('/pregacoes', [HomeController::class, 'pregacoes'])->name('pregacoes.index');

@@ -93,6 +93,41 @@ class HomeController extends Controller
         ]);
     }
 
+    public function faleConosco()
+    {
+        // Pastores que atendem pelo WhatsApp. Só aparecem os que têm número preenchido
+        // (formato internacional, só dígitos: 5551999999999). Foto opcional em public/images/pastores/<slug>.jpg.
+        $pastores = collect([
+            ['slug' => 'leandro', 'nome' => 'Leandro Silva', 'papel' => 'Pastor', 'whatsapp' => ''],
+            ['slug' => 'pastor-2', 'nome' => '', 'papel' => 'Pastor', 'whatsapp' => ''],
+            ['slug' => 'pastor-3', 'nome' => '', 'papel' => 'Pastor', 'whatsapp' => ''],
+        ])
+            ->filter(fn ($p) => $p['nome'] !== '' && preg_match('/^\d{12,13}$/', $p['whatsapp']))
+            ->map(function ($p) {
+                $primeiro = explode(' ', $p['nome'])[0];
+                $msg = rawurlencode("Oi, {$primeiro}! Vi o Instagram da Igreja em Charqueadas e queria conversar.");
+                $foto = "images/pastores/{$p['slug']}.jpg";
+
+                return [
+                    'nome' => $p['nome'],
+                    'papel' => $p['papel'],
+                    'iniciais' => collect(explode(' ', $p['nome']))->map(fn ($n) => mb_substr($n, 0, 1))->take(2)->implode(''),
+                    'foto' => file_exists(public_path($foto)) ? '/'.$foto : null,
+                    'link' => "https://wa.me/{$p['whatsapp']}?text={$msg}",
+                ];
+            })
+            ->values();
+
+        return Inertia::render('FaleConosco', [
+            'pastores' => $pastores,
+            'meta' => [
+                'title' => 'Fale com a gente | Igreja em Charqueadas',
+                'description' => 'Converse com um dos pastores da Igreja em Charqueadas pelo WhatsApp.',
+                'robots' => 'noindex, nofollow',
+            ],
+        ]);
+    }
+
     public function pregacoes()
     {
         $pregacoes = Pregacao::where('ativo', true)
