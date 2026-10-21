@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AniversarioController;
+use App\Http\Controllers\Api\V1\AprenderController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\AutomacaoController;
 use App\Http\Controllers\Api\V1\CadastroController;
@@ -74,6 +76,16 @@ Route::prefix('v1')->middleware('force.json')->group(function () {
         Route::get('cultos/{culto}', [CultoController::class, 'show'])->name('api.v1.cultos.show');
         Route::get('eventos', [EventoController::class, 'index'])->name('api.v1.eventos.index');
         Route::get('eventos/{evento}', [EventoController::class, 'show'])->name('api.v1.eventos.show');
+
+        // Aniversariantes (pastor + líder, mesma regra do painel)
+        Route::get('aniversarios', [AniversarioController::class, 'index'])
+            ->middleware('role:pastor,lider')
+            ->name('api.v1.aniversarios.index');
+
+        // Escola bíblica (qualquer membro logado lê os cursos ativos)
+        Route::get('aprender', [AprenderController::class, 'index'])->name('api.v1.aprender.index');
+        Route::get('aprender/aulas/{aula}', [AprenderController::class, 'aula'])->name('api.v1.aprender.aula');
+        Route::get('aprender/{curso}', [AprenderController::class, 'curso'])->name('api.v1.aprender.curso');
 
         // Contato (membro logado)
         Route::post('contato/sugestao', [ContatoController::class, 'sugestao'])
