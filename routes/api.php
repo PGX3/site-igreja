@@ -9,9 +9,15 @@ use App\Http\Controllers\Api\V1\ContatoController;
 use App\Http\Controllers\Api\V1\CultoController;
 use App\Http\Controllers\Api\V1\DeviceTokenController;
 use App\Http\Controllers\Api\V1\EscalaController;
+use App\Http\Controllers\Api\V1\EscalaNotaController;
+use App\Http\Controllers\Api\V1\EscalaSetlistController;
 use App\Http\Controllers\Api\V1\EventoController;
 use App\Http\Controllers\Api\V1\GrupoController;
+use App\Http\Controllers\Api\V1\GrupoMuralController;
 use App\Http\Controllers\Api\V1\MembroController;
+use App\Http\Controllers\Api\V1\MusicaController;
+use App\Http\Controllers\Api\V1\PedidoOracaoController;
+use App\Http\Controllers\Api\V1\PregacaoController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Mcp\McpController;
 use Illuminate\Support\Facades\Route;
@@ -60,8 +66,14 @@ Route::prefix('v1')->middleware('force.json')->group(function () {
         Route::get('grupos', [GrupoController::class, 'index'])->name('api.v1.grupos.index');
         Route::get('membros', [MembroController::class, 'index'])->name('api.v1.membros.index');
 
+        // Mural do grupo (lê quem é do grupo, publica quem gerencia: autorização no controller)
+        Route::get('grupos/{grupo}/avisos', [GrupoMuralController::class, 'index'])->name('api.v1.grupos.avisos.index');
+        Route::post('grupos/{grupo}/avisos', [GrupoMuralController::class, 'store'])->name('api.v1.grupos.avisos.store');
+        Route::delete('grupos/{grupo}/avisos/{aviso}', [GrupoMuralController::class, 'destroy'])->name('api.v1.grupos.avisos.destroy');
+
         // Escalas
         Route::get('escalas', [EscalaController::class, 'index'])->name('api.v1.escalas.index');
+        Route::get('escalas/gerenciadas', [EscalaController::class, 'gerenciadas'])->name('api.v1.escalas.gerenciadas');
         Route::post('escalas', [EscalaController::class, 'store'])->name('api.v1.escalas.store');
         Route::get('escalas/{escala}', [EscalaController::class, 'show'])->name('api.v1.escalas.show');
         Route::patch('escalas/{escala}', [EscalaController::class, 'update'])->name('api.v1.escalas.update');
@@ -70,6 +82,28 @@ Route::prefix('v1')->middleware('force.json')->group(function () {
         Route::delete('escalas/{escala}/membros/{escalaMembro}', [EscalaController::class, 'removeMembro'])->name('api.v1.escalas.membros.remove');
         Route::patch('escalas/membros/{escalaMembro}/confirmar', [EscalaController::class, 'confirmar'])->name('api.v1.escalas.confirmar');
         Route::patch('escalas/membros/{escalaMembro}/recusar', [EscalaController::class, 'recusar'])->name('api.v1.escalas.recusar');
+
+        // Setlist e notas da escala (quem gerencia o grupo: autorização no controller)
+        Route::post('escalas/{escala}/setlist', [EscalaSetlistController::class, 'store'])->name('api.v1.escalas.setlist.store');
+        Route::patch('escalas/{escala}/setlist/reorder', [EscalaSetlistController::class, 'reorder'])->name('api.v1.escalas.setlist.reorder');
+        Route::patch('escalas/{escala}/setlist/{item}', [EscalaSetlistController::class, 'update'])->name('api.v1.escalas.setlist.update');
+        Route::delete('escalas/{escala}/setlist/{item}', [EscalaSetlistController::class, 'destroy'])->name('api.v1.escalas.setlist.destroy');
+        Route::post('escalas/{escala}/notas', [EscalaNotaController::class, 'store'])->name('api.v1.escalas.notas.store');
+        Route::delete('escalas/{escala}/notas/{nota}', [EscalaNotaController::class, 'destroy'])->name('api.v1.escalas.notas.destroy');
+
+        // Repertório (leitura para os músicos)
+        Route::get('musicas', [MusicaController::class, 'index'])->name('api.v1.musicas.index');
+        Route::get('musicas/{musica}', [MusicaController::class, 'show'])->name('api.v1.musicas.show');
+
+        // Pregações publicadas
+        Route::get('pregacoes', [PregacaoController::class, 'index'])->name('api.v1.pregacoes.index');
+        Route::get('pregacoes/{pregacao}', [PregacaoController::class, 'show'])->name('api.v1.pregacoes.show');
+
+        // Pedidos de oração recebidos (só pastor, mesma regra do painel)
+        Route::middleware('role:pastor')->group(function () {
+            Route::get('pedidos-oracao', [PedidoOracaoController::class, 'index'])->name('api.v1.pedidos-oracao.index');
+            Route::patch('pedidos-oracao/{pedido}/status', [PedidoOracaoController::class, 'atualizarStatus'])->name('api.v1.pedidos-oracao.status');
+        });
 
         // Cultos e eventos
         Route::get('cultos', [CultoController::class, 'index'])->name('api.v1.cultos.index');
