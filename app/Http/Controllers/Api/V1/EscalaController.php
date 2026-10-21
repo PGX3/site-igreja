@@ -29,6 +29,31 @@ class EscalaController extends Controller
         return EscalaResource::collection($escalas);
     }
 
+    /**
+     * Escalas dos grupos que o usuário gerencia (pastor: todos), para o líder
+     * montar e editar pelo app. Filtros opcionais: grupo_id, from, to (Y-m-d).
+     */
+    public function gerenciadas(Request $request): AnonymousResourceCollection
+    {
+        $filtros = $request->validate([
+            'grupo_id' => ['nullable', 'integer'],
+            'from' => ['nullable', 'date_format:Y-m-d'],
+            'to' => ['nullable', 'date_format:Y-m-d'],
+        ]);
+        $user = $request->user();
+
+        $escalas = Escala::query()
+            ->with(['grupo', 'culto', 'evento', 'escalaMembros.user'])
+            ->unless($user->isPastor(), fn ($q) => $q->whereIn('grupo_id', $user->grupoIdsLiderados()))
+            ->when($filtros['grupo_id'] ?? null, fn ($q, $id) => $q->where('grupo_id', $id))
+            ->when($filtros['from'] ?? null, fn ($q, $d) => $q->whereDate('data', '>=', $d))
+            ->when($filtros['to'] ?? null, fn ($q, $d) => $q->whereDate('data', '<=', $d))
+            ->orderByDesc('data')
+            ->get();
+
+        return EscalaResource::collection($escalas);
+    }
+
     public function store(StoreEscalaRequest $request): JsonResponse
     {
         $data = $request->validated();

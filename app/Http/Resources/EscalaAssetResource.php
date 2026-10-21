@@ -2,10 +2,12 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Asset;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
 
+/** @mixin Asset */
 class EscalaAssetResource extends JsonResource
 {
     public function toArray(Request $request): array
