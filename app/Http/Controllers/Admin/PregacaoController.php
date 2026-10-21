@@ -7,8 +7,8 @@ use App\Models\Igreja;
 use App\Models\Pregacao;
 use App\Services\YouTubePregacoesImporter;
 use Illuminate\Http\Request;
-use RuntimeException;
 use Inertia\Inertia;
+use RuntimeException;
 
 class PregacaoController extends Controller
 {
