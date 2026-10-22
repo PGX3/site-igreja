@@ -61,6 +61,7 @@
         <div>
           <label :class="labelClass">Email</label>
           <input v-model="pessoa.email" type="email" placeholder="email@exemplo.com"
+                 :disabled="!!pessoa.id"
                  :class="[inputClass, errors.email && 'border-red-400']" />
           <p v-if="errors.email" class="mt-1 text-xs text-red-500">{{ errors.email }}</p>
         </div>
@@ -97,26 +98,30 @@
       <div>
         <label :class="labelClass">CPF</label>
         <input v-model="pessoa.cpf" type="text" placeholder="000.000.000-00"
+               :disabled="!!pessoa.id"
                :class="[inputClass, errors.cpf && 'border-red-400']" />
         <p v-if="errors.cpf" class="mt-1 text-xs text-red-500">{{ errors.cpf }}</p>
+        <p v-if="pessoa.id" class="mt-1 text-[11px] text-gray-400 dark:text-slate-500">
+          Email, CPF e classificação de quem já está cadastrado são alterados em Membros ou Visitantes.
+        </p>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label :class="labelClass">Classificação</label>
           <div class="flex gap-2">
-            <label class="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg border cursor-pointer text-sm transition"
-                   :class="pessoa.tipo === 'membro'
+            <label class="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg border text-sm transition"
+                   :class="[pessoa.id ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer', pessoa.tipo === 'membro'
                      ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-semibold'
-                     : 'border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700'">
-              <input type="radio" value="membro" v-model="pessoa.tipo" class="sr-only" />
+                     : 'border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700']">
+              <input type="radio" value="membro" v-model="pessoa.tipo" :disabled="!!pessoa.id" class="sr-only" />
               Membro
             </label>
-            <label class="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg border cursor-pointer text-sm transition"
-                   :class="pessoa.tipo === 'visitante'
+            <label class="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg border text-sm transition"
+                   :class="[pessoa.id ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer', pessoa.tipo === 'visitante'
                      ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-semibold'
-                     : 'border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700'">
-              <input type="radio" value="visitante" v-model="pessoa.tipo" class="sr-only" />
+                     : 'border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700']">
+              <input type="radio" value="visitante" v-model="pessoa.tipo" :disabled="!!pessoa.id" class="sr-only" />
               Visitante
             </label>
           </div>
@@ -153,5 +158,6 @@ const labelClass = 'block text-xs font-semibold text-gray-600 dark:text-slate-40
 const inputClass = `w-full border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm
                     bg-white dark:bg-slate-700 text-gray-900 dark:text-white
                     placeholder-gray-400 dark:placeholder-slate-400
-                    focus:outline-none focus:ring-2 focus:ring-blue-500`
+                    focus:outline-none focus:ring-2 focus:ring-blue-500
+                    disabled:opacity-60 disabled:cursor-not-allowed`
 </script>

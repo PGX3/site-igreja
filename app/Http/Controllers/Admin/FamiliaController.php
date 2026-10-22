@@ -53,6 +53,7 @@ class FamiliaController extends Controller
     {
         $data = $this->validateData($request);
         $this->garantirUnicoResponsavel($data['pessoas']);
+        $this->validarVinculos($data['pessoas']);
 
         $familia = DB::transaction(function () use ($data) {
             $familia = Familia::create([
@@ -66,27 +67,14 @@ class FamiliaController extends Controller
 
             $responsavelId = null;
             foreach ($data['pessoas'] as $p) {
-                $attrs = [
-                    'name' => $p['name'],
-                    'telefone' => $p['telefone'],
-                    'email' => $p['email'] ?? null,
-                    'data_nascimento' => $p['data_nascimento'] ?? null,
-                    'sexo' => $p['sexo'] ?? null,
-                    'estado_civil' => $p['estado_civil'] ?? null,
-                    'cpf' => $p['cpf'] ?? null,
-                    'tipo' => $p['tipo'],
-                    'batizado_aguas' => $p['batizado_aguas'] ?? null,
-                    'familia_id' => $familia->id,
-                ];
-
                 if (! empty($p['id'])) {
                     $user = User::find($p['id']);
                     if (! $user || $user->familia_id !== null) {
                         continue;
                     }
-                    $user->update($attrs);
+                    $this->vincular($user, $p, $familia);
                 } else {
-                    $user = User::create($attrs);
+                    $user = User::create($this->dadosNovaPessoa($p, $familia));
                 }
 
                 if (! empty($p['is_responsavel'])) {
@@ -136,6 +124,7 @@ class FamiliaController extends Controller
     public function edit(Familia $familia)
     {
         $familia->load(['membros' => fn ($q) => $q->orderBy('id')]);
+        $verCpf = (bool) auth()->user()?->isPastor();
 
         return Inertia::render('Admin/Familias/Form', [
             'familia' => [
@@ -156,7 +145,7 @@ class FamiliaController extends Controller
                     'data_nascimento' => optional($u->data_nascimento)->format('Y-m-d'),
                     'sexo' => $u->sexo,
                     'estado_civil' => $u->estado_civil,
-                    'cpf' => $u->cpf,
+                    'cpf' => $verCpf ? $u->cpf : null,
                     'tipo' => $u->tipo,
                     'batizado_aguas' => $u->batizado_aguas,
                     'is_responsavel' => $u->id === $familia->responsavel_id,
@@ -170,6 +159,7 @@ class FamiliaController extends Controller
     {
         $data = $this->validateData($request);
         $this->garantirUnicoResponsavel($data['pessoas']);
+        $this->validarVinculos($data['pessoas'], $familia);
 
         DB::transaction(function () use ($familia, $data) {
             $familia->update([
@@ -185,29 +175,16 @@ class FamiliaController extends Controller
             $responsavelId = null;
 
             foreach ($data['pessoas'] as $p) {
-                $attrs = [
-                    'name' => $p['name'],
-                    'telefone' => $p['telefone'],
-                    'email' => $p['email'] ?? null,
-                    'data_nascimento' => $p['data_nascimento'] ?? null,
-                    'sexo' => $p['sexo'] ?? null,
-                    'estado_civil' => $p['estado_civil'] ?? null,
-                    'cpf' => $p['cpf'] ?? null,
-                    'tipo' => $p['tipo'],
-                    'batizado_aguas' => $p['batizado_aguas'] ?? null,
-                    'familia_id' => $familia->id,
-                ];
-
                 if (! empty($p['id'])) {
                     $user = User::find($p['id']);
                     if ($user && ($user->familia_id === null || $user->familia_id === $familia->id)) {
-                        $user->update($attrs);
+                        $this->vincular($user, $p, $familia);
                         $idsRecebidos[] = $user->id;
                     } else {
                         continue;
                     }
                 } else {
-                    $user = User::create($attrs);
+                    $user = User::create($this->dadosNovaPessoa($p, $familia));
                     $idsRecebidos[] = $user->id;
                 }
 
@@ -265,12 +242,13 @@ class FamiliaController extends Controller
 
         $erros = [];
         foreach ($data['pessoas'] as $i => $p) {
-            $ignoreId = $p['id'] ?? null;
+            // Email e CPF de quem já está cadastrado não mudam por este formulário.
+            if (! empty($p['id'])) {
+                continue;
+            }
 
             if (! empty($p['email'])) {
-                $existe = User::where('email', $p['email'])
-                    ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
-                    ->exists();
+                $existe = User::where('email', $p['email'])->exists();
                 if ($existe) {
                     $erros["pessoas.{$i}.email"] = ['Este email já está em uso.'];
                 }
@@ -278,9 +256,7 @@ class FamiliaController extends Controller
 
             if (! empty($p['cpf'])) {
                 $cpfLimpo = Cpf::normalize($p['cpf']);
-                $existe = User::where('cpf', $cpfLimpo)
-                    ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
-                    ->exists();
+                $existe = User::where('cpf', $cpfLimpo)->exists();
                 if ($existe) {
                     $erros["pessoas.{$i}.cpf"] = ['Este CPF já está cadastrado.'];
                 }
@@ -300,11 +276,91 @@ class FamiliaController extends Controller
         abort_if($marcados !== 1, 422, 'Exatamente uma pessoa precisa ser marcada como responsável.');
     }
 
+    /**
+     * Garante que pessoas já cadastradas só entram numa família quando quem
+     * está editando pode mexer nelas (líder não vincula pastor, líder nem superadmin).
+     */
+    private function validarVinculos(array $pessoas, ?Familia $familia = null): void
+    {
+        $erros = [];
+        foreach ($pessoas as $i => $p) {
+            if (empty($p['id'])) {
+                continue;
+            }
+
+            $user = User::find($p['id']);
+            $jaNaFamilia = $familia && $user?->familia_id === $familia->id;
+
+            if ($user && ! $jaNaFamilia && ! $this->podeAlterar($user)) {
+                $erros["pessoas.{$i}.id"] = ['Esta pessoa não pode ser vinculada por este cadastro.'];
+            }
+        }
+
+        if (! empty($erros)) {
+            throw ValidationException::withMessages($erros);
+        }
+    }
+
+    private function podeAlterar(User $user): bool
+    {
+        if ($user->is_superadmin) {
+            return false;
+        }
+
+        if ($user->isPastor() || $user->isLider()) {
+            return (bool) auth()->user()?->isPastor();
+        }
+
+        return true;
+    }
+
+    /**
+     * Vincula uma pessoa já cadastrada à família. Atualiza só dados de perfil:
+     * email, CPF e classificação continuam sendo editados em Membros/Visitantes.
+     */
+    private function vincular(User $user, array $p, Familia $familia): void
+    {
+        if (! $this->podeAlterar($user)) {
+            $user->update(['familia_id' => $familia->id]);
+
+            return;
+        }
+
+        $user->update([
+            'name' => $p['name'],
+            'telefone' => $p['telefone'],
+            'data_nascimento' => $p['data_nascimento'] ?? null,
+            'sexo' => $p['sexo'] ?? null,
+            'estado_civil' => $p['estado_civil'] ?? null,
+            'batizado_aguas' => $p['batizado_aguas'] ?? null,
+            'familia_id' => $familia->id,
+        ]);
+    }
+
+    private function dadosNovaPessoa(array $p, Familia $familia): array
+    {
+        return [
+            'name' => $p['name'],
+            'telefone' => $p['telefone'],
+            'email' => $p['email'] ?? null,
+            'data_nascimento' => $p['data_nascimento'] ?? null,
+            'sexo' => $p['sexo'] ?? null,
+            'estado_civil' => $p['estado_civil'] ?? null,
+            'cpf' => $p['cpf'] ?? null,
+            'tipo' => $p['tipo'],
+            'batizado_aguas' => $p['batizado_aguas'] ?? null,
+            'familia_id' => $familia->id,
+        ];
+    }
+
     private function pessoasDisponiveis(): array
     {
+        $pastor = (bool) auth()->user()?->isPastor();
+
         return User::query()
             ->whereNull('familia_id')
             ->where('is_superadmin', false)
+            ->when(! $pastor, fn ($q) => $q->whereDoesntHave('role', fn ($r) => $r->whereIn('name', ['pastor', 'lider'])))
             ->orderBy('name')
             ->get(['id', 'name', 'telefone', 'tipo', 'email', 'data_nascimento', 'sexo', 'estado_civil', 'cpf', 'batizado_aguas'])
             ->map(fn ($u) => [
@@ -315,7 +371,7 @@ class FamiliaController extends Controller
                 'data_nascimento' => optional($u->data_nascimento)->format('Y-m-d'),
                 'sexo' => $u->sexo,
                 'estado_civil' => $u->estado_civil,
-                'cpf' => $u->cpf,
+                'cpf' => $pastor ? $u->cpf : null,
                 'tipo' => $u->tipo,
                 'batizado_aguas' => $u->batizado_aguas,
             ])
