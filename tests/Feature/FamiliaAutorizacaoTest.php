@@ -192,6 +192,68 @@ class FamiliaAutorizacaoTest extends TestCase
         $this->assertSame('(51) 1111-1111', $integrante->telefone);
     }
 
+    public function test_lider_vincula_visitante_do_cadastro_publico_com_perfil_incompleto(): void
+    {
+        $lider = $this->usuario('Lider', 'lider');
+        $visitante = User::create([
+            'name' => 'Visitante',
+            'telefone' => '(51) 3333-3333',
+            'tipo' => 'visitante',
+        ]);
+
+        $this->actingAs($lider)
+            ->post('/admin/familias', $this->payload([
+                $this->pessoa(['is_responsavel' => true]),
+                $this->pessoa([
+                    'id' => $visitante->id,
+                    'name' => 'Visitante',
+                    'telefone' => '(51) 3333-3333',
+                    'data_nascimento' => null,
+                    'tipo' => 'visitante',
+                    'batizado_aguas' => null,
+                ]),
+            ]))
+            ->assertSessionHasNoErrors();
+
+        $visitante->refresh();
+        $this->assertSame(Familia::sole()->id, $visitante->familia_id);
+        $this->assertNull($visitante->batizado_aguas);
+        $this->assertNull($visitante->data_nascimento);
+    }
+
+    public function test_lider_salva_familia_com_integrante_de_perfil_incompleto(): void
+    {
+        $lider = $this->usuario('Lider', 'lider');
+        $familia = $this->familia();
+        $visitante = User::create([
+            'name' => 'Visitante',
+            'telefone' => '(51) 3333-3333',
+            'tipo' => 'visitante',
+            'familia_id' => $familia->id,
+        ]);
+
+        $this->actingAs($lider)
+            ->put("/admin/familias/{$familia->id}", $this->payload([
+                $this->pessoa(['id' => $visitante->id, 'name' => 'Visitante', 'data_nascimento' => null, 'batizado_aguas' => null, 'is_responsavel' => true]),
+                $this->pessoa(['name' => 'Filho Novo']),
+            ]))
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame($familia->id, $visitante->fresh()->familia_id);
+        $this->assertSame($familia->id, User::where('name', 'Filho Novo')->sole()->familia_id);
+    }
+
+    public function test_lider_ainda_precisa_preencher_perfil_de_pessoa_nova(): void
+    {
+        $lider = $this->usuario('Lider', 'lider');
+
+        $this->actingAs($lider)
+            ->post('/admin/familias', $this->payload([
+                $this->pessoa(['batizado_aguas' => null, 'data_nascimento' => null, 'is_responsavel' => true]),
+            ]))
+            ->assertSessionHasErrors(['pessoas.0.batizado_aguas', 'pessoas.0.data_nascimento']);
+    }
+
     public function test_pastor_vincula_membro_avulso_atualizando_so_o_perfil(): void
     {
         $pastor = $this->usuario('Pastor', 'pastor');

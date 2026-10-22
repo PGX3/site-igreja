@@ -218,6 +218,11 @@ class FamiliaController extends Controller
 
     private function validateData(Request $request): array
     {
+        // Quem não é pastor não grava o perfil de pessoas já cadastradas (ver vincular()),
+        // então o perfil só é obrigatório para pessoas novas: o visitante do cadastro
+        // público pode estar incompleto e o líder não tem como preencher.
+        $obrigatorio = auth()->user()?->isPastor() ? 'required' : 'nullable|required_without:pessoas.*.id';
+
         $data = $request->validate([
             'endereco' => 'required|string|max:255',
             'cidade' => 'required|string|max:80',
@@ -228,15 +233,15 @@ class FamiliaController extends Controller
 
             'pessoas' => 'required|array|min:1',
             'pessoas.*.id' => 'nullable|integer|exists:users,id',
-            'pessoas.*.name' => 'required|string|max:100',
-            'pessoas.*.telefone' => 'required|string|max:20',
+            'pessoas.*.name' => $obrigatorio.'|string|max:100',
+            'pessoas.*.telefone' => $obrigatorio.'|string|max:20',
             'pessoas.*.email' => 'nullable|email|distinct',
             'pessoas.*.cpf' => 'nullable|string|max:14|distinct',
-            'pessoas.*.data_nascimento' => 'required|date|before:today',
+            'pessoas.*.data_nascimento' => $obrigatorio.'|date|before:today',
             'pessoas.*.sexo' => 'nullable|in:M,F',
             'pessoas.*.estado_civil' => 'nullable|string|max:30',
-            'pessoas.*.tipo' => 'required|in:membro,visitante',
-            'pessoas.*.batizado_aguas' => 'required|boolean',
+            'pessoas.*.tipo' => $obrigatorio.'|in:membro,visitante',
+            'pessoas.*.batizado_aguas' => $obrigatorio.'|boolean',
             'pessoas.*.is_responsavel' => 'nullable|boolean',
         ]);
 
