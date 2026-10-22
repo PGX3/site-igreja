@@ -47,6 +47,7 @@
       <div>
         <label :class="labelClass">Nome *</label>
         <input v-model="pessoa.name" type="text" placeholder="Nome completo"
+               :disabled="perfilBloqueado"
                :class="[inputClass, errors.name && 'border-red-400']" />
         <p v-if="errors.name" class="mt-1 text-xs text-red-500">{{ errors.name }}</p>
       </div>
@@ -55,12 +56,14 @@
         <div>
           <label :class="labelClass">Telefone *</label>
           <input v-model="pessoa.telefone" type="text" placeholder="(51) 99999-9999"
+                 :disabled="perfilBloqueado"
                  :class="[inputClass, errors.telefone && 'border-red-400']" />
           <p v-if="errors.telefone" class="mt-1 text-xs text-red-500">{{ errors.telefone }}</p>
         </div>
         <div>
           <label :class="labelClass">Email</label>
           <input v-model="pessoa.email" type="email" placeholder="email@exemplo.com"
+                 :disabled="!!pessoa.id"
                  :class="[inputClass, errors.email && 'border-red-400']" />
           <p v-if="errors.email" class="mt-1 text-xs text-red-500">{{ errors.email }}</p>
         </div>
@@ -70,12 +73,13 @@
         <div>
           <label :class="labelClass">Data de nascimento *</label>
           <input v-model="pessoa.data_nascimento" type="date"
+                 :disabled="perfilBloqueado"
                  :class="[inputClass, errors.data_nascimento && 'border-red-400']" />
           <p v-if="errors.data_nascimento" class="mt-1 text-xs text-red-500">{{ errors.data_nascimento }}</p>
         </div>
         <div>
           <label :class="labelClass">Sexo</label>
-          <select v-model="pessoa.sexo" :class="inputClass">
+          <select v-model="pessoa.sexo" :disabled="perfilBloqueado" :class="inputClass">
             <option value="">Selecione...</option>
             <option value="M">Masculino</option>
             <option value="F">Feminino</option>
@@ -83,7 +87,7 @@
         </div>
         <div>
           <label :class="labelClass">Estado civil</label>
-          <select v-model="pessoa.estado_civil" :class="inputClass">
+          <select v-model="pessoa.estado_civil" :disabled="perfilBloqueado" :class="inputClass">
             <option value="">Selecione...</option>
             <option value="solteiro">Solteiro(a)</option>
             <option value="casado">Casado(a)</option>
@@ -97,33 +101,40 @@
       <div>
         <label :class="labelClass">CPF</label>
         <input v-model="pessoa.cpf" type="text" placeholder="000.000.000-00"
+               :disabled="!!pessoa.id"
                :class="[inputClass, errors.cpf && 'border-red-400']" />
         <p v-if="errors.cpf" class="mt-1 text-xs text-red-500">{{ errors.cpf }}</p>
+        <p v-if="perfilBloqueado" class="mt-1 text-[11px] text-gray-400 dark:text-slate-500">
+          Os dados de quem já está cadastrado só podem ser alterados pelo pastor, em Membros ou Visitantes.
+        </p>
+        <p v-else-if="pessoa.id" class="mt-1 text-[11px] text-gray-400 dark:text-slate-500">
+          Email, CPF e classificação de quem já está cadastrado são alterados em Membros ou Visitantes.
+        </p>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label :class="labelClass">Classificação</label>
           <div class="flex gap-2">
-            <label class="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg border cursor-pointer text-sm transition"
-                   :class="pessoa.tipo === 'membro'
+            <label class="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg border text-sm transition"
+                   :class="[pessoa.id ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer', pessoa.tipo === 'membro'
                      ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-semibold'
-                     : 'border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700'">
-              <input type="radio" value="membro" v-model="pessoa.tipo" class="sr-only" />
+                     : 'border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700']">
+              <input type="radio" value="membro" v-model="pessoa.tipo" :disabled="!!pessoa.id" class="sr-only" />
               Membro
             </label>
-            <label class="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg border cursor-pointer text-sm transition"
-                   :class="pessoa.tipo === 'visitante'
+            <label class="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg border text-sm transition"
+                   :class="[pessoa.id ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer', pessoa.tipo === 'visitante'
                      ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-semibold'
-                     : 'border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700'">
-              <input type="radio" value="visitante" v-model="pessoa.tipo" class="sr-only" />
+                     : 'border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700']">
+              <input type="radio" value="visitante" v-model="pessoa.tipo" :disabled="!!pessoa.id" class="sr-only" />
               Visitante
             </label>
           </div>
         </div>
         <div>
           <label :class="labelClass">Batizado nas águas? *</label>
-          <select v-model="pessoa.batizado_aguas"
+          <select v-model="pessoa.batizado_aguas" :disabled="perfilBloqueado"
                   :class="[inputClass, errors.batizado_aguas && 'border-red-400']">
             <option :value="null" disabled>Selecione...</option>
             <option :value="true">Sim</option>
@@ -137,21 +148,26 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
-defineProps({
+const props = defineProps({
   pessoa: { type: Object, required: true },
   index: { type: Number, required: true },
   errors: { type: Object, default: () => ({}) },
+  podeEditarPerfil: { type: Boolean, default: false },
 })
 
 defineEmits(['remove', 'tornar-responsavel'])
 
 const open = ref(true)
 
+// Pessoa já cadastrada: só o pastor altera os dados de perfil por aqui.
+const perfilBloqueado = computed(() => !!props.pessoa.id && !props.podeEditarPerfil)
+
 const labelClass = 'block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1.5'
 const inputClass = `w-full border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm
                     bg-white dark:bg-slate-700 text-gray-900 dark:text-white
                     placeholder-gray-400 dark:placeholder-slate-400
-                    focus:outline-none focus:ring-2 focus:ring-blue-500`
+                    focus:outline-none focus:ring-2 focus:ring-blue-500
+                    disabled:opacity-60 disabled:cursor-not-allowed`
 </script>

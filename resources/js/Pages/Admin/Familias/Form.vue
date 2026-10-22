@@ -101,6 +101,7 @@
                       :pessoa="p"
                       :index="i"
                       :errors="errorsForIndex(i)"
+                      :pode-editar-perfil="isPastor"
                       @remove="removerPessoa(i)"
                       @tornar-responsavel="tornarResponsavel(i)" />
 
@@ -196,7 +197,7 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import PessoaCard from '@/Components/PessoaCard.vue'
-import { Link, useForm } from '@inertiajs/vue3'
+import { Link, useForm, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 
 const props = defineProps({
@@ -205,6 +206,8 @@ const props = defineProps({
 })
 
 const editando = computed(() => !!props.familia)
+const page = usePage()
+const isPastor = computed(() => page.props.auth?.user?.role === 'pastor')
 
 function pessoaVazia(isResp = false) {
   return {
