@@ -291,7 +291,7 @@ class FamiliaController extends Controller
             $user = User::find($p['id']);
             $jaNaFamilia = $familia && $user?->familia_id === $familia->id;
 
-            if ($user && ! $jaNaFamilia && ! $this->podeAlterar($user)) {
+            if ($user && ! $jaNaFamilia && ! $this->podeVincular($user)) {
                 $erros["pessoas.{$i}.id"] = ['Esta pessoa não pode ser vinculada por este cadastro.'];
             }
         }
@@ -301,7 +301,7 @@ class FamiliaController extends Controller
         }
     }
 
-    private function podeAlterar(User $user): bool
+    private function podeVincular(User $user): bool
     {
         if ($user->is_superadmin) {
             return false;
@@ -315,12 +315,13 @@ class FamiliaController extends Controller
     }
 
     /**
-     * Vincula uma pessoa já cadastrada à família. Atualiza só dados de perfil:
-     * email, CPF e classificação continuam sendo editados em Membros/Visitantes.
+     * Vincula uma pessoa já cadastrada à família. Só o pastor atualiza dados de
+     * perfil por aqui, como em Membros/Visitantes. Email, CPF e classificação
+     * nunca mudam por este formulário.
      */
     private function vincular(User $user, array $p, Familia $familia): void
     {
-        if (! $this->podeAlterar($user)) {
+        if ($user->is_superadmin || ! auth()->user()?->isPastor()) {
             $user->update(['familia_id' => $familia->id]);
 
             return;

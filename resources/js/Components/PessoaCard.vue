@@ -47,6 +47,7 @@
       <div>
         <label :class="labelClass">Nome *</label>
         <input v-model="pessoa.name" type="text" placeholder="Nome completo"
+               :disabled="perfilBloqueado"
                :class="[inputClass, errors.name && 'border-red-400']" />
         <p v-if="errors.name" class="mt-1 text-xs text-red-500">{{ errors.name }}</p>
       </div>
@@ -55,6 +56,7 @@
         <div>
           <label :class="labelClass">Telefone *</label>
           <input v-model="pessoa.telefone" type="text" placeholder="(51) 99999-9999"
+                 :disabled="perfilBloqueado"
                  :class="[inputClass, errors.telefone && 'border-red-400']" />
           <p v-if="errors.telefone" class="mt-1 text-xs text-red-500">{{ errors.telefone }}</p>
         </div>
@@ -71,12 +73,13 @@
         <div>
           <label :class="labelClass">Data de nascimento *</label>
           <input v-model="pessoa.data_nascimento" type="date"
+                 :disabled="perfilBloqueado"
                  :class="[inputClass, errors.data_nascimento && 'border-red-400']" />
           <p v-if="errors.data_nascimento" class="mt-1 text-xs text-red-500">{{ errors.data_nascimento }}</p>
         </div>
         <div>
           <label :class="labelClass">Sexo</label>
-          <select v-model="pessoa.sexo" :class="inputClass">
+          <select v-model="pessoa.sexo" :disabled="perfilBloqueado" :class="inputClass">
             <option value="">Selecione...</option>
             <option value="M">Masculino</option>
             <option value="F">Feminino</option>
@@ -84,7 +87,7 @@
         </div>
         <div>
           <label :class="labelClass">Estado civil</label>
-          <select v-model="pessoa.estado_civil" :class="inputClass">
+          <select v-model="pessoa.estado_civil" :disabled="perfilBloqueado" :class="inputClass">
             <option value="">Selecione...</option>
             <option value="solteiro">Solteiro(a)</option>
             <option value="casado">Casado(a)</option>
@@ -101,7 +104,10 @@
                :disabled="!!pessoa.id"
                :class="[inputClass, errors.cpf && 'border-red-400']" />
         <p v-if="errors.cpf" class="mt-1 text-xs text-red-500">{{ errors.cpf }}</p>
-        <p v-if="pessoa.id" class="mt-1 text-[11px] text-gray-400 dark:text-slate-500">
+        <p v-if="perfilBloqueado" class="mt-1 text-[11px] text-gray-400 dark:text-slate-500">
+          Os dados de quem já está cadastrado só podem ser alterados pelo pastor, em Membros ou Visitantes.
+        </p>
+        <p v-else-if="pessoa.id" class="mt-1 text-[11px] text-gray-400 dark:text-slate-500">
           Email, CPF e classificação de quem já está cadastrado são alterados em Membros ou Visitantes.
         </p>
       </div>
@@ -128,7 +134,7 @@
         </div>
         <div>
           <label :class="labelClass">Batizado nas águas? *</label>
-          <select v-model="pessoa.batizado_aguas"
+          <select v-model="pessoa.batizado_aguas" :disabled="perfilBloqueado"
                   :class="[inputClass, errors.batizado_aguas && 'border-red-400']">
             <option :value="null" disabled>Selecione...</option>
             <option :value="true">Sim</option>
@@ -142,17 +148,21 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
-defineProps({
+const props = defineProps({
   pessoa: { type: Object, required: true },
   index: { type: Number, required: true },
   errors: { type: Object, default: () => ({}) },
+  podeEditarPerfil: { type: Boolean, default: false },
 })
 
 defineEmits(['remove', 'tornar-responsavel'])
 
 const open = ref(true)
+
+// Pessoa já cadastrada: só o pastor altera os dados de perfil por aqui.
+const perfilBloqueado = computed(() => !!props.pessoa.id && !props.podeEditarPerfil)
 
 const labelClass = 'block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1.5'
 const inputClass = `w-full border border-gray-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm

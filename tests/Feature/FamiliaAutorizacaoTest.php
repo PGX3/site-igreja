@@ -139,16 +139,70 @@ class FamiliaAutorizacaoTest extends TestCase
         $this->assertSame($outroLider->id, $familia->fresh()->responsavel_id);
     }
 
-    public function test_vincular_membro_avulso_nao_altera_email_cpf_nem_tipo(): void
+    public function test_lider_vincula_membro_avulso_sem_alterar_nenhum_dado(): void
     {
         $lider = $this->usuario('Lider', 'lider');
-        $avulso = $this->usuario('Avulso', 'membro', ['tipo' => 'visitante', 'cpf' => '52998224725']);
+        $avulso = $this->usuario('Avulso', 'membro', [
+            'tipo' => 'visitante',
+            'cpf' => '52998224725',
+            'telefone' => '(51) 1111-1111',
+            'data_nascimento' => '1980-05-05',
+        ]);
 
         $this->actingAs($lider)
             ->post('/admin/familias', $this->payload([
                 $this->pessoa([
                     'id' => $avulso->id,
                     'name' => 'Avulso da Silva',
+                    'telefone' => '(51) 2222-2222',
+                    'email' => 'novo@exemplo.com',
+                    'cpf' => '11144477735',
+                    'data_nascimento' => '1991-01-01',
+                    'tipo' => 'membro',
+                    'is_responsavel' => true,
+                ]),
+            ]))
+            ->assertSessionHasNoErrors();
+
+        $avulso->refresh();
+        $this->assertSame(Familia::sole()->id, $avulso->familia_id);
+        $this->assertSame('Avulso', $avulso->name);
+        $this->assertSame('(51) 1111-1111', $avulso->telefone);
+        $this->assertSame('1980-05-05', $avulso->data_nascimento->format('Y-m-d'));
+        $this->assertSame('avulso@exemplo.com', $avulso->email);
+        $this->assertSame('52998224725', $avulso->cpf);
+        $this->assertSame('visitante', $avulso->tipo);
+    }
+
+    public function test_lider_editando_familia_nao_altera_dados_de_integrante_existente(): void
+    {
+        $lider = $this->usuario('Lider', 'lider');
+        $familia = $this->familia();
+        $integrante = $this->usuario('Integrante', 'membro', ['familia_id' => $familia->id, 'telefone' => '(51) 1111-1111']);
+
+        $this->actingAs($lider)
+            ->put("/admin/familias/{$familia->id}", $this->payload([
+                $this->pessoa(['id' => $integrante->id, 'name' => 'Nome Trocado', 'telefone' => '(51) 2222-2222', 'is_responsavel' => true]),
+            ]))
+            ->assertRedirect("/admin/familias/{$familia->id}");
+
+        $integrante->refresh();
+        $this->assertSame($familia->id, $integrante->familia_id);
+        $this->assertSame('Integrante', $integrante->name);
+        $this->assertSame('(51) 1111-1111', $integrante->telefone);
+    }
+
+    public function test_pastor_vincula_membro_avulso_atualizando_so_o_perfil(): void
+    {
+        $pastor = $this->usuario('Pastor', 'pastor');
+        $avulso = $this->usuario('Avulso', 'membro', ['tipo' => 'visitante', 'cpf' => '52998224725']);
+
+        $this->actingAs($pastor)
+            ->post('/admin/familias', $this->payload([
+                $this->pessoa([
+                    'id' => $avulso->id,
+                    'name' => 'Avulso da Silva',
+                    'telefone' => '(51) 2222-2222',
                     'email' => 'novo@exemplo.com',
                     'cpf' => '11144477735',
                     'tipo' => 'membro',
@@ -160,6 +214,7 @@ class FamiliaAutorizacaoTest extends TestCase
         $avulso->refresh();
         $this->assertNotNull($avulso->familia_id);
         $this->assertSame('Avulso da Silva', $avulso->name);
+        $this->assertSame('(51) 2222-2222', $avulso->telefone);
         $this->assertSame('avulso@exemplo.com', $avulso->email);
         $this->assertSame('52998224725', $avulso->cpf);
         $this->assertSame('visitante', $avulso->tipo);
