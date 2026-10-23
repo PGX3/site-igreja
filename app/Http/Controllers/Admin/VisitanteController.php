@@ -113,6 +113,9 @@ class VisitanteController extends Controller
     public function update(Request $request, User $visitante)
     {
         abort_unless($visitante->tipo === 'visitante', 404);
+        if (! request()->user()?->isPastor()) {
+            abort(403);
+        }
 
         $data = $this->validateData($request, $visitante->id);
         $visitante->update($data);
@@ -137,6 +140,9 @@ class VisitanteController extends Controller
     public function promoverParaMembro(User $visitante)
     {
         abort_unless($visitante->tipo === 'visitante', 404);
+        if (! request()->user()?->isPastor()) {
+            abort(403);
+        }
 
         $visitante->update(['tipo' => 'membro']);
 
