@@ -83,6 +83,10 @@ class UserController extends Controller
 
     public function update(Request $request, User $usuario)
     {
+        if ($usuario->is_superadmin) {
+            abort(403);
+        }
+
         $data = $request->validate([
             'name' => 'required|string|max:100',
             'email' => 'required|email|unique:users,email,'.$usuario->id,
