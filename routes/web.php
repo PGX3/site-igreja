@@ -78,6 +78,7 @@ Route::post('/sou-novo', [CadastroController::class, 'storeVisitante'])
     ->name('cadastro.visitante.store');
 Route::get('/sou-novo/obrigado', [CadastroController::class, 'obrigadoVisitante'])
     ->name('cadastro.visitante.obrigado');
+Route::redirect('/visitante', '/sou-novo', 301);
 
 Route::get('/convite/{escalaMembro}', [ConfirmacaoEscalaController::class, 'show'])
     ->name('convite.show')->middleware('signed');
