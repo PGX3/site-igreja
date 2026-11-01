@@ -49,9 +49,9 @@
           </thead>
           <tbody>
             <tr v-for="(row, ri) in linhas" :key="ri"
-                class="border-t border-gray-100 dark:border-slate-700/50" :class="corLinha(row)">
+                class="border-t border-gray-100 dark:border-slate-700/50" :class="corLinha(row).fundo">
               <!-- Dia -->
-              <td class="px-3 py-2 sticky left-0 z-10 whitespace-nowrap" :class="corLinha(row) || 'bg-white dark:bg-slate-800'">
+              <td class="px-3 py-2 sticky left-0 z-10 whitespace-nowrap border-l-4" :class="[corLinha(row).fundo || 'bg-white dark:bg-slate-800', corLinha(row).barra]">
                 <span class="font-semibold text-gray-900 dark:text-white">{{ row.dia }}</span>
                 <span class="text-xs text-gray-400 dark:text-slate-500 ml-1 capitalize">{{ row.semana }}</span>
                 <span v-if="row.vinculo" class="block text-[10px] text-gray-400 dark:text-slate-500 truncate max-w-[130px]">{{ row.vinculo }}</span>
@@ -100,7 +100,7 @@
       <div class="lg:hidden space-y-3">
         <div v-for="(row, ri) in linhas" :key="ri"
              class="border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm p-4"
-             :class="corLinha(row) || 'bg-white dark:bg-slate-800'">
+             :class="[corLinha(row).fundo || 'bg-white dark:bg-slate-800', corLinha(row).barra, 'border-l-4']">
           <div class="flex items-start justify-between gap-2 mb-3">
             <div>
               <span class="font-bold text-gray-900 dark:text-white">{{ row.dia }}</span>
@@ -254,25 +254,35 @@ function corMembro(id) {
 }
 function cellStyle(id) {
   const c = id ? corMembro(id) : null
-  if (!c) return { background: 'transparent', color: 'inherit' }
+  if (!c) return { background: 'transparent' }
   return { background: c[0], color: c[1] }
 }
 
-// Fundo da linha: cada evento ganha um tom claro (sorteado pelo id, então não muda
-// a cada recarga) e domingo é sempre cinza. Cores opacas por causa da coluna fixa "Dia".
+// Cor da linha: cada evento do mês ganha uma cor diferente (na ordem em que aparecem)
+// e domingo é sempre cinza. A barra na esquerda reforça a cor. Fundos opacos por
+// causa da coluna fixa "Dia".
 const CORES_EVENTO = [
-  'bg-rose-50 dark:bg-rose-950', 'bg-amber-50 dark:bg-amber-950', 'bg-emerald-50 dark:bg-emerald-950',
-  'bg-sky-50 dark:bg-sky-950', 'bg-violet-50 dark:bg-violet-950', 'bg-orange-50 dark:bg-orange-950',
-  'bg-teal-50 dark:bg-teal-950', 'bg-pink-50 dark:bg-pink-950', 'bg-lime-50 dark:bg-lime-950',
-  'bg-indigo-50 dark:bg-indigo-950',
+  { fundo: 'bg-amber-100 dark:bg-amber-950', barra: 'border-l-amber-400' },
+  { fundo: 'bg-sky-100 dark:bg-sky-950', barra: 'border-l-sky-400' },
+  { fundo: 'bg-rose-100 dark:bg-rose-950', barra: 'border-l-rose-400' },
+  { fundo: 'bg-emerald-100 dark:bg-emerald-950', barra: 'border-l-emerald-400' },
+  { fundo: 'bg-violet-100 dark:bg-violet-950', barra: 'border-l-violet-400' },
+  { fundo: 'bg-orange-100 dark:bg-orange-950', barra: 'border-l-orange-400' },
+  { fundo: 'bg-teal-100 dark:bg-teal-950', barra: 'border-l-teal-400' },
+  { fundo: 'bg-pink-100 dark:bg-pink-950', barra: 'border-l-pink-400' },
 ]
+const DOMINGO = { fundo: 'bg-gray-100 dark:bg-slate-900', barra: 'border-l-gray-300 dark:border-l-slate-600' }
+const SEM_COR = { fundo: '', barra: 'border-l-transparent' }
+
+const corPorEvento = computed(() => {
+  const ids = [...new Set(linhas.value.filter(r => r.evento_id).map(r => r.evento_id))]
+  return Object.fromEntries(ids.map((id, i) => [id, CORES_EVENTO[i % CORES_EVENTO.length]]))
+})
+
 function corLinha(row) {
-  if (row.evento_id) {
-    const sorteio = (Number(row.evento_id) * 2654435761) >>> 0 // espalha ids seguidos em cores diferentes
-    return CORES_EVENTO[sorteio % CORES_EVENTO.length]
-  }
-  if (new Date(row.data + 'T12:00:00').getDay() === 0) return 'bg-gray-100 dark:bg-slate-900'
-  return ''
+  if (row.evento_id) return corPorEvento.value[row.evento_id] ?? SEM_COR
+  if (new Date(row.data + 'T12:00:00').getDay() === 0) return DOMINGO
+  return SEM_COR
 }
 
 function setCell(row, funcao, val) {
