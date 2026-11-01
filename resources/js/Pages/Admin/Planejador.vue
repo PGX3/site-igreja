@@ -162,7 +162,7 @@
         <div class="px-4 py-3 border-b border-gray-100 dark:border-slate-700/50">
           <h2 class="text-sm font-bold text-gray-900 dark:text-white">Resumo do mês</h2>
           <p class="text-xs text-gray-500 dark:text-slate-400">
-            Quantas vezes cada pessoa está escalada. Atualiza enquanto você monta a grade.
+            Quantas vezes cada pessoa está escalada, por dia de culto e em eventos. Atualiza enquanto você monta a grade.
             <span v-if="resumo.media">Média: {{ resumo.media }} por pessoa.</span>
           </p>
         </div>
@@ -305,26 +305,36 @@ function avisoOpcao(row, funcao, memberId) {
   return avisos.length ? ` · ⚠ já em ${avisos.join(', ')}` : ''
 }
 
-// Resumo: escalas por pessoa em cada dia da semana. Duas funções no mesmo dia contam 1.
+// Resumo: escalas por pessoa em cada dia da semana (só cultos) e em eventos, numa
+// coluna à parte. Duas funções na mesma linha contam 1.
 const NOMES_DIAS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
+const EVENTOS = 'eventos'
 const resumo = computed(() => {
   const dias = new Set()
-  const contagem = {} // memberId => { diaSemana: n }
+  let temEventos = false
+  const contagem = {} // memberId => { diaSemana | 'eventos': n }
 
   for (const row of linhas.value) {
-    const wd = new Date(row.data + 'T12:00:00').getDay()
-    dias.add(wd)
+    let chave
+    if (row.evento_id) {
+      chave = EVENTOS
+      temEventos = true
+    } else {
+      chave = new Date(row.data + 'T12:00:00').getDay()
+      dias.add(chave)
+    }
     const pessoas = new Set(Object.values(row.cells).filter(Boolean).map(Number))
     for (const id of pessoas) {
       contagem[id] ??= {}
-      contagem[id][wd] = (contagem[id][wd] || 0) + 1
+      contagem[id][chave] = (contagem[id][chave] || 0) + 1
     }
   }
 
-  const colunas = [...dias].sort((a, b) => a - b).map(wd => ({
-    wd,
-    label: NOMES_DIAS[wd],
-    total: Object.values(contagem).reduce((s, c) => s + (c[wd] || 0), 0),
+  const chaves = [...[...dias].sort((a, b) => a - b), ...(temEventos ? [EVENTOS] : [])]
+  const colunas = chaves.map(chave => ({
+    wd: chave,
+    label: chave === EVENTOS ? 'Eventos' : NOMES_DIAS[chave],
+    total: Object.values(contagem).reduce((s, c) => s + (c[chave] || 0), 0),
   }))
 
   const pessoas = props.membros.map(m => {
