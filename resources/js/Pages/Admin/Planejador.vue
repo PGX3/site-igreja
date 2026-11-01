@@ -49,9 +49,9 @@
           </thead>
           <tbody>
             <tr v-for="(row, ri) in linhas" :key="ri"
-                class="border-t border-gray-100 dark:border-slate-700/50">
+                class="border-t border-gray-100 dark:border-slate-700/50" :class="corLinha(row)">
               <!-- Dia -->
-              <td class="px-3 py-2 sticky left-0 bg-white dark:bg-slate-800 z-10 whitespace-nowrap">
+              <td class="px-3 py-2 sticky left-0 z-10 whitespace-nowrap" :class="corLinha(row) || 'bg-white dark:bg-slate-800'">
                 <span class="font-semibold text-gray-900 dark:text-white">{{ row.dia }}</span>
                 <span class="text-xs text-gray-400 dark:text-slate-500 ml-1 capitalize">{{ row.semana }}</span>
                 <span v-if="row.vinculo" class="block text-[10px] text-gray-400 dark:text-slate-500 truncate max-w-[130px]">{{ row.vinculo }}</span>
@@ -99,7 +99,8 @@
       <!-- GRADE (mobile) -->
       <div class="lg:hidden space-y-3">
         <div v-for="(row, ri) in linhas" :key="ri"
-             class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm p-4">
+             class="border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm p-4"
+             :class="corLinha(row) || 'bg-white dark:bg-slate-800'">
           <div class="flex items-start justify-between gap-2 mb-3">
             <div>
               <span class="font-bold text-gray-900 dark:text-white">{{ row.dia }}</span>
@@ -255,6 +256,23 @@ function cellStyle(id) {
   const c = id ? corMembro(id) : null
   if (!c) return { background: 'transparent', color: 'inherit' }
   return { background: c[0], color: c[1] }
+}
+
+// Fundo da linha: cada evento ganha um tom claro (sorteado pelo id, então não muda
+// a cada recarga) e domingo é sempre cinza. Cores opacas por causa da coluna fixa "Dia".
+const CORES_EVENTO = [
+  'bg-rose-50 dark:bg-rose-950', 'bg-amber-50 dark:bg-amber-950', 'bg-emerald-50 dark:bg-emerald-950',
+  'bg-sky-50 dark:bg-sky-950', 'bg-violet-50 dark:bg-violet-950', 'bg-orange-50 dark:bg-orange-950',
+  'bg-teal-50 dark:bg-teal-950', 'bg-pink-50 dark:bg-pink-950', 'bg-lime-50 dark:bg-lime-950',
+  'bg-indigo-50 dark:bg-indigo-950',
+]
+function corLinha(row) {
+  if (row.evento_id) {
+    const sorteio = (Number(row.evento_id) * 2654435761) >>> 0 // espalha ids seguidos em cores diferentes
+    return CORES_EVENTO[sorteio % CORES_EVENTO.length]
+  }
+  if (new Date(row.data + 'T12:00:00').getDay() === 0) return 'bg-gray-100 dark:bg-slate-900'
+  return ''
 }
 
 function setCell(row, funcao, val) {
