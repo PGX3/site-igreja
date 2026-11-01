@@ -34,7 +34,7 @@ class PlanejadorController extends Controller
         $fim = $inicio->copy()->endOfMonth();
 
         $grupo = $grupoId
-            ? Grupo::with(['funcoes:id,grupo_id,nome', 'membros:id,name'])->find($grupoId)
+            ? Grupo::with(['funcoes:id,grupo_id,nome', 'membros:id,name', 'cultosSemEscala:id'])->find($grupoId)
             : null;
 
         $funcoes = $grupo ? $grupo->funcoes->pluck('nome')->values() : collect();
@@ -53,8 +53,10 @@ class PlanejadorController extends Controller
                 $rows[$this->key($e->data, $e->culto_id, $e->evento_id)] = $this->rowFromEscala($e, $funcoes->all());
             }
 
-            // Candidatos: cultos (recorrentes por dia da semana)
-            foreach (Culto::where('ativo', true)->get() as $culto) {
+            // Candidatos: cultos (recorrentes por dia da semana), menos os que o grupo não escala.
+            // Escalas já criadas aparecem sempre (vieram do bloco acima).
+            $cultosSemEscala = $grupo->cultosSemEscala->pluck('id')->all();
+            foreach (Culto::where('ativo', true)->whereNotIn('id', $cultosSemEscala)->get() as $culto) {
                 $alvo = $this->diasPt[$culto->dia_semana] ?? null;
                 if ($alvo === null) {
                     continue;
@@ -71,10 +73,13 @@ class PlanejadorController extends Controller
                 }
             }
 
-            // Candidatos: eventos do mês
-            foreach (Evento::where('ativo', true)
-                ->whereBetween('data_evento', [$inicio->toDateString(), $fim->toDateString()])
-                ->get() as $ev) {
+            // Candidatos: eventos do mês, se o grupo escala eventos
+            $eventos = $grupo->escala_eventos
+                ? Evento::where('ativo', true)
+                    ->whereBetween('data_evento', [$inicio->toDateString(), $fim->toDateString()])
+                    ->get()
+                : collect();
+            foreach ($eventos as $ev) {
                 $k = $this->key($ev->data_evento, null, $ev->id);
                 if (! isset($rows[$k])) {
                     $rows[$k] = $this->rowVazia($ev->data_evento, null, $ev->id, $ev->nome, $funcoes);

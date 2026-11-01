@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Culto;
 use App\Models\Grupo;
 use App\Models\Role;
 use App\Models\User;
@@ -40,6 +41,7 @@ class GrupoController extends Controller
     {
         return Inertia::render('Admin/Grupos/Form', [
             'usuarios' => $this->usuariosDisponiveis(),
+            'cultos' => $this->cultosAtivos(),
         ]);
     }
 
@@ -51,6 +53,7 @@ class GrupoController extends Controller
             'nome' => $data['nome'],
             'descricao' => $data['descricao'] ?? null,
             'tem_musicas' => $data['tem_musicas'] ?? false,
+            'escala_eventos' => $data['escala_eventos'] ?? true,
             'whatsapp_apikey' => $data['whatsapp_apikey'] ?? null,
             'whatsapp_phone' => $data['whatsapp_phone'] ?? null,
             'lider_id' => $data['lider_id'] ?? null,
@@ -58,6 +61,7 @@ class GrupoController extends Controller
         ]);
 
         $this->sincronizarMembros($grupo, $data['membros_ids'] ?? []);
+        $this->sincronizarCultos($grupo, $data['cultos_ids'] ?? null);
         $this->aplicarRoleLider($grupo, null);
 
         return redirect()->route('admin.grupos.index')
@@ -66,7 +70,9 @@ class GrupoController extends Controller
 
     public function edit(Grupo $grupo)
     {
-        $grupo->load(['lider', 'membros:id', 'funcoes:id,grupo_id,nome']);
+        $grupo->load(['lider', 'membros:id', 'funcoes:id,grupo_id,nome', 'cultosSemEscala:id']);
+        $cultos = $this->cultosAtivos();
+        $semEscala = $grupo->cultosSemEscala->pluck('id');
 
         return Inertia::render('Admin/Grupos/Form', [
             'grupo' => [
@@ -74,6 +80,8 @@ class GrupoController extends Controller
                 'nome' => $grupo->nome,
                 'descricao' => $grupo->descricao,
                 'tem_musicas' => $grupo->tem_musicas,
+                'escala_eventos' => $grupo->escala_eventos,
+                'cultos_ids' => $cultos->pluck('id')->diff($semEscala)->values()->all(),
                 'whatsapp_apikey' => $grupo->whatsapp_apikey,
                 'whatsapp_phone' => $grupo->whatsapp_phone,
                 'lider' => $grupo->lider?->only('id', 'name'),
@@ -81,6 +89,7 @@ class GrupoController extends Controller
                 'funcoes' => $grupo->funcoes->map(fn ($f) => ['id' => $f->id, 'nome' => $f->nome])->values(),
             ],
             'usuarios' => $this->usuariosDisponiveis(),
+            'cultos' => $cultos,
         ]);
     }
 
@@ -93,12 +102,14 @@ class GrupoController extends Controller
             'nome' => $data['nome'],
             'descricao' => $data['descricao'] ?? null,
             'tem_musicas' => $data['tem_musicas'] ?? false,
+            'escala_eventos' => $data['escala_eventos'] ?? true,
             'whatsapp_apikey' => $data['whatsapp_apikey'] ?? null,
             'whatsapp_phone' => $data['whatsapp_phone'] ?? null,
             'lider_id' => $data['lider_id'] ?? null,
         ]);
 
         $this->sincronizarMembros($grupo, $data['membros_ids'] ?? []);
+        $this->sincronizarCultos($grupo, $data['cultos_ids'] ?? null);
         $this->aplicarRoleLider($grupo, $oldLiderId);
 
         return redirect()->route('admin.grupos.index')
@@ -119,6 +130,9 @@ class GrupoController extends Controller
             'nome' => 'required|string|max:100',
             'descricao' => 'nullable|string',
             'tem_musicas' => 'boolean',
+            'escala_eventos' => 'boolean',
+            'cultos_ids' => 'nullable|array',
+            'cultos_ids.*' => 'integer|exists:cultos,id',
             'whatsapp_apikey' => 'nullable|string|max:100',
             'whatsapp_phone' => 'nullable|string|max:30',
             'lider_id' => 'nullable|exists:users,id',
@@ -136,6 +150,36 @@ class GrupoController extends Controller
         }
 
         $grupo->membros()->sync($ids->unique()->values()->all());
+    }
+
+    /**
+     * Recebe os cultos marcados (com escala) e guarda os desmarcados como exceção.
+     * Só olha os cultos ativos: um culto desativado mantém o que já estava.
+     * Sem cultos_ids na requisição (ex.: cliente antigo), não mexe em nada.
+     */
+    private function sincronizarCultos(Grupo $grupo, ?array $cultosIds): void
+    {
+        if ($cultosIds === null) {
+            return;
+        }
+
+        $ativos = Culto::where('ativo', true)->pluck('id');
+        $marcados = collect($cultosIds)->map(fn ($id) => (int) $id);
+        $inativosSemEscala = $grupo->cultosSemEscala()->where('ativo', false)->pluck('cultos.id');
+
+        $grupo->cultosSemEscala()->sync(
+            $ativos->diff($marcados)->merge($inativosSemEscala)->unique()->values()->all()
+        );
+    }
+
+    private function cultosAtivos()
+    {
+        $ordem = ['Domingo' => 0, 'Segunda' => 1, 'Terça' => 2, 'Quarta' => 3, 'Quinta' => 4, 'Sexta' => 5, 'Sábado' => 6];
+
+        return Culto::where('ativo', true)->get(['id', 'nome', 'dia_semana', 'horario'])
+            ->sortBy(fn ($c) => [$ordem[$c->dia_semana] ?? 7, $c->horario])
+            ->values()
+            ->map(fn ($c) => ['id' => $c->id, 'nome' => $c->nome, 'dia_semana' => $c->dia_semana, 'horario' => $c->horario]);
     }
 
     private function aplicarRoleLider(Grupo $grupo, ?int $oldLiderId): void

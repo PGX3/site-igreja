@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Models\Culto;
 use App\Models\Escala;
+use App\Models\Evento;
 use App\Models\Grupo;
 use App\Models\GrupoFuncao;
 use App\Models\Role;
@@ -101,5 +103,66 @@ class PlanejadorTest extends TestCase
             ->get('/admin/planejador?grupo_id='.$this->grupo->id.'&mes=2026-11')
             ->assertInertia(fn (AssertableInertia $page) => $page
                 ->where('rows.0.cells', ['Som, luz' => $this->natasha->id]));
+    }
+
+    private function vinculosDoPlanejador(): array
+    {
+        $vinculos = [];
+        $this->actingAs($this->pastor)
+            ->get('/admin/planejador?grupo_id='.$this->grupo->id.'&mes=2026-11')
+            ->assertInertia(function (AssertableInertia $page) use (&$vinculos) {
+                $vinculos = collect($page->toArray()['props']['rows'])->pluck('vinculo')->unique()->values()->all();
+            });
+
+        return $vinculos;
+    }
+
+    public function test_grupo_escolhe_cultos_e_eventos_do_planejador(): void
+    {
+        $domingo = Culto::create(['nome' => 'Culto de Domingo', 'dia_semana' => 'Domingo', 'horario' => '19:00', 'ativo' => true]);
+        $quarta = Culto::create(['nome' => 'Culto de Oração', 'dia_semana' => 'Quarta', 'horario' => '20:00', 'ativo' => true]);
+        Evento::create(['nome' => 'Marcha pra Jesus', 'data_evento' => '2026-11-14', 'horario' => '15h', 'ativo' => true]);
+
+        // Padrão: tudo aparece
+        $this->assertEqualsCanonicalizing(['Culto de Domingo', 'Culto de Oração', 'Marcha pra Jesus'], $this->vinculosDoPlanejador());
+
+        // Desmarca a quarta e os eventos no formulário do grupo
+        $this->actingAs($this->pastor)->put('/admin/grupos/'.$this->grupo->id, [
+            'nome' => 'Mídias',
+            'membros_ids' => [$this->natasha->id],
+            'cultos_ids' => [$domingo->id],
+            'escala_eventos' => false,
+        ])->assertSessionHasNoErrors();
+
+        $this->assertSame([$quarta->id], $this->grupo->cultosSemEscala()->pluck('cultos.id')->all());
+        $this->assertSame(['Culto de Domingo'], $this->vinculosDoPlanejador());
+    }
+
+    public function test_escala_ja_criada_aparece_mesmo_com_culto_desmarcado(): void
+    {
+        $quarta = Culto::create(['nome' => 'Culto de Oração', 'dia_semana' => 'Quarta', 'horario' => '20:00', 'ativo' => true]);
+        Escala::create([
+            'titulo' => 'Culto de Oração', 'data' => '2026-11-04', 'hora_inicio' => '20:00', 'hora_fim' => '21:00',
+            'grupo_id' => $this->grupo->id, 'culto_id' => $quarta->id, 'status' => 'pendente', 'created_by' => $this->pastor->id,
+        ]);
+        $this->grupo->cultosSemEscala()->attach($quarta->id);
+
+        $this->assertSame(['Culto de Oração'], $this->vinculosDoPlanejador());
+        $this->actingAs($this->pastor)
+            ->get('/admin/planejador?grupo_id='.$this->grupo->id.'&mes=2026-11')
+            ->assertInertia(fn (AssertableInertia $page) => $page->has('rows', 1));
+    }
+
+    public function test_culto_desativado_mantem_a_escolha_ao_salvar_o_grupo(): void
+    {
+        $antigo = Culto::create(['nome' => 'Culto Antigo', 'dia_semana' => 'Sexta', 'horario' => '20:00', 'ativo' => false]);
+        $this->grupo->cultosSemEscala()->attach($antigo->id);
+
+        // Formulário só mostra cultos ativos, então não manda o antigo
+        $this->actingAs($this->pastor)->put('/admin/grupos/'.$this->grupo->id, [
+            'nome' => 'Mídias', 'membros_ids' => [], 'cultos_ids' => [], 'escala_eventos' => true,
+        ])->assertSessionHasNoErrors();
+
+        $this->assertSame([$antigo->id], $this->grupo->cultosSemEscala()->pluck('cultos.id')->all());
     }
 }

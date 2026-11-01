@@ -54,6 +54,36 @@
           </label>
         </div>
 
+        <!-- Escalas no planejador -->
+        <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
+          <h2 class="text-sm font-bold text-gray-900 dark:text-white">Escalas no planejador</h2>
+          <p class="text-xs text-gray-400 dark:text-slate-500 mt-0.5 mb-3">
+            Marque os cultos em que este grupo serve. Só eles viram linha no planejador.
+            Escalas já criadas continuam aparecendo.
+          </p>
+
+          <div class="space-y-2">
+            <label v-for="c in cultos" :key="c.id" class="flex items-center gap-3 cursor-pointer select-none">
+              <input v-model="form.cultos_ids" :value="c.id" type="checkbox"
+                     class="h-4 w-4 rounded border-gray-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500" />
+              <span class="text-sm text-gray-700 dark:text-slate-300">
+                {{ c.nome }}
+                <span class="text-xs text-gray-400 dark:text-slate-500">· {{ c.dia_semana }}<template v-if="c.horario">, {{ c.horario }}</template></span>
+              </span>
+            </label>
+            <p v-if="!cultos.length" class="text-xs text-gray-400 dark:text-slate-500">Nenhum culto ativo cadastrado.</p>
+
+            <label class="flex items-center gap-3 cursor-pointer select-none pt-2 mt-2 border-t border-gray-100 dark:border-slate-700">
+              <input v-model="form.escala_eventos" type="checkbox"
+                     class="h-4 w-4 rounded border-gray-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500" />
+              <span class="text-sm text-gray-700 dark:text-slate-300">
+                Eventos
+                <span class="text-xs text-gray-400 dark:text-slate-500">· Marcha, encontros, batismo…</span>
+              </span>
+            </label>
+          </div>
+        </div>
+
         <!-- Líder -->
         <div>
           <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Líder do Grupo</label>
@@ -216,6 +246,7 @@ import { computed, ref, watch } from 'vue'
 const props = defineProps({
   grupo:    Object,
   usuarios: Array,
+  cultos:   { type: Array, default: () => [] },
 })
 
 const editando = computed(() => !!props.grupo)
@@ -258,6 +289,8 @@ const form = useForm({
   nome:            props.grupo?.nome            ?? '',
   descricao:       props.grupo?.descricao       ?? '',
   tem_musicas:     props.grupo?.tem_musicas     ?? false,
+  escala_eventos:  props.grupo?.escala_eventos  ?? true,
+  cultos_ids:      props.grupo?.cultos_ids      ?? props.cultos.map(c => c.id),
   whatsapp_apikey: props.grupo?.whatsapp_apikey ?? '',
   whatsapp_phone:  props.grupo?.whatsapp_phone  ?? '',
   lider_id:        props.grupo?.lider?.id       ?? null,

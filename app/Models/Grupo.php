@@ -6,12 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Grupo extends Model
 {
-    protected $fillable = ['nome', 'descricao', 'tem_musicas', 'whatsapp_apikey', 'whatsapp_phone', 'lider_id', 'created_by'];
+    protected $fillable = ['nome', 'descricao', 'tem_musicas', 'escala_eventos', 'whatsapp_apikey', 'whatsapp_phone', 'lider_id', 'created_by'];
 
     protected $casts = [
         'lider_id' => 'integer',
         'created_by' => 'integer',
         'tem_musicas' => 'boolean',
+        'escala_eventos' => 'boolean',
     ];
 
     public function lider()
@@ -32,6 +33,12 @@ class Grupo extends Model
     public function funcoes()
     {
         return $this->hasMany(GrupoFuncao::class)->orderBy('nome');
+    }
+
+    /** Cultos que não aparecem no planejador deste grupo. */
+    public function cultosSemEscala()
+    {
+        return $this->belongsToMany(Culto::class, 'grupo_cultos_sem_escala')->withTimestamps();
     }
 
     public function createdBy()
