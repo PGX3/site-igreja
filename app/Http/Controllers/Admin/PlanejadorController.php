@@ -13,6 +13,8 @@ use Inertia\Inertia;
 
 class PlanejadorController extends Controller
 {
+    private const SEPARADOR_FUNCOES = ', ';
+
     private array $diasPt = [
         'Domingo' => 0, 'Segunda' => 1, 'Terça' => 2,
         'Quarta' => 3, 'Quinta' => 4, 'Sexta' => 5, 'Sábado' => 6,
@@ -48,7 +50,7 @@ class PlanejadorController extends Controller
                 ->get();
 
             foreach ($escalas as $e) {
-                $rows[$this->key($e->data, $e->culto_id, $e->evento_id)] = $this->rowFromEscala($e);
+                $rows[$this->key($e->data, $e->culto_id, $e->evento_id)] = $this->rowFromEscala($e, $funcoes->all());
             }
 
             // Candidatos: cultos (recorrentes por dia da semana)
@@ -127,6 +129,10 @@ class PlanejadorController extends Controller
             abort(403);
         }
 
+        // Ordem das colunas, para gravar "Camera, Instagram" sempre na mesma ordem
+        $ordemFuncoes = Grupo::with('funcoes:id,grupo_id,nome')->find($grupoId)
+            ->funcoes->pluck('nome')->flip();
+
         foreach ($request->rows ?? [] as $row) {
             $assignments = collect($row['cells'] ?? [])->filter(fn ($v) => ! empty($v)); // funcao => user_id
             $restricoes = trim((string) ($row['restricoes'] ?? '')) ?: null;
@@ -162,14 +168,18 @@ class PlanejadorController extends Controller
                 $escala->update(['restricoes' => $restricoes, 'updated_by' => $user->id]);
             }
 
-            // Sincroniza membros: um usuário por escala (respeita unique escala_id+user_id)
-            $desejados = []; // user_id => funcao
+            // Sincroniza membros: uma linha por pessoa na escala (unique escala_id+user_id).
+            // Quem está em mais de uma função fica com elas juntas: "Camera, Instagram".
+            $porPessoa = []; // user_id => [funcao, ...]
             foreach ($assignments as $funcao => $userId) {
-                $uid = (int) $userId;
-                if (! isset($desejados[$uid])) {
-                    $desejados[$uid] = $funcao;
-                }
+                $porPessoa[(int) $userId][] = $funcao;
             }
+
+            $desejados = collect($porPessoa)
+                ->map(fn ($fs) => collect($fs)
+                    ->sortBy(fn ($f) => $ordemFuncoes[$f] ?? PHP_INT_MAX)
+                    ->implode(self::SEPARADOR_FUNCOES))
+                ->all(); // user_id => "Funcao A, Funcao B"
 
             $escala->escalaMembros()->whereNotIn('user_id', array_keys($desejados) ?: [0])->delete();
 
@@ -191,12 +201,14 @@ class PlanejadorController extends Controller
         return $d.'|'.($cultoId ?? '').'|'.($eventoId ?? '');
     }
 
-    private function rowFromEscala(Escala $e): array
+    private function rowFromEscala(Escala $e, array $funcoes): array
     {
         $cells = [];
         foreach ($e->escalaMembros as $em) {
             if ($em->funcao) {
-                $cells[$em->funcao] = $em->user_id;
+                foreach ($this->separarFuncoes($em->funcao, $funcoes) as $funcao) {
+                    $cells[$funcao] = $em->user_id;
+                }
             }
         }
 
@@ -211,6 +223,21 @@ class PlanejadorController extends Controller
             'restricoes' => $e->restricoes ?? '',
             'cells' => (object) $cells,
         ];
+    }
+
+    /**
+     * "Camera, Instagram" vira ['Camera', 'Instagram'] quando as duas são funções do grupo.
+     * Se não bater com as funções, devolve o texto inteiro (como sempre foi).
+     */
+    private function separarFuncoes(string $funcao, array $funcoes): array
+    {
+        if (in_array($funcao, $funcoes, true)) {
+            return [$funcao];
+        }
+
+        $partes = array_map('trim', explode(trim(self::SEPARADOR_FUNCOES), $funcao));
+
+        return array_diff($partes, $funcoes) === [] ? $partes : [$funcao];
     }
 
     private function rowVazia(Carbon $data, ?int $cultoId, ?int $eventoId, ?string $vinculo, $funcoes): array

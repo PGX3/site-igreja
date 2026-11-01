@@ -69,10 +69,13 @@
                         ]"
                         :style="cellStyle(row.cells[f])">
                   <option value="">+ Escalar</option>
-                  <option v-for="m in membrosDisponiveis(row, f)" :key="m.id" :value="m.id">
-                    {{ m.nome }}{{ conflito(row, m.id) ? ` · já em ${conflito(row, m.id)}` : '' }}
+                  <option v-for="m in membros" :key="m.id" :value="m.id">
+                    {{ m.nome }}{{ avisoOpcao(row, f, m.id) }}
                   </option>
                 </select>
+                <p v-if="row.cells[f] && outrasFuncoes(row, f, row.cells[f]).length" class="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5 px-1">
+                  ⚠ também em {{ outrasFuncoes(row, f, row.cells[f]).join(', ') }}
+                </p>
                 <p v-if="row.cells[f] && conflito(row, row.cells[f])" class="text-[10px] text-red-500 mt-0.5 px-1">
                   ⚠ também em {{ conflito(row, row.cells[f]) }}
                 </p>
@@ -115,10 +118,13 @@
                       :class="row.cells[f] ? 'border-transparent' : 'border-dashed border-gray-300 dark:border-slate-500 text-gray-400 dark:text-slate-400 bg-gray-50 dark:bg-slate-700/40'"
                       :style="cellStyle(row.cells[f])">
                 <option value="">+ Escalar</option>
-                <option v-for="m in membrosDisponiveis(row, f)" :key="m.id" :value="m.id">
-                  {{ m.nome }}{{ conflito(row, m.id) ? ` · já em ${conflito(row, m.id)}` : '' }}
+                <option v-for="m in membros" :key="m.id" :value="m.id">
+                  {{ m.nome }}{{ avisoOpcao(row, f, m.id) }}
                 </option>
               </select>
+              <p v-if="row.cells[f] && outrasFuncoes(row, f, row.cells[f]).length" class="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5">
+                ⚠ também em {{ outrasFuncoes(row, f, row.cells[f]).join(', ') }}
+              </p>
               <p v-if="row.cells[f] && conflito(row, row.cells[f])" class="text-[10px] text-red-500 mt-0.5">
                 ⚠ também em {{ conflito(row, row.cells[f]) }}
               </p>
@@ -149,6 +155,50 @@
           </button>
         </div>
       </div>
+
+      <!-- RESUMO: quantas vezes cada pessoa está escalada, por dia da semana -->
+      <div v-if="membros.length" class="mt-6 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm">
+        <div class="px-4 py-3 border-b border-gray-100 dark:border-slate-700/50">
+          <h2 class="text-sm font-bold text-gray-900 dark:text-white">Resumo do mês</h2>
+          <p class="text-xs text-gray-500 dark:text-slate-400">
+            Quantas vezes cada pessoa está escalada. Atualiza enquanto você monta a grade.
+            <span v-if="resumo.media">Média: {{ resumo.media }} por pessoa.</span>
+          </p>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm border-collapse">
+            <thead>
+              <tr class="text-left bg-gray-50 dark:bg-slate-900/40">
+                <th class="px-3 py-2 font-semibold text-gray-600 dark:text-slate-300 whitespace-nowrap">Pessoa</th>
+                <th v-for="c in resumo.colunas" :key="c.wd" class="px-3 py-2 font-semibold text-gray-600 dark:text-slate-300 text-center whitespace-nowrap">{{ c.label }}</th>
+                <th class="px-3 py-2 font-semibold text-gray-600 dark:text-slate-300 text-center whitespace-nowrap">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="p in resumo.pessoas" :key="p.id" class="border-t border-gray-100 dark:border-slate-700/50">
+                <td class="px-3 py-1.5 whitespace-nowrap">
+                  <span class="inline-block rounded-md text-xs font-semibold px-2 py-1" :style="cellStyle(p.id)">{{ p.nome }}</span>
+                </td>
+                <td v-for="c in resumo.colunas" :key="c.wd" class="px-3 py-1.5 text-center tabular-nums"
+                    :class="p.porDia[c.wd] ? 'text-gray-900 dark:text-white' : 'text-gray-300 dark:text-slate-600'">
+                  {{ p.porDia[c.wd] || '—' }}
+                </td>
+                <td class="px-3 py-1.5 text-center tabular-nums font-bold"
+                    :class="p.total ? 'text-gray-900 dark:text-white' : 'text-gray-300 dark:text-slate-600'">
+                  {{ p.total || '—' }}
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="border-t-2 border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-900/40">
+                <td class="px-3 py-2 font-semibold text-gray-600 dark:text-slate-300">Total</td>
+                <td v-for="c in resumo.colunas" :key="c.wd" class="px-3 py-2 text-center tabular-nums font-semibold text-gray-700 dark:text-slate-200">{{ c.total }}</td>
+                <td class="px-3 py-2 text-center tabular-nums font-bold text-gray-900 dark:text-white">{{ resumo.total }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
     </template>
 
   </AdminLayout>
@@ -157,7 +207,7 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import { Link, router } from '@inertiajs/vue3'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 const props = defineProps({
   grupos:   { type: Array, default: () => [] },
@@ -212,13 +262,55 @@ function setCell(row, funcao, val) {
   else delete row.cells[funcao]
 }
 
-// Impede a mesma pessoa em duas funções na mesma data
-function membrosDisponiveis(row, funcao) {
-  const usados = Object.entries(row.cells)
-    .filter(([f, v]) => f !== funcao && v)
-    .map(([, v]) => Number(v))
-  return props.membros.filter(m => !usados.includes(m.id) || row.cells[funcao] === m.id)
+// Outras funções em que a pessoa já está nesta mesma data (pode, mas avisa)
+function outrasFuncoes(row, funcao, memberId) {
+  return props.funcoes.filter(f => f !== funcao && Number(row.cells[f]) === Number(memberId))
 }
+
+// Texto extra na opção do select: "· ⚠ já em Instagram"
+function avisoOpcao(row, funcao, memberId) {
+  const avisos = []
+  const mesmoDia = outrasFuncoes(row, funcao, memberId)
+  if (mesmoDia.length) avisos.push(mesmoDia.join(', '))
+  const outroGrupo = conflito(row, memberId)
+  if (outroGrupo) avisos.push(outroGrupo)
+  return avisos.length ? ` · ⚠ já em ${avisos.join(', ')}` : ''
+}
+
+// Resumo: escalas por pessoa em cada dia da semana. Duas funções no mesmo dia contam 1.
+const NOMES_DIAS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
+const resumo = computed(() => {
+  const dias = new Set()
+  const contagem = {} // memberId => { diaSemana: n }
+
+  for (const row of linhas.value) {
+    const wd = new Date(row.data + 'T12:00:00').getDay()
+    dias.add(wd)
+    const pessoas = new Set(Object.values(row.cells).filter(Boolean).map(Number))
+    for (const id of pessoas) {
+      contagem[id] ??= {}
+      contagem[id][wd] = (contagem[id][wd] || 0) + 1
+    }
+  }
+
+  const colunas = [...dias].sort((a, b) => a - b).map(wd => ({
+    wd,
+    label: NOMES_DIAS[wd],
+    total: Object.values(contagem).reduce((s, c) => s + (c[wd] || 0), 0),
+  }))
+
+  const pessoas = props.membros.map(m => {
+    const porDia = contagem[m.id] || {}
+    return { ...m, porDia, total: Object.values(porDia).reduce((s, n) => s + n, 0) }
+  })
+
+  const total = pessoas.reduce((s, p) => s + p.total, 0)
+  const media = pessoas.length && total
+    ? (total / pessoas.length).toLocaleString('pt-BR', { maximumFractionDigits: 1 })
+    : null
+
+  return { colunas, pessoas, total, media }
+})
 
 function trocar(params) {
   router.get('/admin/planejador', {
