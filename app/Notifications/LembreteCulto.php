@@ -23,7 +23,7 @@ class LembreteCulto extends Notification
 
     public function toFcm(mixed $notifiable): FcmMessage
     {
-        $horario = $this->culto->horario ? substr((string) $this->culto->horario, 0, 5) : '';
+        $horario = $this->culto->horario ? mb_substr((string) $this->culto->horario, 0, 5) : '';
 
         return FcmMessage::make(
             "Hoje tem {$this->culto->nome}",

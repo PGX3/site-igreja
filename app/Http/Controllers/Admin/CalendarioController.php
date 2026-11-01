@@ -51,7 +51,7 @@ class CalendarioController extends Controller
                 'date' => $ev->data_evento->format('Y-m-d'),
                 'tipo' => 'evento',
                 'titulo' => $ev->nome,
-                'hora' => $ev->horario ? substr($ev->horario, 0, 5) : null,
+                'hora' => $ev->horario ? mb_substr($ev->horario, 0, 5) : null,
                 'href' => "/eventos/{$ev->id}",
             ]);
         }
@@ -73,7 +73,7 @@ class CalendarioController extends Controller
                         'date' => $dia->format('Y-m-d'),
                         'tipo' => 'culto',
                         'titulo' => $culto->nome,
-                        'hora' => $culto->horario ? substr($culto->horario, 0, 5) : null,
+                        'hora' => $culto->horario ? mb_substr($culto->horario, 0, 5) : null,
                         'href' => "/cultos/{$culto->id}",
                     ]);
                 }

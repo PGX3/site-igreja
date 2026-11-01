@@ -343,7 +343,7 @@ class McpFerramentas
 
     private static function horario(?string $valor): ?string
     {
-        return $valor ? substr($valor, 0, 5) : null;
+        return $valor ? mb_substr($valor, 0, 5) : null;
     }
 
     /**

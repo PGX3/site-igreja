@@ -16,7 +16,7 @@ class CultoResource extends JsonResource
             'id' => $this->id,
             'nome' => $this->nome,
             'dia_semana' => $this->dia_semana,
-            'horario' => $this->horario ? substr((string) $this->horario, 0, 5) : null,
+            'horario' => $this->horario ? mb_substr((string) $this->horario, 0, 5) : null,
             'descricao' => $this->descricao,
             'ativo' => (bool) $this->ativo,
             'proxima_data' => $proxima->format('Y-m-d'),

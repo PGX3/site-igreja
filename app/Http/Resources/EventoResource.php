@@ -16,7 +16,7 @@ class EventoResource extends JsonResource
             'id' => $this->id,
             'nome' => $this->nome,
             'data_evento' => $data?->format('Y-m-d'),
-            'horario' => $this->horario ? substr((string) $this->horario, 0, 5) : null,
+            'horario' => $this->horario ? mb_substr((string) $this->horario, 0, 5) : null,
             'local' => $this->local,
             'descricao' => $this->descricao,
             'ativo' => (bool) $this->ativo,
