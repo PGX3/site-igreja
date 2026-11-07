@@ -55,4 +55,29 @@ defineProps({
   color: #2563eb;
   text-decoration: underline;
 }
+/* Conteúdo colado (código, tabelas, embeds) não pode alargar a página no celular */
+.conteudo-rico :deep(pre) {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: rgba(127, 127, 127, 0.12);
+  margin: 0 0 0.9rem;
+}
+.conteudo-rico :deep(table) {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  margin: 0 0 0.9rem;
+}
+.conteudo-rico :deep(td), .conteudo-rico :deep(th) {
+  border: 1px solid rgba(127, 127, 127, 0.3);
+  padding: 0.35rem 0.6rem;
+}
+.conteudo-rico :deep(iframe), .conteudo-rico :deep(video) {
+  max-width: 100%;
+}
 </style>

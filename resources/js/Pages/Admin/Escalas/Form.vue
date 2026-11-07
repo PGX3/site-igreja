@@ -155,19 +155,19 @@
 
         <div v-if="membrosDoGrupo.length" class="divide-y divide-gray-50 dark:divide-slate-700">
           <div v-for="membro in membrosDoGrupo" :key="membro.id"
-               class="flex items-center gap-4 px-5 py-3 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition">
+               class="flex flex-wrap sm:flex-nowrap items-center gap-x-4 gap-y-2 px-4 sm:px-5 py-3 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition">
             <input :id="`m-${membro.id}`" type="checkbox"
                    :checked="isEscalado(membro.id)"
                    @change="toggleMembro(membro.id)"
                    class="w-4 h-4 rounded border-gray-300 dark:border-slate-500 text-blue-600 focus:ring-blue-500 cursor-pointer" />
-            <label :for="`m-${membro.id}`" class="flex-1 cursor-pointer">
+            <label :for="`m-${membro.id}`" class="flex-1 min-w-0 cursor-pointer">
               <span class="text-sm font-medium text-gray-800 dark:text-slate-200">{{ membro.name }}</span>
             </label>
-            <template v-if="isEscalado(membro.id)">
+            <div v-if="isEscalado(membro.id)" class="flex items-center gap-2 w-full sm:w-auto pl-8 sm:pl-0">
               <input v-model="funcaoDoMembro(membro.id).funcao"
                      :list="`funcoes-grupo-${form.grupo_id}`"
                      type="text" placeholder="Função..." maxlength="100"
-                     class="border border-gray-200 dark:border-slate-600 rounded px-3 py-1.5 text-xs w-40
+                     class="border border-gray-200 dark:border-slate-600 rounded px-3 py-1.5 text-xs flex-1 sm:flex-none sm:w-40
                             bg-white dark:bg-slate-700 text-gray-900 dark:text-white
                             placeholder-gray-400 dark:placeholder-slate-400
                             focus:outline-none focus:ring-1 focus:ring-blue-500" />
@@ -176,7 +176,7 @@
                       class="text-xs font-bold text-gray-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 w-7 h-7 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
                 +
               </button>
-            </template>
+            </div>
           </div>
         </div>
 

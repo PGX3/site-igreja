@@ -79,7 +79,7 @@
              class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden">
 
         <!-- MOBILE -->
-        <div class="sm:hidden">
+        <div class="xl:hidden">
           <div class="p-4">
             <!-- Data + título + status -->
             <div class="flex items-start gap-3 mb-3">
@@ -139,7 +139,7 @@
         </div>
 
         <!-- DESKTOP -->
-        <div class="hidden sm:flex items-center gap-5 p-5">
+        <div class="hidden xl:flex items-center gap-5 p-5">
           <!-- Data -->
           <div class="text-center min-w-[54px]">
             <p class="text-2xl font-black text-gray-900 dark:text-white leading-none">{{ diaDoMes(e.data) }}</p>

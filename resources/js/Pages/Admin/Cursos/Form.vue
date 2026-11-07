@@ -38,7 +38,7 @@
               <span v-else class="text-2xl">📖</span>
             </div>
             <input type="file" accept="image/jpeg,image/png,image/webp" @change="onCapa"
-                   class="text-sm text-gray-600 dark:text-slate-300 file:mr-3 file:py-2 file:px-4 file:rounded-lg
+                   class="w-full min-w-0 text-sm text-gray-600 dark:text-slate-300 file:mr-3 file:py-2 file:px-4 file:rounded-lg
                           file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700
                           dark:file:bg-blue-900/30 dark:file:text-blue-300 hover:file:bg-blue-100 cursor-pointer" />
           </div>

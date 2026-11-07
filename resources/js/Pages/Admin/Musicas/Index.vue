@@ -49,22 +49,25 @@
 
     <div v-else class="space-y-2">
       <div v-for="m in musicasFiltradas" :key="m.id"
-           class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm flex items-center gap-3 px-4 sm:px-5 py-3.5">
-        <div class="flex-shrink-0 w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 flex items-center justify-center">
-          <AppIcon name="mic" size="md" />
+           class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm flex flex-wrap sm:flex-nowrap items-center gap-3 px-4 sm:px-5 py-3.5">
+        <!-- No celular, nome e ações ficam em linhas separadas -->
+        <div class="flex items-center gap-3 flex-1 min-w-0 basis-full sm:basis-0">
+          <div class="flex-shrink-0 w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+            <AppIcon name="mic" size="md" />
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="font-semibold text-gray-900 dark:text-white text-sm truncate">{{ m.nome }}</p>
+            <p class="text-xs text-gray-400 dark:text-slate-500 mt-0.5 truncate">
+              <template v-if="m.vezes">Tocada {{ m.vezes }}x · última: {{ m.ultima }}</template>
+              <template v-else>Nunca tocada</template>
+            </p>
+          </div>
+          <span v-if="m.tom"
+                class="inline-block bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-xs font-bold px-2.5 py-1 rounded-full flex-shrink-0">
+            {{ m.tom }}
+          </span>
         </div>
-        <div class="flex-1 min-w-0">
-          <p class="font-semibold text-gray-900 dark:text-white text-sm truncate">{{ m.nome }}</p>
-          <p class="text-xs text-gray-400 dark:text-slate-500 mt-0.5 truncate">
-            <template v-if="m.vezes">Tocada {{ m.vezes }}x · última: {{ m.ultima }}</template>
-            <template v-else>Nunca tocada</template>
-          </p>
-        </div>
-        <span v-if="m.tom"
-              class="hidden sm:inline-block bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-xs font-bold px-2.5 py-1 rounded-full flex-shrink-0">
-          {{ m.tom }}
-        </span>
-        <div class="flex items-center gap-1 flex-shrink-0">
+        <div class="flex flex-wrap items-center gap-1 flex-shrink-0 w-full sm:w-auto justify-end">
           <a v-if="m.link" :href="m.link" target="_blank" rel="noopener"
              class="text-xs font-semibold px-2.5 py-1.5 rounded transition"
              :class="linkClasse(m.link)" :title="m.link">

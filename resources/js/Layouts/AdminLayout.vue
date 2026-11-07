@@ -151,7 +151,7 @@
         </aside>
 
         <!-- ─────────────────── CONTEÚDO ─────────────────── -->
-        <div class="flex-1 lg:ml-[260px] flex flex-col min-h-0 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+        <div class="flex-1 min-w-0 lg:ml-[260px] flex flex-col min-h-0 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
 
             <!-- Top bar -->
             <header class="h-14 bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-700/50

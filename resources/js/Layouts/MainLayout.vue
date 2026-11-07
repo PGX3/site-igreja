@@ -3,19 +3,19 @@
 
     <!-- NAV -->
     <nav
-      class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-10 md:px-16 py-5 pt-[calc(1.25rem+env(safe-area-inset-top))] transition-all duration-500"
+      class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between gap-6 px-10 md:px-16 py-5 pt-[calc(1.25rem+env(safe-area-inset-top))] transition-all duration-500"
       :class="scrolled || mobileOpen ? 'bg-[#0a0a0a]/96 backdrop-blur-md border-b border-[var(--blue)]/10' : ''"
     >
       <Link href="/" class="flex items-center gap-3 group">
         <LogoIcon :size="34" class="transition-transform duration-300 group-hover:scale-110" />
         <span style="font-family:'Barlow Condensed',sans-serif"
-              class="font-black text-base tracking-[0.2em] uppercase hidden sm:block">
+              class="font-black text-base tracking-[0.2em] uppercase hidden sm:block xl:hidden 2xl:block">
           IGREJA<span class="text-[var(--blue)]">.</span>
         </span>
       </Link>
 
       <!-- Desktop nav -->
-      <ul class="hidden md:flex items-center gap-10 list-none">
+      <ul class="hidden xl:flex items-center gap-5 2xl:gap-10 list-none whitespace-nowrap">
         <li v-for="link in links" :key="link.href">
           <a :href="anchor(link.href)"
              class="text-[10px] font-semibold tracking-[0.25em] uppercase text-white/40
@@ -35,13 +35,13 @@
         </li>
       </ul>
 
-      <div class="hidden md:flex items-center gap-4">
-        <a :href="anchor('#sugestoes')" class="btn-primary text-xs">Fale Conosco</a>
+      <div class="hidden xl:flex items-center gap-4">
+        <a :href="anchor('#sugestoes')" class="btn-primary text-xs whitespace-nowrap">Fale Conosco</a>
       </div>
 
       <!-- Mobile menu btn -->
       <button
-        class="md:hidden flex flex-col gap-1.5 p-2.5 rounded-lg transition-all duration-300"
+        class="xl:hidden flex flex-col gap-1.5 p-2.5 rounded-lg transition-all duration-300"
         :class="mobileOpen ? 'bg-white/15' : 'bg-white/5 hover:bg-white/10'"
         @click="mobileOpen = !mobileOpen"
       >
@@ -53,21 +53,24 @@
 
     <!-- Mobile menu -->
     <Transition name="mobile-menu">
-      <div v-if="mobileOpen"
-           class="fixed inset-0 z-40 bg-[#0a0a0a] flex flex-col items-center justify-center gap-8">
-        <LogoIcon :size="52" class="mb-4 opacity-60" />
-        <a v-for="link in links" :key="link.href" :href="anchor(link.href)"
-           @click="mobileOpen = false"
-           class="text-3xl font-black tracking-widest uppercase text-white/60 hover:text-[var(--blue)] transition-colors"
-           style="font-family:'Barlow Condensed',sans-serif">
-          {{ link.label }}
-        </a>
-        <a :href="anchor('#sugestoes')" @click="mobileOpen = false" class="btn-primary mt-4">Fale Conosco</a>
-        <Link v-if="authUser" href="/admin" @click="mobileOpen = false"
-              class="text-sm font-bold tracking-widest uppercase text-white/30
-                     hover:text-[var(--blue)] transition-colors">
-          Painel →
-        </Link>
+      <!-- Rola em telas baixas (iPhone SE, celular deitado): são 10 itens -->
+      <div v-if="mobileOpen" class="fixed inset-0 z-40 bg-[#0a0a0a] overflow-y-auto">
+        <div class="min-h-full flex flex-col items-center justify-center gap-4 sm:gap-6 px-6
+                    pt-[calc(6rem+env(safe-area-inset-top))] pb-[calc(3rem+env(safe-area-inset-bottom))]">
+          <LogoIcon :size="52" class="mb-2 opacity-60" />
+          <a v-for="link in links" :key="link.href" :href="anchor(link.href)"
+             @click="mobileOpen = false"
+             class="text-2xl sm:text-3xl font-black tracking-widest uppercase text-white/60 hover:text-[var(--blue)] transition-colors"
+             style="font-family:'Barlow Condensed',sans-serif">
+            {{ link.label }}
+          </a>
+          <a :href="anchor('#sugestoes')" @click="mobileOpen = false" class="btn-primary mt-4">Fale Conosco</a>
+          <Link v-if="authUser" href="/admin" @click="mobileOpen = false"
+                class="text-sm font-bold tracking-widest uppercase text-white/30
+                       hover:text-[var(--blue)] transition-colors">
+            Painel →
+          </Link>
+        </div>
       </div>
     </Transition>
 

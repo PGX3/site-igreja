@@ -25,13 +25,13 @@
     <!-- LISTA -->
     <div v-else class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden">
       <div v-for="curso in cursos" :key="curso.id"
-           class="flex items-center gap-4 px-5 py-4 border-b border-gray-100 dark:border-slate-700/50 last:border-0 hover:bg-gray-50 dark:hover:bg-slate-700/40 transition">
+           class="flex flex-wrap sm:flex-nowrap items-center gap-x-4 gap-y-2 px-5 py-4 border-b border-gray-100 dark:border-slate-700/50 last:border-0 hover:bg-gray-50 dark:hover:bg-slate-700/40 transition">
         <div class="w-12 h-12 rounded-lg bg-gray-100 dark:bg-slate-700 overflow-hidden flex-shrink-0 flex items-center justify-center">
           <img v-if="curso.capa_url" :src="curso.capa_url" :alt="curso.titulo" class="w-full h-full object-cover" />
           <span v-else class="text-xl">📖</span>
         </div>
         <div class="flex-1 min-w-0">
-          <p class="font-semibold text-gray-900 dark:text-white truncate">{{ curso.titulo }}</p>
+          <p class="font-semibold text-gray-900 dark:text-white line-clamp-2 sm:line-clamp-none sm:truncate">{{ curso.titulo }}</p>
           <p class="text-xs text-gray-500 dark:text-slate-400">
             {{ curso.modulos_count }} {{ curso.modulos_count === 1 ? 'módulo' : 'módulos' }}
             <span v-if="curso.compartilhado" class="ml-2 text-green-600 dark:text-green-400">· link ativo</span>
@@ -43,7 +43,7 @@
                 : 'bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400'">
           {{ curso.ativo ? 'Ativo' : 'Inativo' }}
         </span>
-        <div class="flex items-center gap-3 text-sm flex-shrink-0">
+        <div class="flex items-center gap-3 text-sm flex-shrink-0 w-full sm:w-auto pl-16 sm:pl-0">
           <a :href="`/admin/aprender/${curso.id}`" target="_blank" rel="noopener"
              class="text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition">
             Ver

@@ -93,7 +93,7 @@
                 </p>
               </div>
               <Link :href="m.tipo === 'membro' ? `/admin/membros/${m.id}/edit` : `/admin/visitantes/${m.id}/edit`"
-                    class="text-xs font-semibold text-gray-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded transition">
+                    class="text-xs font-semibold text-gray-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-1.5 rounded transition whitespace-nowrap flex-shrink-0">
                 Ver ficha
               </Link>
             </div>

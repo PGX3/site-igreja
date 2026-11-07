@@ -92,9 +92,9 @@
 
     <!-- LISTA MEMBROS -->
     <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden">
-      <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between gap-3">
+      <div class="px-4 sm:px-6 py-4 border-b border-gray-100 dark:border-slate-700 flex flex-wrap items-center justify-between gap-3">
         <p class="font-semibold text-gray-900 dark:text-white">Membros Escalados</p>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           <button v-if="can_manage && temAlgumApikey" @click="enviarConvites" :disabled="enviandoConvites"
                   class="text-xs font-semibold text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 disabled:opacity-50 px-3 py-1.5 rounded transition"
                   title="Envia automaticamente para quem tem API Key">
@@ -114,7 +114,7 @@
           </div>
 
           <div class="flex-1 min-w-0">
-            <p class="font-semibold text-gray-900 dark:text-white text-sm truncate">{{ m.user?.name }}</p>
+            <p class="font-semibold text-gray-900 dark:text-white text-sm line-clamp-2 sm:line-clamp-none sm:truncate">{{ m.user?.name }}</p>
             <p class="text-xs text-gray-400 dark:text-slate-500 truncate">
               <span class="hidden sm:inline">{{ m.user?.email }}</span>
               <span class="sm:hidden">{{ m.funcao ?? m.user?.email ?? '' }}</span>
@@ -145,9 +145,9 @@
     <!-- ============================ SETLIST ============================ -->
     <div v-if="escala.grupo?.tem_musicas"
          class="mt-8 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden">
-      <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between gap-3">
+      <div class="px-4 sm:px-6 py-4 border-b border-gray-100 dark:border-slate-700 flex flex-wrap items-center justify-between gap-3">
         <p class="font-semibold text-gray-900 dark:text-white">🎵 Setlist</p>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           <template v-if="escala.setlist?.length">
             <button @click="abrirApresentacao(0)"
                     class="text-xs font-semibold text-gray-900 dark:text-white bg-gray-900/5 dark:bg-white/10 hover:bg-gray-900/10 dark:hover:bg-white/20 px-3 py-1.5 rounded transition">▶ Apresentar</button>
@@ -164,17 +164,18 @@
       <div v-if="escala.setlist?.length">
         <div v-for="(s, idx) in escala.setlist" :key="s.id"
              class="border-b border-gray-50 dark:border-slate-700/50 last:border-0">
-          <div class="flex items-center gap-3 px-4 sm:px-6 py-3">
+          <div class="flex flex-wrap sm:flex-nowrap items-center gap-x-3 gap-y-1 px-4 sm:px-6 py-3">
             <span class="w-6 text-center text-sm font-bold text-gray-400 dark:text-slate-500 flex-shrink-0">{{ idx + 1 }}</span>
             <div class="flex-1 min-w-0">
-              <p class="font-semibold text-gray-900 dark:text-white text-sm truncate">{{ s.musica?.nome ?? '(música removida)' }}</p>
-              <p v-if="s.observacao" class="text-xs text-gray-400 dark:text-slate-500 truncate">{{ s.observacao }}</p>
+              <p class="font-semibold text-gray-900 dark:text-white text-sm line-clamp-2 sm:line-clamp-none sm:truncate">{{ s.musica?.nome ?? '(música removida)' }}</p>
+              <p v-if="s.observacao" class="text-xs text-gray-400 dark:text-slate-500 line-clamp-2 sm:line-clamp-none sm:truncate">{{ s.observacao }}</p>
             </div>
             <span v-if="tomExibido(s)"
                   class="bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-xs font-bold px-2.5 py-1 rounded-full flex-shrink-0">
               {{ tomExibido(s) }}
             </span>
-            <div class="flex items-center gap-0.5 flex-shrink-0">
+            <!-- No celular os controles vão para uma segunda linha, alinhados à direita -->
+            <div class="flex items-center gap-0.5 flex-shrink-0 w-full sm:w-auto justify-end">
               <button v-if="s.musica" @click="abrirApresentacao(idx)"
                       class="text-xs font-semibold text-gray-900 dark:text-white bg-gray-900/5 dark:bg-white/10 hover:bg-gray-900/10 dark:hover:bg-white/20 px-2.5 py-1.5 rounded transition" title="Ver no celular">📱</button>
               <template v-if="can_manage">

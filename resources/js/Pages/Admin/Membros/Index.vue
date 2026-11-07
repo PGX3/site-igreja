@@ -41,30 +41,10 @@
       <div v-for="m in membrosFiltrados" :key="m.id"
            class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-4 shadow-sm">
 
-        <!-- Nome + ações -->
-        <div class="flex items-start justify-between gap-2 mb-2">
-          <div class="min-w-0">
-            <p class="font-semibold text-gray-900 dark:text-white truncate">{{ m.name }}</p>
-            <p v-if="m.email" class="text-xs text-gray-400 dark:text-slate-500 truncate">{{ m.email }}</p>
-          </div>
-          <div class="flex gap-1 flex-shrink-0">
-            <Link v-if="isPastor" :href="`/admin/membros/${m.id}/edit`"
-                  class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-2.5 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
-              Editar
-            </Link>
-            <Link v-else :href="`/admin/membros/${m.id}`"
-                  class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-2.5 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
-              Visualizar
-            </Link>
-            <button v-if="isPastor" @click="paraGerarSenha = m"
-                    class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 px-2.5 py-1.5 rounded hover:bg-amber-50 dark:hover:bg-amber-900/20 transition">
-              Senha
-            </button>
-            <button v-if="isPastor" @click="paraExcluir = m"
-                    class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-red-600 px-2.5 py-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
-              Excluir
-            </button>
-          </div>
+        <!-- Nome -->
+        <div class="min-w-0 mb-2">
+          <p class="font-semibold text-gray-900 dark:text-white break-words">{{ m.name }}</p>
+          <p v-if="m.email" class="text-xs text-gray-400 dark:text-slate-500 truncate">{{ m.email }}</p>
         </div>
 
         <!-- Grupos -->
@@ -99,6 +79,26 @@
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
             Batizado
           </span>
+        </div>
+
+        <!-- Ações -->
+        <div class="flex justify-end gap-1 mt-3 -mb-1.5 -mr-2.5">
+            <Link v-if="isPastor" :href="`/admin/membros/${m.id}/edit`"
+                  class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-2.5 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
+              Editar
+            </Link>
+            <Link v-else :href="`/admin/membros/${m.id}`"
+                  class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-2.5 py-1.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
+              Visualizar
+            </Link>
+            <button v-if="isPastor" @click="paraGerarSenha = m"
+                    class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 px-2.5 py-1.5 rounded hover:bg-amber-50 dark:hover:bg-amber-900/20 transition">
+              Senha
+            </button>
+            <button v-if="isPastor" @click="paraExcluir = m"
+                    class="text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-red-600 px-2.5 py-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+              Excluir
+            </button>
         </div>
       </div>
     </div>
@@ -140,7 +140,7 @@
         </template>
 
         <template #item-telefone="{ name, telefone }">
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 whitespace-nowrap">
             <span>{{ telefone || '—' }}</span>
             <a v-if="telefone" :href="whatsappUrl(telefone)" target="_blank" rel="noopener"
                :title="`Abrir WhatsApp de ${name}`" @click.stop

@@ -9,7 +9,7 @@
       </Link>
       <div class="flex flex-wrap items-center justify-between gap-3 mt-4">
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ curso.titulo }}</h1>
-        <div class="flex items-center gap-4">
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
           <a :href="`/admin/aprender/${curso.id}`" target="_blank" rel="noopener"
              class="text-sm font-semibold text-gray-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition">
             Ver curso ↗
@@ -50,7 +50,7 @@
         <!-- Cabeçalho do módulo -->
         <div class="flex items-center gap-2 px-4 py-3 bg-gray-50 dark:bg-slate-900/40 border-b border-gray-100 dark:border-slate-700/50">
           <span class="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest">Mód. {{ mi + 1 }}</span>
-          <p class="flex-1 font-semibold text-gray-900 dark:text-white truncate">{{ modulo.titulo }}</p>
+          <p class="flex-1 min-w-0 font-semibold text-gray-900 dark:text-white line-clamp-2 sm:line-clamp-none sm:truncate">{{ modulo.titulo }}</p>
           <a :href="`/admin/aprender/modulos/${modulo.id}/pdf`" target="_blank" rel="noopener" class="btn-icon" title="PDF do módulo">📄</a>
           <button @click="moverModulo(mi, -1)" :disabled="mi === 0" class="btn-icon" title="Subir">↑</button>
           <button @click="moverModulo(mi, 1)" :disabled="mi === curso.modulos.length - 1" class="btn-icon" title="Descer">↓</button>
@@ -60,8 +60,9 @@
 
         <!-- Aulas -->
         <div>
+          <!-- No celular: título na primeira linha, ações na segunda -->
           <div v-for="(aula, ai) in modulo.aulas" :key="aula.id"
-               class="flex items-center gap-2 px-4 py-3 border-b border-gray-100 dark:border-slate-700/50 last:border-0">
+               class="flex flex-wrap sm:flex-nowrap items-center gap-x-2 gap-y-1 px-4 py-3 border-b border-gray-100 dark:border-slate-700/50 last:border-0">
             <span class="w-6 text-right flex-shrink-0 text-gray-400 dark:text-slate-500 text-xs font-semibold">
               {{ ai + 1 }}
             </span>
@@ -69,10 +70,11 @@
               <TipoAulaIcon :tipo="aula.tipo" :size="14" />
             </span>
             <Link :href="`/admin/aulas/${aula.id}/edit`"
-                  class="flex-1 text-sm font-medium text-gray-800 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 truncate">
+                  class="flex-1 min-w-0 text-sm font-medium text-gray-800 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 line-clamp-2 sm:line-clamp-none sm:truncate">
               {{ aula.titulo }}
               <span v-if="!aula.ativo" class="text-xs text-gray-400 dark:text-slate-500">(oculta)</span>
             </Link>
+            <div class="flex items-center gap-1 w-full sm:w-auto justify-end sm:contents">
             <Link :href="`/admin/aulas/${aula.id}/edit`" class="btn-link-sm" title="Editar a aula">editar</Link>
             <a :href="`/admin/aprender/aulas/${aula.id}`" target="_blank" rel="noopener" class="btn-link-sm" title="Pré-visualizar a aula">ver</a>
             <button v-if="aula.share_url" @click="copiar(aula.share_url)" class="btn-link-sm" title="Copiar link da aula">
@@ -82,6 +84,7 @@
             <button @click="moverAula(modulo, ai, -1)" :disabled="ai === 0" class="btn-icon" title="Subir">↑</button>
             <button @click="moverAula(modulo, ai, 1)" :disabled="ai === modulo.aulas.length - 1" class="btn-icon" title="Descer">↓</button>
             <button @click="excluirAula(aula)" class="btn-icon hover:text-red-500" title="Excluir">🗑</button>
+            </div>
           </div>
 
           <!-- Nova aula -->

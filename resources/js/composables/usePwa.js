@@ -13,6 +13,7 @@ const instalando = ref(false)
 let promptInstalacao = null
 let workerEsperando = null
 let iniciado = false
+let atualizacaoPedida = false
 
 const ua = navigator.userAgent
 // iPadOS se apresenta como Mac, mas com tela de toque.
@@ -73,10 +74,11 @@ export function iniciarPwa() {
     }
   })
 
-  let recarregando = false
+  // controllerchange também dispara na primeira instalação (clientsClaim),
+  // então só recarrega quando foi o usuário que pediu a atualização.
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (recarregando) return
-    recarregando = true
+    if (!atualizacaoPedida) return
+    atualizacaoPedida = false
     window.location.reload()
   })
 }
@@ -113,6 +115,7 @@ export function usePwa() {
       window.location.reload()
       return
     }
+    atualizacaoPedida = true
     workerEsperando.postMessage({ type: 'SKIP_WAITING' })
   }
 
