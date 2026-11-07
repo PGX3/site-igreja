@@ -11,7 +11,8 @@
         <!-- ─────────────────── SIDEBAR ─────────────────── -->
         <aside
             class="w-[260px] bg-white dark:bg-slate-900 border-r border-gray-100 dark:border-slate-700/50
-                   flex flex-col fixed inset-y-0 left-0 z-30 transition-all duration-300"
+                   flex flex-col fixed inset-y-0 left-0 z-30 transition-all duration-300
+                   pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]"
             :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
         >
             <!-- Logo -->
@@ -150,7 +151,7 @@
         </aside>
 
         <!-- ─────────────────── CONTEÚDO ─────────────────── -->
-        <div class="flex-1 lg:ml-[260px] flex flex-col min-h-0">
+        <div class="flex-1 lg:ml-[260px] flex flex-col min-h-0 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
 
             <!-- Top bar -->
             <header class="h-14 bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-700/50
@@ -196,6 +197,8 @@
                 <slot />
             </main>
         </div>
+
+        <PwaBanner />
     </div>
 </template>
 
@@ -204,6 +207,7 @@ import { Link, usePage } from "@inertiajs/vue3";
 import { computed, ref } from "vue";
 import LogoIcon from "@/Components/LogoIcon.vue";
 import AppIcon from "@/Components/AppIcon.vue";
+import PwaBanner from "@/Components/PwaBanner.vue";
 import { useTheme } from "@/composables/useTheme.js";
 
 const { isDark, toggle: toggleTheme } = useTheme();

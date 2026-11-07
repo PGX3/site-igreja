@@ -3,7 +3,7 @@
 
     <!-- NAV -->
     <nav
-      class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-10 md:px-16 py-5 transition-all duration-500"
+      class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-10 md:px-16 py-5 pt-[calc(1.25rem+env(safe-area-inset-top))] transition-all duration-500"
       :class="scrolled || mobileOpen ? 'bg-[#0a0a0a]/96 backdrop-blur-md border-b border-[var(--blue)]/10' : ''"
     >
       <Link href="/" class="flex items-center gap-3 group">
@@ -109,6 +109,8 @@
         </div>
       </div>
     </footer>
+
+    <PwaBanner :sugerir-instalacao="false" />
   </div>
 </template>
 
@@ -116,6 +118,7 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { Link, usePage } from '@inertiajs/vue3'
 import LogoIcon from '@/Components/LogoIcon.vue'
+import PwaBanner from '@/Components/PwaBanner.vue'
 
 const scrolled   = ref(false)
 const mobileOpen = ref(false)

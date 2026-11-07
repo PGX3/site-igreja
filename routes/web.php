@@ -47,6 +47,18 @@ use Illuminate\Support\Facades\Route;
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
 
+// Service worker da PWA. O Vite gera em public/build/sw.js, mas o escopo de um
+// SW é a pasta de onde ele é servido: na raiz ele controla o site inteiro.
+Route::get('/sw.js', function () {
+    $arquivo = public_path('build/sw.js');
+    abort_unless(file_exists($arquivo), 404);
+
+    return response()->file($arquivo, [
+        'Content-Type' => 'application/javascript; charset=utf-8',
+        'Cache-Control' => 'no-cache, max-age=0',
+    ]);
+})->name('sw');
+
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/primeira-vez', [HomeController::class, 'primeiraVez'])->name('primeira-vez');
 // Página fora do menu e do sitemap (noindex): link usado no destaque "1ª vez" do Instagram.

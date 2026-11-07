@@ -5,6 +5,9 @@ import { ZiggyVue } from '../../vendor/tightenco/ziggy'
 import Vue3EasyDataTable from 'vue3-easy-data-table'
 import 'vue3-easy-data-table/dist/style.css'
 import '../css/app.css'
+import { iniciarPwa } from '@/composables/usePwa.js'
+
+iniciarPwa()
 
 createInertiaApp({
   title: (title) => title ? `${title} · Igreja em Charqueadas` : 'Igreja em Charqueadas',

@@ -56,6 +56,10 @@
             <label class="block text-[9px] font-bold tracking-[0.3em] uppercase text-white/30 mb-2">Senha</label>
             <input v-model="form.password" type="password" required class="field w-full" placeholder="••••••••" />
           </div>
+          <label class="flex items-center gap-2.5 cursor-pointer select-none">
+            <input v-model="form.remember" type="checkbox" class="w-4 h-4 rounded border-white/20 bg-white/5 accent-[var(--blue)]" />
+            <span class="text-[11px] tracking-[0.15em] uppercase text-white/40">Manter conectado</span>
+          </label>
           <button type="submit" :disabled="form.processing"
                   class="btn-primary w-full text-center mt-2 disabled:opacity-40 disabled:cursor-not-allowed">
             {{ form.processing ? 'Entrando...' : '→ Entrar' }}
@@ -75,6 +79,6 @@
 <script setup>
 import { useForm, Link } from '@inertiajs/vue3'
 import LogoIcon from '@/Components/LogoIcon.vue'
-const form = useForm({ email: '', password: '' })
+const form = useForm({ email: '', password: '', remember: true })
 function submit() { form.post('/login') }
 </script>
