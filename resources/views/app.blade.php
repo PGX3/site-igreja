@@ -44,7 +44,8 @@
     {{-- PWA: comportamento quando adicionada à tela inicial --}}
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    {{-- "default" deixa o iOS pintar a barra de status com o theme-color, que o painel troca conforme o tema --}}
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Igreja" />
     <meta name="application-name" content="Igreja em Charqueadas" />
 

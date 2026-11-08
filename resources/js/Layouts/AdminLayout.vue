@@ -204,13 +204,21 @@
 
 <script setup>
 import { Link, usePage } from "@inertiajs/vue3";
-import { computed, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import LogoIcon from "@/Components/LogoIcon.vue";
 import AppIcon from "@/Components/AppIcon.vue";
 import PwaBanner from "@/Components/PwaBanner.vue";
-import { useTheme } from "@/composables/useTheme.js";
+import { useTheme, definirCorTema, COR_SITE, COR_PAINEL_CLARO, COR_PAINEL_ESCURO } from "@/composables/useTheme.js";
 
 const { isDark, toggle: toggleTheme } = useTheme();
+
+// Barra de status do celular acompanha o fundo do painel (claro ou escuro).
+function aplicarCorTema() {
+    definirCorTema(isDark.value ? COR_PAINEL_ESCURO : COR_PAINEL_CLARO);
+}
+onMounted(aplicarCorTema);
+watch(isDark, aplicarCorTema);
+onUnmounted(() => definirCorTema(COR_SITE));
 const sidebarOpen = ref(false);
 const userMenuOpen = ref(false);
 
