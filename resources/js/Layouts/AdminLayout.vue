@@ -260,6 +260,7 @@ const routeTitles = {
     "/admin": null,
     "/admin/membros": "Membros",
     "/admin/visitantes": "Visitantes",
+    "/admin/recepcao": "iPad da recepção",
     "/admin/aniversarios": "Aniversários",
     "/admin/calendario": "Calendário",
     "/admin/planejador": "Planejador",
@@ -326,6 +327,7 @@ const navGroups = computed(() => {
         ];
         if (isPastor) {
             pessoas.push({ href: "/admin/grupos", label: "Grupos", icon: "users" });
+            pessoas.push({ href: "/admin/recepcao", label: "iPad da recepção", icon: "clipboard" });
         }
         groups.push({ label: "Pessoas", items: pessoas });
 

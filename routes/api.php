@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\V1\MusicaController;
 use App\Http\Controllers\Api\V1\PedidoOracaoController;
 use App\Http\Controllers\Api\V1\PregacaoController;
 use App\Http\Controllers\Api\V1\ProfileController;
+use App\Http\Controllers\Api\V1\RecepcaoController;
 use App\Http\Controllers\Mcp\McpController;
 use Illuminate\Support\Facades\Route;
 
@@ -39,6 +40,19 @@ Route::prefix('v1')->middleware('force.json')->group(function () {
             Route::get('culto-excecoes', [AutomacaoController::class, 'excecoes'])->name('culto-excecoes.index');
             Route::post('culto-excecoes', [AutomacaoController::class, 'salvarExcecao'])->name('culto-excecoes.store');
             Route::delete('culto-excecoes/{excecao}', [AutomacaoController::class, 'removerExcecao'])->name('culto-excecoes.destroy');
+        });
+
+    // iPad da recepção (app Recepção): token do aparelho, gerado em /admin/recepcao
+    Route::prefix('recepcao')->name('api.v1.recepcao.')
+        ->middleware(['recepcao.token', 'throttle:recepcao'])
+        ->group(function () {
+            Route::get('/', [RecepcaoController::class, 'config'])->name('config');
+            Route::post('diacono', [RecepcaoController::class, 'diacono'])
+                ->middleware('throttle:6,1')
+                ->name('diacono');
+            Route::post('visitantes', [RecepcaoController::class, 'storeVisitante'])->name('visitantes.store');
+            Route::post('oracao', [RecepcaoController::class, 'storeOracao'])->name('oracao.store');
+            Route::post('sugestao', [RecepcaoController::class, 'storeSugestao'])->name('sugestao.store');
         });
 
     Route::post('auth/login', [AuthController::class, 'login'])

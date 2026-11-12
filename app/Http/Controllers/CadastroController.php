@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Familia;
 use App\Models\User;
 use App\Services\RecaptchaService;
+use App\Services\RegistroVisitante;
 use App\Support\Cpf;
-use App\Support\Telefone;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -192,15 +192,6 @@ class CadastroController extends Controller
      */
     private function usuarioPorTelefone(?string $telefone): ?User
     {
-        $sufixo = Telefone::sufixo($telefone);
-
-        if ($sufixo === null) {
-            return null;
-        }
-
-        return User::whereNotNull('telefone')
-            ->where('telefone', 'like', '%'.$sufixo.'%')
-            ->get()
-            ->first(fn (User $u) => Telefone::mesmoNumero($u->telefone, $telefone));
+        return app(RegistroVisitante::class)->porTelefone($telefone);
     }
 }

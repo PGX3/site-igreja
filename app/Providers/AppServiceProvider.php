@@ -64,6 +64,11 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(30)->by($request->user()?->id ?: $request->ip());
         });
 
+        // iPad da recepção: limite por aparelho (token), não por IP da igreja.
+        RateLimiter::for('recepcao', function (Request $request) {
+            return Limit::perMinute(30)->by(hash('sha256', (string) $request->bearerToken()) ?: $request->ip());
+        });
+
         RateLimiter::for('cadastro', function (Request $request) {
             return Limit::perMinute(20)->by($request->user()?->id ?: $request->ip());
         });

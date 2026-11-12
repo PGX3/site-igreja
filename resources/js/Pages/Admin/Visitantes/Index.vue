@@ -48,6 +48,9 @@
           <p class="font-semibold text-gray-900 dark:text-white break-words">{{ v.name }}</p>
           <p v-if="v.email" class="text-xs text-gray-400 dark:text-slate-500 truncate">{{ v.email }}</p>
           <p v-if="v.como_conheceu" class="text-xs text-gray-400 dark:text-slate-500 truncate">{{ v.como_conheceu }}</p>
+          <span v-if="v.autoriza_contato === false"
+                class="inline-block mt-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400"
+                title="Pediu para não ser contatado pelo WhatsApp (LGPD)">Não autorizou contato</span>
         </div>
 
         <!-- Info: telefone, convidado por, data -->
@@ -109,6 +112,9 @@
             Nasc. {{ formatDate(v.data_nascimento) }}
           </p>
           <p v-if="v.como_conheceu" class="text-xs text-gray-400 dark:text-slate-500">{{ v.como_conheceu }}</p>
+          <span v-if="v.autoriza_contato === false"
+                class="inline-block mt-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400"
+                title="Pediu para não ser contatado pelo WhatsApp (LGPD)">Não autorizou contato</span>
         </template>
 
         <template #item-telefone="{ name, telefone }">

@@ -32,6 +32,7 @@ use App\Http\Controllers\Admin\PedidoOracaoController;
 use App\Http\Controllers\Admin\PerfilController;
 use App\Http\Controllers\Admin\PlanejadorController;
 use App\Http\Controllers\Admin\PregacaoController;
+use App\Http\Controllers\Admin\RecepcaoController;
 use App\Http\Controllers\Admin\SugestaoController;
 use App\Http\Controllers\Admin\TextoController;
 use App\Http\Controllers\Admin\UserController;
@@ -220,6 +221,12 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::middleware('role:pastor')->group(function () {
         // Dados da igreja (usados no timbrado dos documentos)
         Route::get('igreja', [IgrejaController::class, 'edit'])->name('igreja.edit');
+
+        // iPad da recepção (cadastro de visitantes)
+        Route::get('recepcao', [RecepcaoController::class, 'index'])->name('recepcao.index');
+        Route::post('recepcao', [RecepcaoController::class, 'store'])->name('recepcao.store');
+        Route::put('recepcao/{dispositivo}', [RecepcaoController::class, 'update'])->name('recepcao.update');
+        Route::delete('recepcao/{dispositivo}', [RecepcaoController::class, 'destroy'])->name('recepcao.destroy');
         Route::put('igreja', [IgrejaController::class, 'update'])->name('igreja.update');
 
         Route::resource('grupos', GrupoController::class)->except(['index']);

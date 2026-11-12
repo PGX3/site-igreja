@@ -38,6 +38,8 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'data_nascimento' => 'date',
         'primeira_visita' => 'date',
+        'autoriza_contato' => 'boolean',
+        'autoriza_contato_em' => 'datetime',
         'batizado_aguas' => 'boolean',
         'disponibilidade' => 'array',
         'password' => 'hashed',

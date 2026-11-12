@@ -33,6 +33,7 @@ class VisitanteController extends Controller
                 'como_conheceu' => $u->como_conheceu,
                 'convidado_por' => $u->convidadoPor?->name,
                 'primeira_visita' => optional($u->primeira_visita)->format('Y-m-d'),
+                'autoriza_contato' => $u->autoriza_contato,
             ]);
 
         return Inertia::render('Admin/Visitantes/Index', [
