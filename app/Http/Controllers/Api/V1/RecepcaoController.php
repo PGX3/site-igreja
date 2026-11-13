@@ -156,9 +156,7 @@ class RecepcaoController extends Controller
 
         $dispositivo->increment('cadastros');
 
-        if (! $existente) {
-            $this->avisarPastores($visitante, $dispositivo);
-        }
+        $this->avisarPastores($visitante, $dispositivo, (bool) $existente);
 
         $resposta = [
             'ok' => true,
@@ -245,11 +243,11 @@ class RecepcaoController extends Controller
         return response()->json($resposta, 201);
     }
 
-    private function avisarPastores(User $visitante, RecepcaoDispositivo $dispositivo): void
+    private function avisarPastores(User $visitante, RecepcaoDispositivo $dispositivo, bool $retorno): void
     {
         try {
             $pastores = User::whereHas('role', fn ($q) => $q->where('name', 'pastor'))->get();
-            Notification::send($pastores, new NovoVisitante($visitante, $dispositivo->nome));
+            Notification::send($pastores, new NovoVisitante($visitante, $dispositivo->nome, $retorno));
         } catch (\Throwable $e) {
             // Aviso é bônus: o cadastro já está salvo.
             Log::warning("Aviso de novo visitante falhou: {$e->getMessage()}");

@@ -126,6 +126,9 @@ class RecepcaoTest extends TestCase
 
     public function test_mesmo_telefone_e_retorno_e_nao_mexe_em_membro(): void
     {
+        Notification::fake();
+        $pastor = $this->usuario('pastor');
+        $pastor->deviceTokens()->create(['token' => 'fcm-pastor', 'platform' => 'android']);
         $membro = $this->usuario('membro', 'membro', 'Joana Membro');
         $membro->update(['telefone' => '51992824071']);
 
@@ -138,13 +141,23 @@ class RecepcaoTest extends TestCase
         $this->assertSame('Joana Membro', $membro->name);
         $this->assertNull($membro->autoriza_contato);
         $this->assertSame(0, User::visitantes()->count());
+
+        Notification::assertSentTo($pastor, NovoVisitante::class,
+            fn (NovoVisitante $n) => $n->retorno && $n->toFcm($pastor)->title === 'Cadastro na recepção: Joana Membro');
     }
 
     public function test_visitante_que_volta_atualiza_a_resposta_de_contato(): void
     {
         $this->api()->postJson('/api/v1/recepcao/visitantes', $this->payload(['autoriza_contato' => false]))->assertCreated();
+        Notification::fake();
+        $pastor = $this->usuario('pastor');
+        $pastor->deviceTokens()->create(['token' => 'fcm-pastor', 'platform' => 'android']);
+
         $this->api()->postJson('/api/v1/recepcao/visitantes', $this->payload(['uuid' => 'envio-2', 'autoriza_contato' => true]))
             ->assertOk()->assertJsonPath('retorno', true);
+
+        Notification::assertSentTo($pastor, NovoVisitante::class,
+            fn (NovoVisitante $n) => str_starts_with($n->toFcm($pastor)->title, 'Visitante voltou: Joana'));
 
         $this->assertTrue(User::visitantes()->sole()->autoriza_contato);
     }
