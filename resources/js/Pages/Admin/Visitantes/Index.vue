@@ -9,10 +9,20 @@
           {{ visitantes.length }} visitante(s) em acompanhamento
         </p>
       </div>
-      <Link v-if="isPastor" href="/admin/visitantes/create"
-            class="self-start sm:self-auto bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition">
-        + Novo Visitante
-      </Link>
+      <div class="self-start sm:self-auto flex flex-wrap gap-2">
+        <button type="button" @click="abrirExportar"
+                class="inline-flex items-center gap-2 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400
+                       hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-4 py-2.5 rounded-lg text-sm font-semibold transition">
+          <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+            <path :d="WHATSAPP_PATH" />
+          </svg>
+          Exportar para WhatsApp
+        </button>
+        <Link v-if="isPastor" href="/admin/visitantes/create"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition">
+          + Novo Visitante
+        </Link>
+      </div>
     </div>
 
     <div v-if="$page.props.flash?.success"
@@ -162,6 +172,65 @@
       </EasyDataTable>
     </div>
 
+    <!-- MODAL EXPORTAR -->
+    <div v-if="exportarAberto"
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+         @click.self="exportarAberto = false">
+      <div class="w-full max-w-lg bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-gray-200 dark:border-slate-700 flex flex-col max-h-[85vh]">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-slate-700">
+          <h3 class="font-bold text-gray-900 dark:text-white">Lista para o grupo da liderança</h3>
+          <button type="button" @click="exportarAberto = false"
+                  class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5"><path d="M18 6 6 18M6 6l12 12" /></svg>
+          </button>
+        </div>
+        <div class="p-5 overflow-y-auto space-y-4">
+          <div class="flex flex-wrap gap-2">
+            <button v-for="p in PERIODOS" :key="p.dias ?? 'todos'" type="button" @click="periodo = p.dias"
+                    class="text-xs font-semibold px-3 py-1.5 rounded-full border transition"
+                    :class="periodo === p.dias
+                      ? 'bg-emerald-600 border-emerald-600 text-white'
+                      : 'border-gray-200 dark:border-slate-600 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700'">
+              {{ p.label }}
+            </button>
+          </div>
+          <p class="text-xs text-gray-500 dark:text-slate-400">
+            {{ paraExportar.length }} visitante(s) na lista.
+            <span v-if="semAutorizacao">
+              {{ semAutorizacao }} pediu(ram) para não ser contatado(s) e ficou(aram) de fora.
+            </span>
+          </p>
+          <textarea ref="msgArea" readonly rows="12"
+                    class="w-full resize-none rounded-xl border border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-900/50
+                           text-sm text-gray-700 dark:text-slate-200 p-4 font-mono leading-relaxed focus:outline-none"
+                    :value="mensagemExportar"></textarea>
+        </div>
+        <div class="flex flex-wrap items-center justify-end gap-2 px-5 py-4 border-t border-gray-100 dark:border-slate-700">
+          <button type="button" @click="exportarAberto = false"
+                  class="text-sm font-semibold text-gray-500 dark:text-slate-400 px-4 py-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
+            Fechar
+          </button>
+          <button type="button" @click="copiarMensagem" :disabled="!paraExportar.length"
+                  class="inline-flex items-center gap-2 text-sm font-semibold text-white px-4 py-2.5 rounded-xl shadow-sm transition-colors disabled:opacity-50"
+                  :class="copiado ? 'bg-emerald-500' : 'bg-blue-600 hover:bg-blue-700'">
+            <svg v-if="!copiado" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+              <rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+            </svg>
+            <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="M20 6 9 17l-5-5" /></svg>
+            {{ copiado ? 'Copiado!' : 'Copiar' }}
+          </button>
+          <button type="button" @click="compartilharWhatsApp" :disabled="!paraExportar.length"
+                  class="inline-flex items-center gap-2 text-sm font-semibold text-white px-4 py-2.5 rounded-xl shadow-sm
+                         bg-emerald-600 hover:bg-emerald-700 transition-colors disabled:opacity-50">
+            <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+              <path :d="WHATSAPP_PATH" />
+            </svg>
+            Enviar no WhatsApp
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- MODAL EXCLUIR -->
     <div v-if="paraExcluir"
          class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -211,7 +280,7 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import { Link, usePage } from '@inertiajs/vue3'
-import { ref, computed } from 'vue'
+import { ref, computed, nextTick } from 'vue'
 
 const isPastor = computed(() => usePage().props.auth?.user?.role === 'pastor')
 
@@ -254,5 +323,81 @@ function whatsappUrl(telefone) {
   if (d.startsWith('0')) d = d.slice(1)
   if (d.length <= 11) d = '55' + d
   return `https://wa.me/${d}`
+}
+
+// Exportar lista para o grupo da liderança
+const WHATSAPP_PATH = 'M19.05 4.91A9.82 9.82 0 0 0 12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.91-7.01zM12.05 20.15h-.01a8.23 8.23 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.22 8.22 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 0 1 2.41 5.83c-.01 4.54-3.71 8.23-8.23 8.23zm4.52-6.17c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.17.25-.64.81-.79.97-.15.17-.29.19-.54.06-.25-.12-1.05-.39-2-1.23a7.4 7.4 0 0 1-1.37-1.7c-.14-.25-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.14.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.42h-.48c-.17 0-.43.06-.66.31-.23.25-.86.84-.86 2.05 0 1.21.88 2.37 1 2.54.12.17 1.73 2.64 4.2 3.7.59.25 1.04.4 1.4.52.59.19 1.12.16 1.55.1.47-.07 1.47-.6 1.67-1.18.21-.58.21-1.08.14-1.18-.06-.1-.22-.16-.47-.28z'
+
+const PERIODOS = [
+  { dias: 7, label: 'Últimos 7 dias' },
+  { dias: 30, label: 'Últimos 30 dias' },
+  { dias: 90, label: 'Últimos 3 meses' },
+  { dias: null, label: 'Todos' },
+]
+
+const exportarAberto = ref(false)
+const periodo = ref(7)
+const copiado = ref(false)
+const msgArea = ref(null)
+
+function hojeMenos(dias) {
+  const d = new Date()
+  d.setDate(d.getDate() - dias)
+  const pad = n => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
+
+const doPeriodo = computed(() => {
+  if (periodo.value === null) return props.visitantes
+  const desde = hojeMenos(periodo.value)
+  return props.visitantes.filter(v => v.primeira_visita && v.primeira_visita >= desde)
+})
+
+const paraExportar = computed(() => doPeriodo.value.filter(v => v.autoriza_contato !== false))
+const semAutorizacao = computed(() => doPeriodo.value.length - paraExportar.value.length)
+
+const mensagemExportar = computed(() => {
+  const rotulo = PERIODOS.find(p => p.dias === periodo.value)?.label.toLowerCase()
+  const blocos = paraExportar.value.map(v => {
+    const detalhes = [
+      v.primeira_visita ? `1ª visita ${formatDate(v.primeira_visita)}` : null,
+      v.convidado_por ? `convidado(a) por ${v.convidado_por}` : null,
+    ].filter(Boolean).join(', ')
+    return [
+      `👤 *${v.name}*`,
+      detalhes || null,
+      v.telefone ? whatsappUrl(v.telefone) : 'Sem telefone',
+    ].filter(Boolean).join('\n')
+  })
+  return [
+    `🙌 *Visitantes da igreja* (${rotulo})`,
+    '',
+    'Vamos acolher quem nos visitou! Mandem uma mensagem de boas-vindas pelo link de cada um:',
+    '',
+    blocos.join('\n\n') || 'Nenhum visitante no período.',
+  ].join('\n')
+})
+
+function abrirExportar() {
+  copiado.value = false
+  exportarAberto.value = true
+}
+
+async function copiarMensagem() {
+  try {
+    await navigator.clipboard.writeText(mensagemExportar.value)
+  } catch {
+    if (msgArea.value) {
+      msgArea.value.select()
+      document.execCommand('copy')
+    }
+  }
+  copiado.value = true
+  await nextTick()
+  setTimeout(() => { copiado.value = false }, 2000)
+}
+
+function compartilharWhatsApp() {
+  window.open(`https://wa.me/?text=${encodeURIComponent(mensagemExportar.value)}`, '_blank', 'noopener')
 }
 </script>
