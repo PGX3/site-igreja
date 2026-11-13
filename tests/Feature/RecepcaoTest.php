@@ -221,6 +221,21 @@ class RecepcaoTest extends TestCase
         $this->withToken('rcp_errado')->postJson('/api/v1/recepcao/sugestao', ['mensagem' => 'oi oi oi'])->assertUnauthorized();
     }
 
+    public function test_apagar_visitante_atualiza_o_contador_do_menu(): void
+    {
+        $pastor = $this->usuario('pastor');
+        $this->api()->postJson('/api/v1/recepcao/visitantes', $this->payload())->assertCreated();
+
+        $this->actingAs($pastor)->get('/admin/visitantes')
+            ->assertInertia(fn ($page) => $page->where('novosVisitantesMes', 1));
+
+        $v = User::visitantes()->sole();
+        $this->actingAs($pastor)->delete("/admin/visitantes/{$v->id}")->assertRedirect('/admin/visitantes');
+
+        $this->actingAs($pastor)->get('/admin/visitantes')
+            ->assertInertia(fn ($page) => $page->where('novosVisitantesMes', 0)->where('visitantes', []));
+    }
+
     public function test_so_pastor_gerencia_os_aparelhos(): void
     {
         $lider = $this->usuario('lider');

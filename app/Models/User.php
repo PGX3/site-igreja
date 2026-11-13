@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Support\Cpf;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Cache;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -44,6 +45,14 @@ class User extends Authenticatable
         'disponibilidade' => 'array',
         'password' => 'hashed',
     ];
+
+    /** Contadores do menu lateral (cache de 5 min) acompanham cadastros e exclusões na hora. */
+    protected static function booted(): void
+    {
+        $limpar = fn () => Cache::deleteMultiple(['sidebar_total_visitantes', 'sidebar_novos_visitantes_mes', 'sidebar_aniversariantes']);
+        static::saved($limpar);
+        static::deleted($limpar);
+    }
 
     public function setCpfAttribute($value): void
     {

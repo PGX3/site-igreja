@@ -108,7 +108,7 @@
                   class="px-4 py-2 text-sm font-semibold text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition">
             Cancelar
           </button>
-          <Link :href="`/admin/musicas/${musicaParaExcluir.id}`" method="delete" as="button"
+          <Link :href="`/admin/musicas/${musicaParaExcluir.id}`" method="delete" as="button" @success="musicaParaExcluir = null"
                 class="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition">
             Excluir
           </Link>
