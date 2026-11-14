@@ -32,7 +32,7 @@ class SeoController extends Controller
             $urls[] = ['loc' => route('eventos.show', $evento), 'changefreq' => 'weekly', 'priority' => '0.7'];
         }
 
-        foreach (Pregacao::where('ativo', true)->get() as $pregacao) {
+        foreach (Pregacao::publicadas()->get() as $pregacao) {
             $urls[] = ['loc' => route('pregacoes.show', $pregacao), 'changefreq' => 'monthly', 'priority' => '0.6'];
         }
 

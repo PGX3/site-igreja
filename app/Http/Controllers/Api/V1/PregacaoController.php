@@ -11,7 +11,7 @@ class PregacaoController extends Controller
 {
     public function index(): JsonResponse
     {
-        $pregacoes = Pregacao::where('ativo', true)
+        $pregacoes = Pregacao::publicadas()
             ->orderByDesc('data_pregacao')
             ->get()
             ->map(fn (Pregacao $p) => self::pregacao($p));
@@ -21,7 +21,7 @@ class PregacaoController extends Controller
 
     public function show(Pregacao $pregacao): JsonResponse
     {
-        abort_unless($pregacao->ativo, 404);
+        abort_unless($pregacao->publicada(), 404);
 
         return response()->json(['data' => self::pregacao($pregacao) + ['descricao' => $pregacao->descricao]]);
     }

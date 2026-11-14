@@ -252,7 +252,7 @@ class McpFerramentas
         $limite = (int) ($dados['limite'] ?? config('mcp.limite_padrao'));
 
         $pregacoes = Pregacao::query()
-            ->where('ativo', true)
+            ->publicadas()
             ->when($termo !== '', function ($query) use ($termo) {
                 $like = '%'.str_replace(['%', '_'], ['\%', '\_'], $termo).'%';
 
@@ -294,7 +294,7 @@ class McpFerramentas
         ]);
 
         $pregacao = Pregacao::query()
-            ->where('ativo', true)
+            ->publicadas()
             ->find((int) $dados['id']);
 
         if (! $pregacao) {

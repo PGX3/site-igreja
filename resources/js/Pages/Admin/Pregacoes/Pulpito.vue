@@ -46,7 +46,7 @@
             <path v-else d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" />
           </svg>
         </button>
-        <Link :href="`/admin/roteiros/${roteiro.id}/edit`" :class="botao" title="Voltar para o editor">
+        <Link :href="`/admin/pregacoes/${roteiro.id}/edit`" :class="botao" title="Voltar para o editor">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
         </Link>
       </div>

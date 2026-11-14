@@ -62,7 +62,7 @@ Route::prefix('v1')->middleware('force.json')->group(function () {
         ->group(function () {
             Route::get('/', [PulpitoController::class, 'config'])->name('config');
             Route::get('roteiros', [PulpitoController::class, 'roteiros'])->name('roteiros.index');
-            Route::get('roteiros/{roteiro}', [PulpitoController::class, 'roteiro'])->name('roteiros.show');
+            Route::get('roteiros/{pregacao}', [PulpitoController::class, 'roteiro'])->name('roteiros.show');
         });
 
     Route::post('auth/login', [AuthController::class, 'login'])

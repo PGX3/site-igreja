@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Igreja;
-use App\Models\Roteiro;
+use App\Models\Pregacao;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -31,37 +31,39 @@ class PulpitoController extends Controller
     {
         $hoje = now()->startOfDay();
 
-        $roteiros = Roteiro::with('autor:id,name')
-            ->whereBetween('data', [
+        $roteiros = Pregacao::query()
+            ->whereNotNull('roteiro')->where('roteiro', '!=', '')
+            ->whereBetween('data_pregacao', [
                 $hoje->copy()->subDays(self::DIAS_ANTES)->toDateString(),
                 $hoje->copy()->addDays(self::DIAS_DEPOIS)->toDateString(),
             ])
-            ->orderBy('data')
+            ->orderBy('data_pregacao')
             ->orderBy('titulo')
             ->get()
-            ->map(fn (Roteiro $r) => $this->resumo($r))
+            ->map(fn (Pregacao $p) => $this->resumo($p))
             ->values();
 
         return response()->json(['data' => $roteiros]);
     }
 
-    public function roteiro(Roteiro $roteiro): JsonResponse
+    /** O id é o da pregação (o roteiro faz parte dela). */
+    public function roteiro(Pregacao $pregacao): JsonResponse
     {
-        return response()->json(['data' => array_merge($this->resumo($roteiro), [
-            'conteudo' => $roteiro->conteudo ?? '',
-            'tamanho_fonte' => $roteiro->tamanho_fonte,
+        return response()->json(['data' => array_merge($this->resumo($pregacao), [
+            'conteudo' => $pregacao->roteiro ?? '',
+            'tamanho_fonte' => $pregacao->roteiro_fonte,
         ])]);
     }
 
-    private function resumo(Roteiro $r): array
+    private function resumo(Pregacao $p): array
     {
         return [
-            'id' => $r->id,
-            'titulo' => $r->titulo,
-            'data' => $r->data->format('Y-m-d'),
-            'versiculo' => $r->versiculo,
-            'pregador' => $r->autor?->name,
-            'atualizado_em' => $r->updated_at?->toIso8601String(),
+            'id' => $p->id,
+            'titulo' => $p->titulo,
+            'data' => $p->data_pregacao->format('Y-m-d'),
+            'versiculo' => $p->versiculo,
+            'pregador' => $p->pregador,
+            'atualizado_em' => $p->updated_at?->toIso8601String(),
         ];
     }
 }

@@ -34,7 +34,6 @@ use App\Http\Controllers\Admin\PlanejadorController;
 use App\Http\Controllers\Admin\PregacaoController;
 use App\Http\Controllers\Admin\PulpitoController;
 use App\Http\Controllers\Admin\RecepcaoController;
-use App\Http\Controllers\Admin\RoteiroController;
 use App\Http\Controllers\Admin\SugestaoController;
 use App\Http\Controllers\Admin\TextoController;
 use App\Http\Controllers\Admin\UserController;
@@ -131,11 +130,14 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::post('aprender/aulas/{aula}/comentarios', [AulaComentarioController::class, 'store'])->name('aprender.comentarios.store');
     Route::delete('aprender/comentarios/{comentario}', [AulaComentarioController::class, 'destroy'])->name('aprender.comentarios.destroy');
 
-    // Roteiros de pregação: pastor + usuários marcados como pregador (cada um vê os seus)
+    // Pregações (rascunho com roteiro → publicada com vídeo): pastor vê todas, pregador as suas
     Route::middleware('pregador')->group(function () {
-        Route::get('roteiros/{roteiro}/pulpito', [RoteiroController::class, 'pulpito'])->name('roteiros.pulpito');
-        Route::resource('roteiros', RoteiroController::class)->only(['index', 'store', 'edit', 'update', 'destroy']);
+        Route::get('pregacoes/{pregacao}/pulpito', [PregacaoController::class, 'pulpito'])->name('pregacoes.pulpito');
+        Route::resource('pregacoes', PregacaoController::class)
+            ->only(['index', 'store', 'edit', 'update', 'destroy'])
+            ->parameters(['pregacoes' => 'pregacao']);
     });
+    Route::redirect('roteiros', '/admin/pregacoes');
 
     // Todas as roles: ver suas próprias escalas e confirmar/recusar
     Route::get('minhas-escalas', [EscalaMembroController::class, 'index'])->name('minhas-escalas.index');
@@ -248,7 +250,6 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
         Route::resource('cultos', CultoController::class);
         Route::resource('eventos', EventoController::class);
         Route::post('pregacoes/importar-youtube', [PregacaoController::class, 'importarYoutube'])->name('pregacoes.importar-youtube');
-        Route::resource('pregacoes', PregacaoController::class)->parameters(['pregacoes' => 'pregacao']);
         Route::resource('textos', TextoController::class);
 
         Route::get('sugestoes', [SugestaoController::class, 'index'])->name('sugestoes.index');

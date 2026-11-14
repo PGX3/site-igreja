@@ -94,7 +94,7 @@
                class="mt-0.5 w-4 h-4 rounded border-gray-300 dark:border-slate-500 text-blue-600 focus:ring-blue-500 cursor-pointer" />
         <span>
           <span class="block text-sm font-semibold text-gray-700 dark:text-slate-300">Pregador</span>
-          <span class="block text-xs text-gray-500 dark:text-slate-400">Pode escrever roteiros de pregação e usar no iPad do púlpito. Pastores já podem.</span>
+          <span class="block text-xs text-gray-500 dark:text-slate-400">Pode criar pregações, escrever o roteiro e usar no iPad do púlpito. Pastores já podem.</span>
         </span>
       </label>
 

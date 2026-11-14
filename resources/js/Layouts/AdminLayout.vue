@@ -262,7 +262,6 @@ const routeTitles = {
     "/admin/visitantes": "Visitantes",
     "/admin/recepcao": "iPad da recepção",
     "/admin/pulpito": "iPad do púlpito",
-    "/admin/roteiros": "Roteiros de pregação",
     "/admin/aniversarios": "Aniversários",
     "/admin/calendario": "Calendário",
     "/admin/planejador": "Planejador",
@@ -308,8 +307,9 @@ const navGroups = computed(() => {
             { href: "/admin/aprender",    label: "Meus Cursos",    icon: "book-open" },
         ],
     });
-    if (user.value?.pode_pregar) {
-        groups[0].items.push({ href: "/admin/roteiros", label: "Roteiros de pregação", icon: "file-text" });
+    // Pregador que não é pastor: vê as próprias pregações (o pastor tem "Pregações" em Conteúdo).
+    if (user.value?.pode_pregar && !isPastor) {
+        groups[0].items.push({ href: "/admin/pregacoes", label: "Minhas pregações", icon: "megaphone" });
     }
 
     if (isPastor || isLider) {

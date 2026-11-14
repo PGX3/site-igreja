@@ -33,7 +33,7 @@ class HomeController extends Controller
                 'mes_curto' => mb_strtoupper(self::mesesCurtos()[$e->data_evento->month]),
             ]);
 
-        $pregacoes = Pregacao::where('ativo', true)
+        $pregacoes = Pregacao::publicadas()
             ->orderByDesc('data_pregacao')
             ->limit(3)
             ->get()
@@ -133,7 +133,7 @@ class HomeController extends Controller
 
     public function pregacoes()
     {
-        $pregacoes = Pregacao::where('ativo', true)
+        $pregacoes = Pregacao::publicadas()
             ->orderByDesc('data_pregacao')
             ->get()
             ->map(fn ($p) => [
@@ -158,6 +158,7 @@ class HomeController extends Controller
 
     public function showPregacao(Pregacao $pregacao)
     {
+        abort_unless($pregacao->publicada(), 404); // rascunho (roteiro sem vídeo) não é público
         $meses = self::meses();
         $diasNomes = self::diasNomes();
 

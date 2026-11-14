@@ -58,13 +58,7 @@ class YouTubePregacoesImporter
                     continue;
                 }
 
-                Pregacao::create([
-                    'titulo' => Str::limit($titulo, 150, ''),
-                    'youtube_url' => "https://www.youtube.com/watch?v={$videoId}",
-                    'descricao' => data_get($item, 'snippet.description') ?: null,
-                    'data_pregacao' => Carbon::parse($publicadoEm)->toDateString(),
-                    'ativo' => true,
-                ]);
+                $this->criarPregacao($videoId, $titulo, $publicadoEm, data_get($item, 'snippet.description') ?: null);
 
                 $videoIdsCadastrados[$videoId] = true;
                 $importadas++;
@@ -141,6 +135,27 @@ class YouTubePregacoesImporter
 
     private function criarPregacao(string $videoId, string $titulo, string $publicadoEm, ?string $descricao): void
     {
+        $url = "https://www.youtube.com/watch?v={$videoId}";
+        $publicado = Carbon::parse($publicadoEm);
+
+        // Se o pregador já escreveu o roteiro dessa pregação (rascunho sem vídeo na semana
+        // anterior à publicação), o vídeo entra nela em vez de criar outra pregação.
+        $rascunho = Pregacao::query()
+            ->where(fn ($q) => $q->whereNull('youtube_url')->orWhere('youtube_url', ''))
+            ->whereBetween('data_pregacao', [$publicado->copy()->subDays(6)->toDateString(), $publicado->toDateString()])
+            ->orderByDesc('data_pregacao')
+            ->first();
+
+        if ($rascunho) {
+            $rascunho->update([
+                'youtube_url' => $url,
+                'descricao' => $rascunho->descricao ?: ($descricao ?: null),
+                'ativo' => true,
+            ]);
+
+            return;
+        }
+
         Pregacao::create([
             'titulo' => Str::limit(trim($titulo), 150, ''),
             'youtube_url' => "https://www.youtube.com/watch?v={$videoId}",

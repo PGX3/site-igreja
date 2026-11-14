@@ -137,15 +137,10 @@ class User extends Authenticatable
         return $this->role?->name === 'pastor';
     }
 
-    /** Pode escrever roteiros de pregação. `is_pregador` fica fora do $fillable: só o pastor marca. */
+    /** Pode escrever pregações (roteiro no iPad do púlpito). `is_pregador` fica fora do $fillable: só o pastor marca. */
     public function podePregar(): bool
     {
         return $this->isPastor() || (bool) $this->is_pregador;
-    }
-
-    public function roteiros()
-    {
-        return $this->hasMany(Roteiro::class);
     }
 
     public function isLider()
