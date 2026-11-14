@@ -5,6 +5,8 @@ use App\Http\Middleware\CheckRole;
 use App\Http\Middleware\ForceJsonResponse;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\McpToken;
+use App\Http\Middleware\Pregador;
+use App\Http\Middleware\PulpitoToken;
 use App\Http\Middleware\RecepcaoToken;
 use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -39,6 +41,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'mcp.token' => McpToken::class,
             'automacao.token' => AutomacaoToken::class,
             'recepcao.token' => RecepcaoToken::class,
+            'pulpito.token' => PulpitoToken::class,
+            'pregador' => Pregador::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

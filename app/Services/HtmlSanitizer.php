@@ -60,6 +60,8 @@ class HtmlSanitizer
         // 'display' não é preciso aqui: o leitor já aplica display:block nas imagens via CSS.
         $config->set('CSS.AllowedProperties', [
             'color', 'text-align', 'width', 'height', 'float', 'margin',
+            // Roteiros de pregação: marca-texto e tamanho da letra.
+            'background-color', 'font-size',
         ]);
 
         // Só http/https/mailto: bloqueia javascript:, data: etc.

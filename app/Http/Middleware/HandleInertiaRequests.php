@@ -28,7 +28,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => $user
                     ? array_merge(
                         $user->only('id', 'name', 'email'),
-                        ['role' => $user->role?->name]
+                        ['role' => $user->role?->name, 'pode_pregar' => $user->podePregar()]
                     )
                     : null,
             ],

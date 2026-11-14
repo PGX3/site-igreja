@@ -42,6 +42,7 @@ class User extends Authenticatable
         'autoriza_contato' => 'boolean',
         'autoriza_contato_em' => 'datetime',
         'batizado_aguas' => 'boolean',
+        'is_pregador' => 'boolean',
         'disponibilidade' => 'array',
         'password' => 'hashed',
     ];
@@ -134,6 +135,17 @@ class User extends Authenticatable
     public function isPastor()
     {
         return $this->role?->name === 'pastor';
+    }
+
+    /** Pode escrever roteiros de pregação. `is_pregador` fica fora do $fillable: só o pastor marca. */
+    public function podePregar(): bool
+    {
+        return $this->isPastor() || (bool) $this->is_pregador;
+    }
+
+    public function roteiros()
+    {
+        return $this->hasMany(Roteiro::class);
     }
 
     public function isLider()

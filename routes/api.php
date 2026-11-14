@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\V1\MusicaController;
 use App\Http\Controllers\Api\V1\PedidoOracaoController;
 use App\Http\Controllers\Api\V1\PregacaoController;
 use App\Http\Controllers\Api\V1\ProfileController;
+use App\Http\Controllers\Api\V1\PulpitoController;
 use App\Http\Controllers\Api\V1\RecepcaoController;
 use App\Http\Controllers\Mcp\McpController;
 use Illuminate\Support\Facades\Route;
@@ -53,6 +54,15 @@ Route::prefix('v1')->middleware('force.json')->group(function () {
             Route::post('visitantes', [RecepcaoController::class, 'storeVisitante'])->name('visitantes.store');
             Route::post('oracao', [RecepcaoController::class, 'storeOracao'])->name('oracao.store');
             Route::post('sugestao', [RecepcaoController::class, 'storeSugestao'])->name('sugestao.store');
+        });
+
+    // iPad do púlpito (app Pregação): token do aparelho, gerado em /admin/pulpito
+    Route::prefix('pulpito')->name('api.v1.pulpito.')
+        ->middleware(['pulpito.token', 'throttle:api'])
+        ->group(function () {
+            Route::get('/', [PulpitoController::class, 'config'])->name('config');
+            Route::get('roteiros', [PulpitoController::class, 'roteiros'])->name('roteiros.index');
+            Route::get('roteiros/{roteiro}', [PulpitoController::class, 'roteiro'])->name('roteiros.show');
         });
 
     Route::post('auth/login', [AuthController::class, 'login'])

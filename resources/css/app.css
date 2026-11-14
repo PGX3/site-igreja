@@ -334,3 +334,17 @@ body::after {
 .dark .vue3-easy-data-table__footer .easy-data-table__rows-selector ul.select-items {
   box-shadow: 0 4px 12px rgb(0 0 0 / 0.4), 0 0 0 1px theme('colors.slate.700');
 }
+
+/* Roteiro de pregação: mesmo visual no editor, na prévia e no modo púlpito
+   (o app do iPad imita estas regras). Fundo sempre escuro. */
+.roteiro p { margin: 0 0 0.6em; }
+.roteiro h2 { font-size: 1.35em; font-weight: 700; color: #fff; margin: 1.2em 0 0.4em; line-height: 1.25; }
+.roteiro h3 { font-size: 1.1em; font-weight: 700; color: #7dd3fc; margin: 1em 0 0.3em; text-transform: uppercase; letter-spacing: 0.04em; }
+.roteiro > :first-child { margin-top: 0; }
+.roteiro ul { list-style: disc; padding-left: 1.3em; margin: 0 0 0.6em; }
+.roteiro ol { list-style: decimal; padding-left: 1.3em; margin: 0 0 0.6em; }
+.roteiro li > p { margin: 0 0 0.2em; }
+.roteiro blockquote { border-left: 3px solid #00A7FF; padding: 0.1em 0 0.1em 0.9em; margin: 0.4em 0 0.8em; color: #cbd5e1; font-style: italic; }
+.roteiro span[style*='background-color'] { border-radius: 0.2em; padding: 0 0.12em; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.roteiro strong { color: #fff; }
+.roteiro .ProseMirror { outline: none; min-height: 55vh; }

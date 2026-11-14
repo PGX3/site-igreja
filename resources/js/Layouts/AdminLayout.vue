@@ -261,6 +261,8 @@ const routeTitles = {
     "/admin/membros": "Membros",
     "/admin/visitantes": "Visitantes",
     "/admin/recepcao": "iPad da recepção",
+    "/admin/pulpito": "iPad do púlpito",
+    "/admin/roteiros": "Roteiros de pregação",
     "/admin/aniversarios": "Aniversários",
     "/admin/calendario": "Calendário",
     "/admin/planejador": "Planejador",
@@ -306,6 +308,9 @@ const navGroups = computed(() => {
             { href: "/admin/aprender",    label: "Meus Cursos",    icon: "book-open" },
         ],
     });
+    if (user.value?.pode_pregar) {
+        groups[0].items.push({ href: "/admin/roteiros", label: "Roteiros de pregação", icon: "file-text" });
+    }
 
     if (isPastor || isLider) {
         const anivBadge = page.props.aniversariantesHoje || 0;
@@ -328,6 +333,7 @@ const navGroups = computed(() => {
         if (isPastor) {
             pessoas.push({ href: "/admin/grupos", label: "Grupos", icon: "users" });
             pessoas.push({ href: "/admin/recepcao", label: "iPad da recepção", icon: "clipboard" });
+            pessoas.push({ href: "/admin/pulpito", label: "iPad do púlpito", icon: "mic" });
         }
         groups.push({ label: "Pessoas", items: pessoas });
 

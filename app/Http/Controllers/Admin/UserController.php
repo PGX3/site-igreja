@@ -25,6 +25,7 @@ class UserController extends Controller
                 'role' => $u->role?->only('name', 'display_name'),
                 'grupos' => $u->grupos->map->only('id', 'nome')->values(),
                 'telefone' => $u->telefone,
+                'is_pregador' => (bool) $u->is_pregador,
             ]);
 
         return Inertia::render('Admin/Usuarios/Index', compact('usuarios'));
@@ -49,13 +50,17 @@ class UserController extends Controller
             'grupo_ids.*' => 'exists:grupos,id',
             'telefone' => 'nullable|string|max:20',
             'data_nascimento' => 'nullable|date|before:today',
+            'is_pregador' => 'boolean',
         ]);
 
         $grupoIds = $data['grupo_ids'] ?? [];
-        unset($data['grupo_ids']);
+        $pregador = (bool) ($data['is_pregador'] ?? false);
+        unset($data['grupo_ids'], $data['is_pregador']);
         $data['password'] = Hash::make($data['password']);
 
         $user = User::create($data);
+        // is_pregador fica fora do $fillable: só esta tela (pastor) marca.
+        $user->forceFill(['is_pregador' => $pregador])->save();
         $user->grupos()->sync($grupoIds);
 
         return redirect()->route('admin.usuarios.index')
@@ -73,6 +78,7 @@ class UserController extends Controller
                 $usuario->only('id', 'name', 'email', 'role_id', 'telefone'),
                 [
                     'data_nascimento' => $usuario->data_nascimento?->format('Y-m-d'),
+                    'is_pregador' => (bool) $usuario->is_pregador,
                     'grupo_ids' => $usuario->grupos()->pluck('grupos.id')->map(fn ($id) => (int) $id)->toArray(),
                 ]
             ),
@@ -92,10 +98,12 @@ class UserController extends Controller
             'grupo_ids.*' => 'exists:grupos,id',
             'telefone' => 'nullable|string|max:20',
             'data_nascimento' => 'nullable|date|before:today',
+            'is_pregador' => 'boolean',
         ]);
 
         $grupoIds = $data['grupo_ids'] ?? [];
-        unset($data['grupo_ids']);
+        $pregador = (bool) ($data['is_pregador'] ?? false);
+        unset($data['grupo_ids'], $data['is_pregador']);
 
         if (! empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
@@ -104,6 +112,7 @@ class UserController extends Controller
         }
 
         $usuario->update($data);
+        $usuario->forceFill(['is_pregador' => $pregador])->save();
         $usuario->grupos()->sync($grupoIds);
 
         return redirect()->route('admin.usuarios.index')

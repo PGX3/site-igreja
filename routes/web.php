@@ -32,7 +32,9 @@ use App\Http\Controllers\Admin\PedidoOracaoController;
 use App\Http\Controllers\Admin\PerfilController;
 use App\Http\Controllers\Admin\PlanejadorController;
 use App\Http\Controllers\Admin\PregacaoController;
+use App\Http\Controllers\Admin\PulpitoController;
 use App\Http\Controllers\Admin\RecepcaoController;
+use App\Http\Controllers\Admin\RoteiroController;
 use App\Http\Controllers\Admin\SugestaoController;
 use App\Http\Controllers\Admin\TextoController;
 use App\Http\Controllers\Admin\UserController;
@@ -128,6 +130,12 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     // Comentários nas aulas (qualquer autenticado)
     Route::post('aprender/aulas/{aula}/comentarios', [AulaComentarioController::class, 'store'])->name('aprender.comentarios.store');
     Route::delete('aprender/comentarios/{comentario}', [AulaComentarioController::class, 'destroy'])->name('aprender.comentarios.destroy');
+
+    // Roteiros de pregação: pastor + usuários marcados como pregador (cada um vê os seus)
+    Route::middleware('pregador')->group(function () {
+        Route::get('roteiros/{roteiro}/pulpito', [RoteiroController::class, 'pulpito'])->name('roteiros.pulpito');
+        Route::resource('roteiros', RoteiroController::class)->only(['index', 'store', 'edit', 'update', 'destroy']);
+    });
 
     // Todas as roles: ver suas próprias escalas e confirmar/recusar
     Route::get('minhas-escalas', [EscalaMembroController::class, 'index'])->name('minhas-escalas.index');
@@ -228,6 +236,11 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
         Route::put('recepcao/{dispositivo}', [RecepcaoController::class, 'update'])->name('recepcao.update');
         Route::delete('recepcao/{dispositivo}', [RecepcaoController::class, 'destroy'])->name('recepcao.destroy');
         Route::put('igreja', [IgrejaController::class, 'update'])->name('igreja.update');
+
+        // iPad do púlpito (app Pregação: lê os roteiros)
+        Route::get('pulpito', [PulpitoController::class, 'index'])->name('pulpito.index');
+        Route::post('pulpito', [PulpitoController::class, 'store'])->name('pulpito.store');
+        Route::delete('pulpito/{dispositivo}', [PulpitoController::class, 'destroy'])->name('pulpito.destroy');
 
         Route::resource('grupos', GrupoController::class)->except(['index']);
         Route::resource('usuarios', UserController::class)->except(['show']);

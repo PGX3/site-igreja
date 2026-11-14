@@ -88,6 +88,16 @@
         <p v-if="form.errors.role_id" class="mt-1 text-xs text-red-500">{{ form.errors.role_id }}</p>
       </div>
 
+      <!-- Pregador -->
+      <label class="flex items-start gap-3 cursor-pointer">
+        <input type="checkbox" v-model="form.is_pregador"
+               class="mt-0.5 w-4 h-4 rounded border-gray-300 dark:border-slate-500 text-blue-600 focus:ring-blue-500 cursor-pointer" />
+        <span>
+          <span class="block text-sm font-semibold text-gray-700 dark:text-slate-300">Pregador</span>
+          <span class="block text-xs text-gray-500 dark:text-slate-400">Pode escrever roteiros de pregação e usar no iPad do púlpito. Pastores já podem.</span>
+        </span>
+      </label>
+
       <!-- Grupos (múltiplos) -->
       <div>
         <label class="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5">Grupos</label>
@@ -145,6 +155,7 @@ const form = useForm({
   data_nascimento: props.usuario?.data_nascimento ?? '',
   role_id:         props.usuario?.role_id         ?? '',
   grupo_ids:       props.usuario?.grupo_ids       ?? [],
+  is_pregador:     props.usuario?.is_pregador     ?? false,
 })
 
 function submit() {
