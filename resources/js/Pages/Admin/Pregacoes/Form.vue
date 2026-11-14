@@ -98,11 +98,11 @@
     </div>
 
     <!-- EDITOR -->
-    <div class="rounded-xl overflow-hidden border border-slate-800 shadow-sm bg-[#0B1015]">
+    <div class="rounded-xl border border-slate-800 shadow-sm bg-[#0B1015]">
 
       <!-- BARRA DE FERRAMENTAS -->
       <div v-if="editor"
-           class="sticky top-0 z-10 flex flex-wrap items-center gap-1 px-2 py-2 border-b border-slate-800 bg-[#10161D]">
+           class="sticky -top-4 sm:-top-6 lg:-top-8 z-20 rounded-t-xl flex flex-wrap items-center gap-1 px-2 py-2 border-b border-slate-800 bg-[#10161D] shadow-[0_6px_12px_-6px_rgba(0,0,0,0.5)]">
         <button type="button" @click="cmd().toggleBold().run()" :class="btn(editor.isActive('bold'))" title="Negrito (Ctrl+B)">
           <span class="font-bold">B</span>
         </button>
