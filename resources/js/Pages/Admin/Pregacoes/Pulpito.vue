@@ -5,7 +5,7 @@
 
     <!-- TEXTO -->
     <main ref="folha" class="flex-1 overflow-y-auto overscroll-contain">
-      <div class="max-w-4xl mx-auto px-6 sm:px-12 py-10 sm:py-14">
+      <div class="mx-auto px-5 sm:px-8 py-8 sm:py-12 transition-[max-width] duration-200" :style="{ maxWidth: largura + '%' }">
         <p v-if="roteiro.versiculo" class="text-[13px] uppercase tracking-[0.25em] text-sky-400/80 mb-2">{{ roteiro.versiculo }}</p>
         <h1 class="font-bold mb-8" :style="{ fontSize: (fonte * 1.4) + 'px', lineHeight: 1.2 }">{{ roteiro.titulo }}</h1>
         <div v-if="roteiro.conteudo" class="roteiro select-text" :style="{ fontSize: fonte + 'px', lineHeight: 1.5 }" v-html="roteiro.conteudo"></div>
@@ -36,19 +36,30 @@
       </button>
 
       <div class="flex md:flex-col items-center gap-2">
-        <div class="flex md:flex-col gap-2">
-          <button type="button" @click="mudarFonte(2)" :class="botao" title="Aumentar letra (+)">A+</button>
+        <div class="grid grid-cols-2 gap-2">
           <button type="button" @click="mudarFonte(-2)" :class="botao" title="Diminuir letra (−)"><span class="text-sm">A−</span></button>
+          <button type="button" @click="mudarFonte(2)" :class="botao" title="Aumentar letra (+)">A+</button>
+          <!-- Margens: texto mais estreito / mais largo -->
+          <button type="button" @click="mudarLargura(-10)" :disabled="largura <= LARGURA_MIN" :class="botao" title="Margens maiores ([)">
+            <svg width="20" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 4v16M21 4v16M6 12h4.5M10.5 12L8 9.5M10.5 12L8 14.5M18 12h-4.5M13.5 12l2.5-2.5M13.5 12l2.5 2.5" />
+            </svg>
+          </button>
+          <button type="button" @click="mudarLargura(10)" :disabled="largura >= 100" :class="botao" title="Margens menores (])">
+            <svg width="20" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 4v16M21 4v16M7 12h10M7 12l2.5-2.5M7 12l2.5 2.5M17 12l-2.5-2.5M17 12l-2.5 2.5" />
+            </svg>
+          </button>
+          <button type="button" @click="alternarTelaCheia" :class="botao" :title="telaCheia ? 'Sair da tela cheia (F)' : 'Tela cheia (F)'">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path v-if="!telaCheia" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+              <path v-else d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" />
+            </svg>
+          </button>
+          <Link :href="`/admin/pregacoes/${roteiro.id}/edit`" :class="botao" title="Voltar para o editor">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+          </Link>
         </div>
-        <button type="button" @click="alternarTelaCheia" :class="botao" :title="telaCheia ? 'Sair da tela cheia (F)' : 'Tela cheia (F)'">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path v-if="!telaCheia" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
-            <path v-else d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" />
-          </svg>
-        </button>
-        <Link :href="`/admin/pregacoes/${roteiro.id}/edit`" :class="botao" title="Voltar para o editor">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
-        </Link>
       </div>
     </aside>
   </div>
@@ -64,7 +75,7 @@ const props = defineProps({
   fonteMax: { type: Number, default: 48 },
 })
 
-const botao = 'w-11 h-11 rounded-xl bg-white/5 hover:bg-white/10 text-slate-200 font-semibold flex items-center justify-center transition'
+const botao = 'w-11 h-11 rounded-xl bg-white/5 hover:bg-white/10 text-slate-200 font-semibold flex items-center justify-center transition disabled:opacity-30'
 
 // Tamanho da letra: começa no do roteiro; o ajuste fica salvo neste aparelho.
 const chaveFonte = `roteiro-fonte-${props.roteiro.id}`
@@ -72,6 +83,14 @@ const fonte = ref(Number(localStorage.getItem(chaveFonte)) || props.roteiro.tama
 function mudarFonte(delta) {
   fonte.value = Math.min(props.fonteMax + 16, Math.max(props.fonteMin, fonte.value + delta))
   localStorage.setItem(chaveFonte, String(fonte.value))
+}
+
+// Largura do texto (margens): fica salva neste aparelho, vale para todos os roteiros.
+const LARGURA_MIN = 50
+const largura = ref(Number(localStorage.getItem('pulpito-largura')) || 100)
+function mudarLargura(delta) {
+  largura.value = Math.min(100, Math.max(LARGURA_MIN, largura.value + delta))
+  localStorage.setItem('pulpito-largura', String(largura.value))
 }
 
 // Relógio
@@ -123,6 +142,8 @@ function teclas(e) {
   else if (e.key === '+' || e.key === '=') mudarFonte(2)
   else if (e.key === '-') mudarFonte(-2)
   else if (e.key === 'f' || e.key === 'F') alternarTelaCheia()
+  else if (e.key === '[') mudarLargura(-10)
+  else if (e.key === ']') mudarLargura(10)
 }
 
 let timers = []
