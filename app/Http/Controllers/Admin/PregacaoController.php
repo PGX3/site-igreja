@@ -61,8 +61,12 @@ class PregacaoController extends Controller
             return back()->with('error', $e->getMessage());
         }
 
-        $mensagem = $quantidade
-            ? "{$quantidade} ".($quantidade === 1 ? 'vídeo importado!' : 'vídeos importados!')
+        $partes = array_filter([
+            $quantidade['pregacoes'] ? $quantidade['pregacoes'].' '.($quantidade['pregacoes'] === 1 ? 'pregação' : 'pregações') : null,
+            $quantidade['cortes'] ? $quantidade['cortes'].' '.($quantidade['cortes'] === 1 ? 'corte' : 'cortes') : null,
+        ]);
+        $mensagem = $partes
+            ? 'Importado: '.implode(' e ', $partes).'!'
             : 'Nenhum vídeo novo para importar.';
 
         return back()->with('success', $mensagem);
@@ -108,6 +112,12 @@ class PregacaoController extends Controller
             ],
             'ehPastor' => $ehPastor,
             'pregadores' => $ehPastor ? $this->pregadores() : [],
+            // Cortes (Shorts) desta pregação e para onde dá para mover: só o pastor mexe.
+            'cortes' => $ehPastor ? PregacaoCorteController::listaAdmin($pregacao) : [],
+            'pregacoesParaCortes' => $ehPastor ? Pregacao::publicadas()
+                ->orderByDesc('data_pregacao')->limit(40)->get(['id', 'titulo', 'data_pregacao'])
+                ->map(fn (Pregacao $p) => ['id' => $p->id, 'titulo' => $p->titulo, 'data' => $p->data_pregacao->format('d/m')])
+                ->all() : [],
             'fonteMin' => Pregacao::ROTEIRO_FONTE_MIN,
             'fonteMax' => Pregacao::ROTEIRO_FONTE_MAX,
         ]);

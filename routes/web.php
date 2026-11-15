@@ -32,6 +32,7 @@ use App\Http\Controllers\Admin\PedidoOracaoController;
 use App\Http\Controllers\Admin\PerfilController;
 use App\Http\Controllers\Admin\PlanejadorController;
 use App\Http\Controllers\Admin\PregacaoController;
+use App\Http\Controllers\Admin\PregacaoCorteController;
 use App\Http\Controllers\Admin\PulpitoController;
 use App\Http\Controllers\Admin\RecepcaoController;
 use App\Http\Controllers\Admin\SugestaoController;
@@ -250,6 +251,8 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
         Route::resource('cultos', CultoController::class);
         Route::resource('eventos', EventoController::class);
         Route::post('pregacoes/importar-youtube', [PregacaoController::class, 'importarYoutube'])->name('pregacoes.importar-youtube');
+        Route::post('pregacoes/{pregacao}/cortes', [PregacaoCorteController::class, 'store'])->name('pregacoes.cortes.store');
+        Route::patch('cortes/{corte}', [PregacaoCorteController::class, 'update'])->name('cortes.update');
         Route::resource('textos', TextoController::class);
 
         Route::get('sugestoes', [SugestaoController::class, 'index'])->name('sugestoes.index');

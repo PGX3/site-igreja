@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Pregação. Nasce como rascunho (roteiro do pregador, lido no iPad do púlpito)
@@ -39,6 +40,12 @@ class Pregacao extends Model
     public function publicada(): bool
     {
         return $this->ativo && filled($this->youtube_url);
+    }
+
+    /** Cortes (Shorts) desta pregação. */
+    public function cortes(): HasMany
+    {
+        return $this->hasMany(PregacaoCorte::class);
     }
 
     public function pregadorUsuario(): BelongsTo

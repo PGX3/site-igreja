@@ -312,6 +312,8 @@ class McpFerramentas
             'youtube_url' => $pregacao->youtube_url,
             'descricao' => self::textoSimples($pregacao->descricao),
             'url' => url("/pregacoes/{$pregacao->id}"),
+            'cortes' => $pregacao->cortes()->visiveis()->get()
+                ->map(fn ($c) => ['titulo' => $c->titulo, 'url' => $c->url()])->all(),
         ];
     }
 

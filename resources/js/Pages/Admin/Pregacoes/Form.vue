@@ -92,6 +92,57 @@
       </div>
     </details>
 
+    <!-- CORTES (Shorts) — pastor, depois de publicada -->
+    <details v-if="ehPastor && status !== 'rascunho'" :open="cortes.length > 0"
+             class="mb-6 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm group">
+      <summary class="cursor-pointer select-none list-none px-5 py-4 flex items-center justify-between gap-3">
+        <span>
+          <span class="font-semibold text-gray-900 dark:text-white">Cortes (Shorts)</span>
+          <span class="ml-2 text-xs font-semibold text-gray-400 dark:text-slate-500 tabular-nums">{{ cortesNoSite }}</span>
+          <span class="block text-xs text-gray-500 dark:text-slate-400 mt-0.5">
+            Aparecem dentro da página desta pregação. O importador do YouTube coloca os Shorts aqui sozinho; se cair na pregação errada, mova.
+          </span>
+        </span>
+        <svg class="w-4 h-4 text-gray-400 transition-transform group-open:rotate-90 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6" /></svg>
+      </summary>
+      <div class="px-5 pb-5">
+        <ul v-if="cortes.length" class="divide-y divide-gray-100 dark:divide-slate-700/70 mb-4">
+          <li v-for="c in cortes" :key="c.id" class="py-3 flex items-center gap-3" :class="{ 'opacity-50': !c.ativo }">
+            <a :href="c.url" target="_blank" rel="noopener" class="flex-shrink-0 w-11 aspect-[9/16] rounded-md overflow-hidden bg-gray-100 dark:bg-slate-900">
+              <img :src="c.thumb" @error="(e) => { if (e.target.src !== c.thumb_reserva) e.target.src = c.thumb_reserva }"
+                   alt="" loading="lazy" class="w-full h-full object-cover" />
+            </a>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ c.titulo }}</p>
+              <p class="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
+                {{ dataCurta(c.publicado_em) }} · {{ c.fixado ? 'escolhido à mão' : 'automático' }}{{ c.ativo ? '' : ' · escondido' }}
+              </p>
+            </div>
+            <select :value="p.id" @change="moverCorte(c, $event.target.value)" title="Mover para outra pregação"
+                    class="hidden sm:block w-48 border border-gray-200 dark:border-slate-700 rounded-lg px-2 py-1.5 text-xs bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-blue-500">
+              <option :value="p.id">Esta pregação</option>
+              <option v-for="o in outrasPregacoes" :key="o.id" :value="o.id">{{ o.data }} · {{ o.titulo }}</option>
+              <option value="">Nenhuma (tirar daqui)</option>
+            </select>
+            <button type="button" @click="alternarCorte(c)" :class="botaoSecundario + ' !px-2.5 !py-1.5 text-xs'">
+              {{ c.ativo ? 'Esconder' : 'Mostrar' }}
+            </button>
+          </li>
+        </ul>
+        <p v-else class="text-sm text-gray-500 dark:text-slate-400 mb-4">Nenhum corte ainda.</p>
+
+        <form @submit.prevent="adicionarCorte" class="flex flex-col sm:flex-row gap-2">
+          <input v-model.trim="novoCorte" type="url" placeholder="Cole o link de um Short (youtube.com/shorts/...)" :class="campo" />
+          <button type="submit" :disabled="!novoCorte || adicionando"
+                  class="flex-shrink-0 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-semibold transition">
+            {{ adicionando ? 'Adicionando…' : 'Adicionar corte' }}
+          </button>
+        </form>
+        <p v-if="erroCorte" class="text-red-500 text-xs mt-1.5">{{ erroCorte }}</p>
+        <p class="sm:hidden text-xs text-gray-400 dark:text-slate-500 mt-3">Para mover um corte para outra pregação, use o computador.</p>
+      </div>
+    </details>
+
     <div class="flex items-end justify-between mb-2">
       <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400">Roteiro</p>
       <p class="text-xs text-gray-400 dark:text-slate-500">{{ ehPastor ? 'Só o pregador e os pastores veem.' : 'Só você e o pastor veem.' }} No culto, aparece no iPad do púlpito.</p>
@@ -255,6 +306,8 @@ const props = defineProps({
   pregadores: { type: Array, default: () => [] },
   fonteMin: { type: Number, default: 16 },
   fonteMax: { type: Number, default: 48 },
+  cortes: { type: Array, default: () => [] },
+  pregacoesParaCortes: { type: Array, default: () => [] },
 })
 
 // Cores pensadas para fundo escuro (púlpito): o marca-texto é translúcido, então a letra branca continua legível.
@@ -403,6 +456,56 @@ function antesDeFechar(e) {
 const tirarGuarda = router.on('before', (event) => {
   if (event.detail.visit.method === 'get' && pendente()) salvar({ keepalive: true })
 })
+
+// ─── Cortes (Shorts) ───
+const cortes = ref([...props.cortes])
+const outrasPregacoes = computed(() => props.pregacoesParaCortes.filter((o) => o.id !== p.id))
+const cortesNoSite = computed(() => {
+  const n = cortes.value.filter((c) => c.ativo).length
+  return n ? `${n} no site` : ''
+})
+const novoCorte = ref('')
+const adicionando = ref(false)
+const erroCorte = ref('')
+const dataCurta = (d) => d ? new Date(d + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : ''
+
+async function enviarCorte(url, metodo, corpo) {
+  const res = await fetch(url, {
+    method: metodo,
+    credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-XSRF-TOKEN': xsrf() },
+    body: JSON.stringify(corpo),
+  })
+  const json = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(Object.values(json.errors ?? {})[0]?.[0] ?? 'Não deu certo. Tente de novo.')
+  return json
+}
+
+async function moverCorte(c, destino) {
+  const id = destino === '' ? null : Number(destino)
+  if (id === p.id) return
+  try {
+    await enviarCorte(`/admin/cortes/${c.id}`, 'PATCH', { pregacao_id: id })
+    cortes.value = cortes.value.filter((x) => x.id !== c.id)
+  } catch (e) { alert(e.message) }
+}
+
+async function alternarCorte(c) {
+  try {
+    await enviarCorte(`/admin/cortes/${c.id}`, 'PATCH', { ativo: !c.ativo })
+    c.ativo = !c.ativo
+  } catch (e) { alert(e.message) }
+}
+
+async function adicionarCorte() {
+  erroCorte.value = ''
+  adicionando.value = true
+  try {
+    const json = await enviarCorte(`/admin/pregacoes/${p.id}/cortes`, 'POST', { url: novoCorte.value })
+    cortes.value = json.cortes
+    novoCorte.value = ''
+  } catch (e) { erroCorte.value = e.message } finally { adicionando.value = false }
+}
 
 async function abrirPulpito() {
   await salvar()

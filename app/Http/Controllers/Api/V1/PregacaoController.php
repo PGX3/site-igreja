@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pregacao;
+use App\Models\PregacaoCorte;
 use Illuminate\Http\JsonResponse;
 
 /** Pregações publicadas (as mesmas da página pública /pregacoes). */
@@ -23,7 +24,10 @@ class PregacaoController extends Controller
     {
         abort_unless($pregacao->publicada(), 404);
 
-        return response()->json(['data' => self::pregacao($pregacao) + ['descricao' => $pregacao->descricao]]);
+        return response()->json(['data' => self::pregacao($pregacao) + [
+            'descricao' => $pregacao->descricao,
+            'cortes' => $pregacao->cortes()->visiveis()->get()->map(fn (PregacaoCorte $c) => $c->paraExibir())->all(),
+        ]]);
     }
 
     private static function pregacao(Pregacao $p): array

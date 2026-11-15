@@ -7,6 +7,7 @@ use App\Models\Culto;
 use App\Models\Curso;
 use App\Models\Evento;
 use App\Models\Pregacao;
+use App\Models\PregacaoCorte;
 use App\Models\Texto;
 use App\Services\CultoProximaDataResolver;
 use Carbon\Carbon;
@@ -178,6 +179,7 @@ class HomeController extends Controller
                 'mes' => mb_strtoupper($nomeMes),
                 'ano' => $data->year,
                 'data_fmt' => ucfirst($nomeDia).', '.$data->day.' de '.$nomeMes.' de '.$data->year,
+                'cortes' => $pregacao->cortes()->visiveis()->get()->map(fn (PregacaoCorte $c) => $c->paraExibir())->all(),
             ],
             'meta' => [
                 'title' => $pregacao->titulo.' · Igreja em Charqueadas',
