@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\V1\AniversarioController;
 use App\Http\Controllers\Api\V1\AprenderController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\AutomacaoController;
+use App\Http\Controllers\Api\V1\AutomacaoMusicaController;
 use App\Http\Controllers\Api\V1\CadastroController;
 use App\Http\Controllers\Api\V1\ContatoController;
 use App\Http\Controllers\Api\V1\CultoController;
@@ -41,6 +42,10 @@ Route::prefix('v1')->middleware('force.json')->group(function () {
             Route::get('culto-excecoes', [AutomacaoController::class, 'excecoes'])->name('culto-excecoes.index');
             Route::post('culto-excecoes', [AutomacaoController::class, 'salvarExcecao'])->name('culto-excecoes.store');
             Route::delete('culto-excecoes/{excecao}', [AutomacaoController::class, 'removerExcecao'])->name('culto-excecoes.destroy');
+
+            // Repertório: uma IA local empurra as músicas da pasta do louvor
+            Route::get('musicas', [AutomacaoMusicaController::class, 'index'])->name('musicas.index');
+            Route::post('musicas', [AutomacaoMusicaController::class, 'salvar'])->name('musicas.salvar');
         });
 
     // iPad da recepção (app Recepção): token do aparelho, gerado em /admin/recepcao
