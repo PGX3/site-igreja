@@ -46,4 +46,28 @@ class GrupoFuncaoController extends Controller
 
         return back()->with('success', 'Função removida.');
     }
+
+    /** Marca quem do grupo faz esta função (usado na sugestão de escala). */
+    public function membros(Request $request, Grupo $grupo, GrupoFuncao $funcao): RedirectResponse
+    {
+        if (! $request->user()->canManageGrupo($grupo->id)) {
+            abort(403);
+        }
+
+        if ($funcao->grupo_id !== $grupo->id) {
+            abort(404);
+        }
+
+        $data = $request->validate([
+            'membros_ids' => 'present|array',
+            'membros_ids.*' => 'integer',
+        ]);
+
+        // Só quem é membro do grupo pode ter função nele
+        $funcao->membros()->sync(
+            $grupo->membros()->whereIn('users.id', $data['membros_ids'])->pluck('users.id')->all()
+        );
+
+        return back();
+    }
 }

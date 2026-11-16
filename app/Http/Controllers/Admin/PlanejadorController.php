@@ -7,13 +7,19 @@ use App\Models\Culto;
 use App\Models\Escala;
 use App\Models\Evento;
 use App\Models\Grupo;
+use App\Services\InterpretadorRestricoes;
+use App\Services\SugestorEscala;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class PlanejadorController extends Controller
 {
     private const SEPARADOR_FUNCOES = ', ';
+
+    /** Quantos dias para trás contam como carga recente na sugestão e no resumo. */
+    private const DIAS_HISTORICO = 90;
 
     private array $diasPt = [
         'Domingo' => 0, 'Segunda' => 1, 'Terça' => 2,
@@ -34,7 +40,7 @@ class PlanejadorController extends Controller
         $fim = $inicio->copy()->endOfMonth();
 
         $grupo = $grupoId
-            ? Grupo::with(['funcoes:id,grupo_id,nome', 'membros:id,name', 'cultosSemEscala:id'])->find($grupoId)
+            ? Grupo::with(['funcoes:id,grupo_id,nome', 'funcoes.membros:id', 'membros:id,name', 'cultosSemEscala:id'])->find($grupoId)
             : null;
 
         $funcoes = $grupo ? $grupo->funcoes->pluck('nome')->values() : collect();
@@ -89,21 +95,7 @@ class PlanejadorController extends Controller
 
         $rows = $rows->sortBy(fn ($r) => $r['data'].($r['vinculo'] ?? ''))->values();
 
-        // Pessoas já escaladas em OUTROS grupos no mês (para evitar choque de agenda)
-        $ocupados = [];
-        if ($grupo) {
-            $outras = Escala::with(['grupo:id,nome', 'escalaMembros:id,escala_id,user_id'])
-                ->where('grupo_id', '!=', $grupoId)
-                ->whereBetween('data', [$inicio->toDateString(), $fim->toDateString()])
-                ->get();
-
-            foreach ($outras as $e) {
-                $d = $e->data->format('Y-m-d');
-                foreach ($e->escalaMembros as $em) {
-                    $ocupados[$d][$em->user_id] = $e->grupo?->nome ?? 'outro grupo';
-                }
-            }
-        }
+        $ocupados = $grupo ? $this->ocupados($grupoId, $inicio, $fim) : [];
 
         return Inertia::render('Admin/Planejador', [
             'editavel' => $grupoId ? $user->canManageGrupo($grupoId) : false,
@@ -116,8 +108,126 @@ class PlanejadorController extends Controller
             'next' => $inicio->copy()->addMonth()->format('Y-m'),
             'funcoes' => $funcoes,
             'membros' => $membros,
+            'aptos' => $grupo ? (object) $this->aptos($grupo) : (object) [],
+            'historico' => $grupo ? (object) $this->resumoHistorico($grupo, $inicio) : (object) [],
             'rows' => $rows,
         ]);
+    }
+
+    /**
+     * Sugere quem escalar nas células vazias da grade (não salva nada).
+     * Equilibra pela carga de cada pessoa e respeita função, outros grupos e "Não pode".
+     */
+    public function sugerir(Request $request, SugestorEscala $sugestor, InterpretadorRestricoes $interprete): JsonResponse
+    {
+        $data = $request->validate([
+            'grupo_id' => 'required|exists:grupos,id',
+            'mes' => 'required|date_format:Y-m',
+            'rows' => 'required|array',
+            'rows.*.data' => 'required|date_format:Y-m-d',
+            'rows.*.vinculo' => 'nullable|string',
+            'rows.*.restricoes' => 'nullable|string',
+            'rows.*.cells' => 'nullable|array',
+        ]);
+
+        $grupoId = (int) $data['grupo_id'];
+        if (! $request->user()->canManageGrupo($grupoId)) {
+            abort(403);
+        }
+
+        $grupo = Grupo::with(['funcoes:id,grupo_id,nome', 'funcoes.membros:id', 'membros:id,name'])->find($grupoId);
+        $inicio = Carbon::createFromFormat('Y-m-d', $data['mes'].'-01')->startOfMonth();
+        $fim = $inicio->copy()->endOfMonth();
+
+        $linhas = array_values($data['rows']);
+        $membros = $grupo->membros->pluck('name', 'id')->all();
+
+        $lido = $interprete->interpretar(
+            array_map(fn ($r) => [
+                'data' => $r['data'],
+                'vinculo' => $r['vinculo'] ?? null,
+                'texto' => (string) ($r['restricoes'] ?? ''),
+            ], $linhas),
+            $membros,
+        );
+
+        $resultado = $sugestor->sugerir(
+            linhas: array_map(fn ($r) => ['data' => $r['data'], 'cells' => $r['cells'] ?? []], $linhas),
+            funcoes: $grupo->funcoes->pluck('nome')->all(),
+            membros: array_keys($membros),
+            aptos: $this->aptos($grupo),
+            historico: $this->historico(array_keys($membros), $inicio),
+            ocupados: $this->ocupados($grupoId, $inicio, $fim),
+            naoPodem: $lido['nao_podem'],
+        );
+
+        return response()->json([
+            'sugestoes' => $resultado['sugestoes'],
+            'sem_candidato' => $resultado['sem_candidato'],
+            'nao_podem' => collect($lido['nao_podem'])
+                ->map(fn ($ids, $linha) => ['linha' => $linha, 'ids' => $ids])
+                ->values(),
+            'ia' => $lido['ia'],
+        ]);
+    }
+
+    /** Pessoas já escaladas em OUTROS grupos no mês: data => [user_id => nome do grupo]. */
+    private function ocupados(int $grupoId, Carbon $inicio, Carbon $fim): array
+    {
+        $ocupados = [];
+
+        $outras = Escala::with(['grupo:id,nome', 'escalaMembros:id,escala_id,user_id'])
+            ->where('grupo_id', '!=', $grupoId)
+            ->whereBetween('data', [$inicio->toDateString(), $fim->toDateString()])
+            ->get();
+
+        foreach ($outras as $e) {
+            $d = $e->data->format('Y-m-d');
+            foreach ($e->escalaMembros as $em) {
+                $ocupados[$d][$em->user_id] = $e->grupo?->nome ?? 'outro grupo';
+            }
+        }
+
+        return $ocupados;
+    }
+
+    /** Função => ids de quem faz (só membros atuais). Função sem ninguém marcado não aparece. */
+    private function aptos(Grupo $grupo): array
+    {
+        $membros = $grupo->membros->pluck('id');
+
+        return $grupo->funcoes
+            ->mapWithKeys(fn ($f) => [$f->nome => $f->membros->pluck('id')->intersect($membros)->values()->all()])
+            ->filter()
+            ->all();
+    }
+
+    /** user_id => datas (Y-m-d) em que serviu nos últimos dias antes do mês, em qualquer grupo. */
+    private function historico(array $membrosIds, Carbon $inicio): array
+    {
+        $historico = [];
+
+        $linhas = Escala::query()
+            ->join('escala_membros', 'escala_membros.escala_id', '=', 'escalas.id')
+            ->whereIn('escala_membros.user_id', $membrosIds)
+            ->where('escalas.data', '<', $inicio->toDateString())
+            ->where('escalas.data', '>=', $inicio->copy()->subDays(self::DIAS_HISTORICO)->toDateString())
+            ->orderBy('escalas.data')
+            ->get(['escala_membros.user_id', 'escalas.data']);
+
+        foreach ($linhas as $l) {
+            $historico[$l->user_id][] = Carbon::parse($l->data)->format('Y-m-d');
+        }
+
+        return $historico;
+    }
+
+    /** Para o resumo da tela: user_id => ['recentes' => n, 'ultima' => 'Y-m-d']. */
+    private function resumoHistorico(Grupo $grupo, Carbon $inicio): array
+    {
+        return collect($this->historico($grupo->membros->pluck('id')->all(), $inicio))
+            ->map(fn ($datas) => ['recentes' => count($datas), 'ultima' => end($datas)])
+            ->all();
     }
 
     public function salvar(Request $request)

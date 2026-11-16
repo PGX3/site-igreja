@@ -188,17 +188,30 @@
           <div class="px-5 py-4 border-b border-gray-100 dark:border-slate-700">
             <h2 class="text-sm font-bold text-gray-900 dark:text-white">Funções do Grupo</h2>
             <p class="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
-              Lista de funções sugeridas ao montar escalas (ex: Vocal, Guitarra, Bateria).
+              Colunas do planejador (ex: Vocal, Guitarra, Bateria). Marque quem faz cada função:
+              a sugestão automática de escala só usa as pessoas marcadas. Função sem ninguém marcado aceita qualquer membro.
             </p>
           </div>
 
           <ul v-if="funcoes.length" class="divide-y divide-gray-50 dark:divide-slate-700/50">
-            <li v-for="f in funcoes" :key="f.id" class="flex items-center justify-between px-5 py-2.5">
-              <span class="text-sm text-gray-800 dark:text-slate-200">{{ f.nome }}</span>
-              <button type="button" @click="removerFuncao(f)"
-                      class="text-xs font-semibold text-gray-400 dark:text-slate-500 hover:text-red-600 px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
-                Remover
-              </button>
+            <li v-for="f in funcoes" :key="f.id" class="px-5 py-3">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-semibold text-gray-800 dark:text-slate-200">{{ f.nome }}</span>
+                <button type="button" @click="removerFuncao(f)"
+                        class="text-xs font-semibold text-gray-400 dark:text-slate-500 hover:text-red-600 px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+                  Remover
+                </button>
+              </div>
+              <!-- Quem faz esta função -->
+              <div v-if="membrosSalvos.length" class="mt-2 flex flex-wrap gap-1.5">
+                <button v-for="m in membrosSalvos" :key="m.id" type="button" @click="alternarFuncao(f, m.id)"
+                        class="text-xs font-semibold px-2.5 py-1 rounded-full border transition"
+                        :class="f.membros_ids.includes(m.id)
+                          ? 'bg-blue-600 border-blue-600 text-white'
+                          : 'bg-white dark:bg-slate-700 border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-300 hover:border-blue-400'">
+                  {{ m.name }}
+                </button>
+              </div>
             </li>
           </ul>
           <p v-else class="px-5 py-4 text-xs text-gray-400 dark:text-slate-500">
@@ -251,14 +264,32 @@ const props = defineProps({
 
 const editando = computed(() => !!props.grupo)
 
-const funcoes = ref([...(props.grupo?.funcoes ?? [])])
+const copiarFuncoes = (lista) => (lista ?? []).map(f => ({ ...f, membros_ids: [...(f.membros_ids ?? [])] }))
+const funcoes = ref(copiarFuncoes(props.grupo?.funcoes))
 const novaFuncao = ref('')
 const funcaoErro = ref('')
 const salvandoFuncao = ref(false)
 
 watch(() => props.grupo?.funcoes, (novas) => {
-  if (novas) funcoes.value = [...novas]
+  if (novas) funcoes.value = copiarFuncoes(novas)
 })
+
+// Só membros já salvos no grupo podem ser marcados numa função
+const membrosSalvos = computed(() => {
+  const ids = new Set(props.grupo?.membros_ids ?? [])
+  return (props.usuarios ?? []).filter(u => ids.has(u.id))
+})
+
+function alternarFuncao(f, userId) {
+  const idx = f.membros_ids.indexOf(userId)
+  if (idx >= 0) f.membros_ids.splice(idx, 1)
+  else f.membros_ids.push(userId)
+
+  router.put(`/admin/grupos/${props.grupo.id}/funcoes/${f.id}/membros`,
+    { membros_ids: f.membros_ids },
+    { preserveScroll: true, preserveState: true },
+  )
+}
 
 function adicionarFuncao() {
   const nome = novaFuncao.value.trim()

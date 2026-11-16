@@ -8,6 +8,7 @@ use App\Models\Grupo;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class GrupoController extends Controller
@@ -70,7 +71,7 @@ class GrupoController extends Controller
 
     public function edit(Grupo $grupo)
     {
-        $grupo->load(['lider', 'membros:id', 'funcoes:id,grupo_id,nome', 'cultosSemEscala:id']);
+        $grupo->load(['lider', 'membros:id', 'funcoes:id,grupo_id,nome', 'funcoes.membros:id', 'cultosSemEscala:id']);
         $cultos = $this->cultosAtivos();
         $semEscala = $grupo->cultosSemEscala->pluck('id');
 
@@ -86,7 +87,11 @@ class GrupoController extends Controller
                 'whatsapp_phone' => $grupo->whatsapp_phone,
                 'lider' => $grupo->lider?->only('id', 'name'),
                 'membros_ids' => $grupo->membros->pluck('id')->all(),
-                'funcoes' => $grupo->funcoes->map(fn ($f) => ['id' => $f->id, 'nome' => $f->nome])->values(),
+                'funcoes' => $grupo->funcoes->map(fn ($f) => [
+                    'id' => $f->id,
+                    'nome' => $f->nome,
+                    'membros_ids' => $f->membros->pluck('id')->all(),
+                ])->values(),
             ],
             'usuarios' => $this->usuariosDisponiveis(),
             'cultos' => $cultos,
@@ -150,6 +155,12 @@ class GrupoController extends Controller
         }
 
         $grupo->membros()->sync($ids->unique()->values()->all());
+
+        // Quem saiu do grupo deixa de constar nas funções dele
+        DB::table('grupo_funcao_user')
+            ->whereIn('grupo_funcao_id', $grupo->funcoes()->pluck('id'))
+            ->whereNotIn('user_id', $ids->unique()->values()->all() ?: [0])
+            ->delete();
     }
 
     /**

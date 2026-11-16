@@ -14,4 +14,10 @@ class GrupoFuncao extends Model
     {
         return $this->belongsTo(Grupo::class);
     }
+
+    /** Quem do grupo faz esta função (base da sugestão de escala). */
+    public function membros()
+    {
+        return $this->belongsToMany(User::class, 'grupo_funcao_user')->withTimestamps();
+    }
 }

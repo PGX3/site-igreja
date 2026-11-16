@@ -45,6 +45,13 @@ return [
         'api_key' => env('YOUTUBE_API_KEY'),
     ],
 
+    // IA do planejador de escalas: lê o texto livre de "Não pode". Sem chave, usa só os nomes.
+    'deepseek' => [
+        'api_key' => env('DEEPSEEK_API_KEY'),
+        'base_url' => env('DEEPSEEK_BASE_URL', 'https://api.deepseek.com'),
+        'model' => env('DEEPSEEK_MODEL', 'deepseek-chat'),
+    ],
+
     // Token Bearer das automações internas (ex.: aniversariantes da semana no WhatsApp)
     'automacao' => [
         'token' => env('AUTOMACAO_TOKEN'),

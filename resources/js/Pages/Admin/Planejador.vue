@@ -63,15 +63,24 @@
                         class="w-full min-w-[120px] rounded-md text-xs font-semibold px-2 py-1.5 border transition focus:outline-none focus:ring-2 focus:ring-blue-500"
                         :class="[
                           editavel ? 'cursor-pointer' : 'cursor-default',
+                          row.sugeridas[f] ? 'ring-2 ring-violet-400 dark:ring-violet-500' : '',
                           row.cells[f]
                             ? 'border-transparent'
                             : 'border-dashed border-gray-300 dark:border-slate-500 text-gray-400 dark:text-slate-400 bg-gray-50 dark:bg-slate-700/40' + (editavel ? ' hover:border-blue-400 hover:text-blue-500' : ''),
                         ]"
                         :style="cellStyle(row.cells[f])">
                   <option value="">+ Escalar</option>
-                  <option v-for="m in membros" :key="m.id" :value="m.id">
-                    {{ m.nome }}{{ avisoOpcao(row, f, m.id) }}
-                  </option>
+                  <template v-if="opcoes[f].outros.length && opcoes[f].aptos.length">
+                    <optgroup label="Fazem esta função">
+                      <option v-for="m in opcoes[f].aptos" :key="m.id" :value="m.id">{{ rotuloOpcao(row, f, m) }}</option>
+                    </optgroup>
+                    <optgroup label="Outros do grupo">
+                      <option v-for="m in opcoes[f].outros" :key="m.id" :value="m.id">{{ rotuloOpcao(row, f, m) }}</option>
+                    </optgroup>
+                  </template>
+                  <template v-else>
+                    <option v-for="m in opcoes[f].todos" :key="m.id" :value="m.id">{{ rotuloOpcao(row, f, m) }}</option>
+                  </template>
                 </select>
                 <p v-if="row.cells[f] && outrasFuncoes(row, f, row.cells[f]).length" class="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5 px-1">
                   ⚠ também em {{ outrasFuncoes(row, f, row.cells[f]).join(', ') }}
@@ -116,12 +125,23 @@
               <label class="block text-[11px] font-semibold text-gray-500 dark:text-slate-400 mb-1">{{ f }}</label>
               <select :value="row.cells[f] ?? ''" @change="setCell(row, f, $event.target.value)" :disabled="!editavel"
                       class="w-full rounded-md text-sm font-semibold px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      :class="row.cells[f] ? 'border-transparent' : 'border-dashed border-gray-300 dark:border-slate-500 text-gray-400 dark:text-slate-400 bg-gray-50 dark:bg-slate-700/40'"
+                      :class="[
+                        row.cells[f] ? 'border-transparent' : 'border-dashed border-gray-300 dark:border-slate-500 text-gray-400 dark:text-slate-400 bg-gray-50 dark:bg-slate-700/40',
+                        row.sugeridas[f] ? 'ring-2 ring-violet-400 dark:ring-violet-500' : '',
+                      ]"
                       :style="cellStyle(row.cells[f])">
                 <option value="">+ Escalar</option>
-                <option v-for="m in membros" :key="m.id" :value="m.id">
-                  {{ m.nome }}{{ avisoOpcao(row, f, m.id) }}
-                </option>
+                <template v-if="opcoes[f].outros.length && opcoes[f].aptos.length">
+                  <optgroup label="Fazem esta função">
+                    <option v-for="m in opcoes[f].aptos" :key="m.id" :value="m.id">{{ rotuloOpcao(row, f, m) }}</option>
+                  </optgroup>
+                  <optgroup label="Outros do grupo">
+                    <option v-for="m in opcoes[f].outros" :key="m.id" :value="m.id">{{ rotuloOpcao(row, f, m) }}</option>
+                  </optgroup>
+                </template>
+                <template v-else>
+                  <option v-for="m in opcoes[f].todos" :key="m.id" :value="m.id">{{ rotuloOpcao(row, f, m) }}</option>
+                </template>
               </select>
               <p v-if="row.cells[f] && outrasFuncoes(row, f, row.cells[f]).length" class="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5">
                 ⚠ também em {{ outrasFuncoes(row, f, row.cells[f]).join(', ') }}
@@ -147,6 +167,15 @@
           {{ salvando ? 'Salvando…' : 'Salvar planejamento' }}
         </button>
 
+        <button @click="sugerir" :disabled="sugerindo"
+                class="border border-violet-300 dark:border-violet-700 text-violet-700 dark:text-violet-300 hover:bg-violet-50 dark:hover:bg-violet-900/30 disabled:opacity-50 px-4 py-2.5 rounded-lg text-sm font-semibold transition">
+          {{ sugerindo ? 'Sugerindo…' : '✨ Sugerir escala' }}
+        </button>
+        <button v-if="temSugestoes" @click="desfazerSugestao"
+                class="text-sm font-semibold text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-white px-2 py-2 transition">
+          Desfazer sugestão
+        </button>
+
         <div class="flex items-center gap-2">
           <input v-model="novaData" type="date"
                  class="rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
@@ -155,6 +184,35 @@
             + Adicionar data
           </button>
         </div>
+      </div>
+
+      <!-- RESULTADO DA SUGESTÃO -->
+      <div v-if="sugestao"
+           class="mt-4 p-4 rounded-xl border text-sm"
+           :class="sugestao.erro
+             ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300'
+             : 'bg-violet-50 dark:bg-violet-900/20 border-violet-200 dark:border-violet-800 text-violet-900 dark:text-violet-100'">
+        <p class="font-semibold">{{ sugestao.titulo }}</p>
+        <template v-if="!sugestao.erro">
+          <p class="text-xs mt-1 opacity-80">
+            Quem serviu menos entra primeiro, sem repetir a pessoa em semanas seguidas quando dá para evitar.
+            Nada foi salvo ainda: as células com borda roxa são sugestões.
+          </p>
+          <div v-if="sugestao.naoPodem.length" class="mt-3">
+            <p class="text-xs font-semibold">
+              "Não pode" entendido {{ sugestao.ia ? 'pela IA' : 'pelos nomes' }}:
+            </p>
+            <ul class="text-xs mt-1 space-y-0.5">
+              <li v-for="n in sugestao.naoPodem" :key="n.dia">{{ n.dia }}: {{ n.nomes }}</li>
+            </ul>
+          </div>
+          <div v-if="sugestao.semCandidato.length" class="mt-3">
+            <p class="text-xs font-semibold">Ficou sem ninguém disponível:</p>
+            <ul class="text-xs mt-1 space-y-0.5">
+              <li v-for="(c, i) in sugestao.semCandidato" :key="i">{{ c }}</li>
+            </ul>
+          </div>
+        </template>
       </div>
 
       <!-- RESUMO: quantas vezes cada pessoa está escalada, por dia da semana -->
@@ -173,6 +231,8 @@
                 <th class="px-3 py-2 font-semibold text-gray-600 dark:text-slate-300 whitespace-nowrap">Pessoa</th>
                 <th v-for="c in resumo.colunas" :key="c.wd" class="px-3 py-2 font-semibold text-gray-600 dark:text-slate-300 text-center whitespace-nowrap">{{ c.label }}</th>
                 <th class="px-3 py-2 font-semibold text-gray-600 dark:text-slate-300 text-center whitespace-nowrap">Total</th>
+                <th class="px-3 py-2 font-semibold text-gray-600 dark:text-slate-300 text-center whitespace-nowrap" title="Escalas nos 90 dias antes deste mês, em qualquer grupo">90 dias antes</th>
+                <th class="px-3 py-2 font-semibold text-gray-600 dark:text-slate-300 text-center whitespace-nowrap">Última vez</th>
               </tr>
             </thead>
             <tbody>
@@ -188,6 +248,12 @@
                     :class="p.total ? 'text-gray-900 dark:text-white' : 'text-gray-300 dark:text-slate-600'">
                   {{ p.total || '—' }}
                 </td>
+                <td class="px-3 py-1.5 text-center tabular-nums text-gray-500 dark:text-slate-400">
+                  {{ historico[p.id]?.recentes || '—' }}
+                </td>
+                <td class="px-3 py-1.5 text-center tabular-nums text-gray-500 dark:text-slate-400 whitespace-nowrap">
+                  {{ dataCurta(historico[p.id]?.ultima) }}
+                </td>
               </tr>
             </tbody>
             <tfoot>
@@ -195,6 +261,7 @@
                 <td class="px-3 py-2 font-semibold text-gray-600 dark:text-slate-300">Total</td>
                 <td v-for="c in resumo.colunas" :key="c.wd" class="px-3 py-2 text-center tabular-nums font-semibold text-gray-700 dark:text-slate-200">{{ c.total }}</td>
                 <td class="px-3 py-2 text-center tabular-nums font-bold text-gray-900 dark:text-white">{{ resumo.total }}</td>
+                <td colspan="2"></td>
               </tr>
             </tfoot>
           </table>
@@ -221,6 +288,8 @@ const props = defineProps({
   membros:  { type: Array, default: () => [] },
   rows:     { type: Array, default: () => [] },
   ocupados: { type: Object, default: () => ({}) },
+  aptos:    { type: Object, default: () => ({}) },
+  historico: { type: Object, default: () => ({}) },
   editavel: { type: Boolean, default: false },
 })
 
@@ -234,7 +303,7 @@ const linhas = ref(clonar(props.rows))
 watch(() => props.rows, (r) => { linhas.value = clonar(r) })
 
 function clonar(rows) {
-  return rows.map(r => ({ ...r, cells: { ...(r.cells || {}) }, restricoes: r.restricoes || '' }))
+  return rows.map(r => ({ ...r, cells: { ...(r.cells || {}) }, restricoes: r.restricoes || '', sugeridas: {} }))
 }
 
 const salvando = ref(false)
@@ -286,6 +355,7 @@ function corLinha(row) {
 }
 
 function setCell(row, funcao, val) {
+  delete row.sugeridas[funcao] // mexeu à mão, deixa de ser sugestão
   if (val) row.cells[funcao] = Number(val)
   else delete row.cells[funcao]
 }
@@ -350,6 +420,93 @@ const resumo = computed(() => {
   return { colunas, pessoas, total, media }
 })
 
+// Opções de cada coluna: quem faz a função primeiro, e dentro de cada bloco quem
+// tem menos escalas no mês aparece antes.
+const opcoes = computed(() => {
+  const carga = Object.fromEntries(resumo.value.pessoas.map(p => [p.id, p.total]))
+  const todos = [...props.membros].sort((a, b) => (carga[a.id] - carga[b.id]) || a.nome.localeCompare(b.nome))
+  return Object.fromEntries(props.funcoes.map(f => {
+    const ids = new Set(props.aptos?.[f] ?? [])
+    return [f, {
+      todos,
+      aptos: todos.filter(m => ids.has(m.id)),
+      outros: todos.filter(m => !ids.has(m.id)),
+    }]
+  }))
+})
+
+function rotuloOpcao(row, funcao, m) {
+  const total = resumo.value.pessoas.find(p => p.id === m.id)?.total ?? 0
+  return `${m.nome} (${total}x)${avisoOpcao(row, funcao, m.id)}`
+}
+
+function dataCurta(d) {
+  return d ? new Date(d + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '—'
+}
+
+// Sugestão automática: preenche só as células vazias, como rascunho (não salva).
+const sugerindo = ref(false)
+const sugestao = ref(null)
+const temSugestoes = computed(() => linhas.value.some(r => Object.keys(r.sugeridas).length))
+
+function xsrf() {
+  const m = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/)
+  return m ? decodeURIComponent(m[1]) : ''
+}
+
+async function sugerir() {
+  sugerindo.value = true
+  sugestao.value = null
+  const enviadas = linhas.value
+  try {
+    const res = await fetch('/admin/planejador/sugerir', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-XSRF-TOKEN': xsrf() },
+      body: JSON.stringify({
+        grupo_id: props.grupo_id,
+        mes: props.mes,
+        rows: enviadas.map(r => ({ data: r.data, vinculo: r.vinculo, restricoes: r.restricoes, cells: r.cells })),
+      }),
+    })
+    if (!res.ok) throw new Error()
+    const json = await res.json()
+
+    for (const s of json.sugestoes) {
+      const row = enviadas[s.linha]
+      if (!row || row.cells[s.funcao]) continue
+      row.cells[s.funcao] = s.user_id
+      row.sugeridas[s.funcao] = true
+    }
+
+    const nome = (id) => props.membros.find(m => m.id === id)?.nome ?? '?'
+    const n = json.sugestoes.length
+    sugestao.value = {
+      titulo: n
+        ? `${n} ${n === 1 ? 'célula sugerida' : 'células sugeridas'}. Revise e clique em "Salvar planejamento".`
+        : 'Nenhuma célula vazia para sugerir.',
+      ia: json.ia,
+      naoPodem: json.nao_podem.map(x => ({
+        dia: `${enviadas[x.linha]?.dia} ${enviadas[x.linha]?.vinculo ?? ''}`.trim(),
+        nomes: x.ids.map(nome).join(', '),
+      })),
+      semCandidato: json.sem_candidato.map(x => `${enviadas[x.linha]?.dia} · ${x.funcao}`),
+    }
+  } catch {
+    sugestao.value = { erro: true, titulo: 'Não deu para sugerir agora. Tente de novo.' }
+  } finally {
+    sugerindo.value = false
+  }
+}
+
+function desfazerSugestao() {
+  for (const row of linhas.value) {
+    for (const f of Object.keys(row.sugeridas)) delete row.cells[f]
+    row.sugeridas = {}
+  }
+  sugestao.value = null
+}
+
 function trocar(params) {
   router.get('/admin/planejador', {
     grupo_id: params.grupo_id ?? props.grupo_id,
@@ -366,7 +523,7 @@ function adicionarData() {
     dia: d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
     semana: d.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', ''),
     culto_id: null, evento_id: null, vinculo: null,
-    restricoes: '', cells: {},
+    restricoes: '', cells: {}, sugeridas: {},
   })
   linhas.value.sort((a, b) => a.data.localeCompare(b.data))
   novaData.value = ''

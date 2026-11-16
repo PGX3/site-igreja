@@ -154,6 +154,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
         Route::get('calendario', [CalendarioController::class, 'index'])->name('calendario.index');
         Route::get('planejador', [PlanejadorController::class, 'index'])->name('planejador.index');
         Route::post('planejador', [PlanejadorController::class, 'salvar'])->name('planejador.salvar');
+        Route::post('planejador/sugerir', [PlanejadorController::class, 'sugerir'])->name('planejador.sugerir');
 
         Route::resource('escalas', EscalaController::class);
         Route::post('escalas/{escala}/duplicar', [EscalaController::class, 'duplicar'])->name('escalas.duplicar');
@@ -223,6 +224,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 
         Route::post('grupos/{grupo}/funcoes', [GrupoFuncaoController::class, 'store'])->name('grupos.funcoes.store');
         Route::delete('grupos/{grupo}/funcoes/{funcao}', [GrupoFuncaoController::class, 'destroy'])->name('grupos.funcoes.destroy');
+        Route::put('grupos/{grupo}/funcoes/{funcao}/membros', [GrupoFuncaoController::class, 'membros'])->name('grupos.funcoes.membros');
     });
 
     // Listagem de grupos: todos os autenticados veem seus grupos
