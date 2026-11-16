@@ -63,6 +63,21 @@
         <span class="w-4 h-4 rounded-full border border-gray-400 dark:border-slate-500 bg-white dark:bg-slate-800"></span>
       </button>
 
+      <!-- TAGS DA LETRA DE MÚSICA -->
+      <template v-if="marcacoesMusica">
+        <span class="w-px h-5 bg-gray-200 dark:bg-slate-600 mx-1"></span>
+        <button type="button" @click="alternarParte('refrao')"
+                :class="btnTag(editor.isActive('paragraph', { parte: 'refrao' }))"
+                title="Marca as linhas selecionadas como refrão">
+          <span class="text-green-700 dark:text-green-400">Refrão</span>
+        </button>
+        <button type="button" @click="editor.chain().focus().toggleMark('instrucao').run()"
+                :class="btnTag(editor.isActive('instrucao'))"
+                title="Instrução para a banda (REFRÃO:, 2X, SOLO). Não aparece para o público">
+          <span class="text-red-600 dark:text-red-400">Instrução</span>
+        </button>
+      </template>
+
       <!-- IMAGEM -->
       <template v-if="permiteImagem">
         <span class="w-px h-5 bg-gray-200 dark:bg-slate-600 mx-1"></span>
@@ -95,7 +110,7 @@
 
 <script setup>
 import { ref, watch, onBeforeUnmount } from 'vue'
-import { useEditor, EditorContent } from '@tiptap/vue-3'
+import { useEditor, EditorContent, Extension, Mark } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import { TextStyle, Color } from '@tiptap/extension-text-style'
 import TextAlign from '@tiptap/extension-text-align'
@@ -106,6 +121,8 @@ const props = defineProps({
   temErro:       { type: Boolean, default: false },
   permiteImagem: { type: Boolean, default: false },
   permiteBlocos: { type: Boolean, default: false },
+  // Letra de música: botões e suporte às tags de refrão e instrução
+  marcacoesMusica: { type: Boolean, default: false },
   uploadUrl:     { type: String, default: '' },
 })
 const emit = defineEmits(['update:modelValue'])
@@ -123,7 +140,37 @@ const fileInput = ref(null)
 const enviando = ref(false)
 const erroUpload = ref('')
 
+// Tags da letra de música. O HTML guarda o significado e a cor vem do CSS:
+//   <p class="refrao">…</p>              parte da música
+//   <span class="instrucao">2X</span>    instrução para a banda
+const PARTES = ['refrao', 'pre-refrao', 'ponte']
+
+const ParteDaMusica = Extension.create({
+  name: 'parteDaMusica',
+  addGlobalAttributes() {
+    return [{
+      types: ['paragraph'],
+      attributes: {
+        parte: {
+          default: null,
+          parseHTML: (el) => PARTES.find((p) => el.classList.contains(p)) ?? null,
+          renderHTML: (attrs) => (attrs.parte ? { class: attrs.parte } : {}),
+        },
+      },
+    }]
+  },
+})
+
+const Instrucao = Mark.create({
+  name: 'instrucao',
+  parseHTML() { return [{ tag: 'span.instrucao' }] },
+  renderHTML() { return ['span', { class: 'instrucao' }, 0] },
+})
+
 const extensions = [StarterKit, TextStyle, Color]
+if (props.marcacoesMusica) {
+  extensions.push(ParteDaMusica, Instrucao)
+}
 if (props.permiteBlocos) {
   extensions.push(TextAlign.configure({ types: ['heading', 'paragraph'] }))
 }
@@ -143,6 +190,18 @@ const editor = useEditor({
     emit('update:modelValue', html === '<p></p>' ? '' : html)
   },
 })
+
+function alternarParte(parte) {
+  const ativa = editor.value.isActive('paragraph', { parte })
+  editor.value.chain().focus().updateAttributes('paragraph', { parte: ativa ? null : parte }).run()
+}
+
+function btnTag(ativo) {
+  return [
+    'h-8 px-2.5 rounded text-xs font-bold transition',
+    ativo ? 'bg-gray-200 dark:bg-slate-600' : 'hover:bg-gray-200 dark:hover:bg-slate-700',
+  ]
+}
 
 function tratarArquivos(arquivos) {
   const imagens = arquivos.filter((f) => f.type.startsWith('image/'))

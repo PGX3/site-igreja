@@ -47,7 +47,7 @@ class HtmlSanitizer
 
         // Tags que o RichTextEditor gera (StarterKit + underline, cor, alinhamento, imagem).
         $config->set('HTML.Allowed', implode(',', [
-            'p[style]', 'br', 'span[style]', 'strong', 'b', 'em', 'i', 'u', 's', 'strike',
+            'p[style|class]', 'br', 'span[style|class]', 'strong', 'b', 'em', 'i', 'u', 's', 'strike',
             'code', 'pre', 'blockquote',
             'ul', 'ol', 'li',
             'h1[style]', 'h2[style]', 'h3[style]', 'h4[style]',
@@ -55,6 +55,9 @@ class HtmlSanitizer
             'a[href|title|target|rel]',
             'img[src|alt|style]',
         ]));
+
+        // Únicas classes aceitas: as tags da letra de música (parte da música e instrução da banda).
+        $config->set('Attr.AllowedClasses', ['refrao', 'pre-refrao', 'ponte', 'instrucao']);
 
         // Propriedades CSS inline usadas pelo editor (cor, alinhamento, largura/posição da imagem).
         // 'display' não é preciso aqui: o leitor já aplica display:block nas imagens via CSS.

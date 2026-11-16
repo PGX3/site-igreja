@@ -8,6 +8,7 @@ use App\Models\Musica;
 use App\Services\HtmlSanitizer;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class MusicaController extends Controller
@@ -27,7 +28,10 @@ class MusicaController extends Controller
             ->map(fn ($m) => [
                 'id' => $m->id,
                 'nome' => $m->nome,
+                'artista' => $m->artista,
                 'tom' => $m->tom,
+                'bpm' => $m->bpm,
+                'categoria' => $m->categoria,
                 'letra' => $m->letra,
                 'link' => $m->link,
                 'vezes' => $m->setlist_itens_count,
@@ -43,7 +47,10 @@ class MusicaController extends Controller
 
     public function create()
     {
-        return Inertia::render('Admin/Musicas/Form');
+        return Inertia::render('Admin/Musicas/Form', [
+            'categorias' => Musica::CATEGORIAS,
+            'tipos_secao' => Musica::TIPOS_SECAO,
+        ]);
     }
 
     public function show(Musica $musica)
@@ -67,8 +74,18 @@ class MusicaController extends Controller
             'musica' => [
                 'id' => $musica->id,
                 'nome' => $musica->nome,
+                'artista' => $musica->artista,
                 'tom' => $musica->tom,
+                'bpm' => $musica->bpm,
+                'categoria' => Musica::CATEGORIAS[$musica->categoria] ?? null,
                 'letra' => $musica->letra,
+                'letra_crua' => $musica->letraCrua(),
+                'secoes_publico' => collect($musica->secoes_publico)->map(fn ($s) => [
+                    'tipo' => $s['tipo'],
+                    'rotulo' => Musica::TIPOS_SECAO[$s['tipo']] ?? $s['tipo'],
+                    'texto' => $s['texto'],
+                ])->all(),
+                'letra_publico' => $musica->letraPublicoTexto(),
                 'link' => $musica->link,
                 'vezes' => $historico->count(),
                 'ultima' => $historico->first()['data'] ?? null,
@@ -94,10 +111,16 @@ class MusicaController extends Controller
             'musica' => [
                 'id' => $musica->id,
                 'nome' => $musica->nome,
+                'artista' => $musica->artista,
                 'tom' => $musica->tom,
+                'bpm' => $musica->bpm,
+                'categoria' => $musica->categoria,
                 'letra' => $musica->letra,
+                'secoes_publico' => $musica->secoes_publico ?? [],
                 'link' => $musica->link,
             ],
+            'categorias' => Musica::CATEGORIAS,
+            'tipos_secao' => Musica::TIPOS_SECAO,
         ]);
     }
 
@@ -126,8 +149,14 @@ class MusicaController extends Controller
     {
         $data = $request->validate([
             'nome' => 'required|string|max:200',
+            'artista' => 'nullable|string|max:150',
             'tom' => 'nullable|string|max:10',
-            'letra' => 'required|string',
+            'bpm' => 'nullable|integer|between:20,400',
+            'categoria' => ['nullable', Rule::in(array_keys(Musica::CATEGORIAS))],
+            'letra' => 'nullable|string',
+            'secoes_publico' => 'nullable|array',
+            'secoes_publico.*.tipo' => ['nullable', Rule::in(array_keys(Musica::TIPOS_SECAO))],
+            'secoes_publico.*.texto' => 'nullable|string',
             'link' => 'nullable|url|max:500',
         ], [], [
             'nome' => 'nome',
@@ -135,7 +164,10 @@ class MusicaController extends Controller
             'link' => 'link',
         ]);
 
-        $data['letra'] = HtmlSanitizer::clean($data['letra']);
+        // Letra é opcional: dá para cadastrar só pelo nome e completar depois.
+        // A coluna não aceita null (e o app espera texto), então vazio vira ''.
+        $data['letra'] = HtmlSanitizer::clean($data['letra'] ?? '');
+        $data['secoes_publico'] = Musica::limparSecoes($data['secoes_publico'] ?? null);
 
         return $data;
     }

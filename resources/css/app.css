@@ -348,3 +348,14 @@ body::after {
 .roteiro span[style*='background-color'] { border-radius: 0.2em; padding: 0 0.12em; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
 .roteiro strong { color: #fff; }
 .roteiro .ProseMirror { outline: none; min-height: 55vh; }
+
+/* Letra de música: tags de parte (<p class="refrao">) e de instrução da banda
+   (<span class="instrucao">2X</span>). A cor vem daqui, não fica gravada na letra. */
+p.refrao { color: #15803d; }
+p.pre-refrao { color: #0f766e; }
+p.ponte { color: #7e22ce; }
+span.instrucao { color: #dc2626; font-weight: 700; }
+.dark p.refrao { color: #4ade80; }
+.dark p.pre-refrao { color: #2dd4bf; }
+.dark p.ponte { color: #c084fc; }
+.dark span.instrucao { color: #f87171; }

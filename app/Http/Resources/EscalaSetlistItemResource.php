@@ -18,7 +18,7 @@ class EscalaSetlistItemResource extends JsonResource
                 'id' => $this->musica->id,
                 'nome' => $this->musica->nome,
                 'tom' => $this->musica->tom,
-                'letra' => $this->musica->letra,
+                'letra' => $this->musica->letraComCores(),
                 'link' => $this->musica->link,
             ]),
         ];

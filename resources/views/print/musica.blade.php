@@ -12,6 +12,10 @@
         .letra p { margin: 0; }
         .letra p:empty::before { content: "\00a0"; }
         .letra strong { font-weight: 800; }
+        .letra p.refrao { color: #15803d; }
+        .letra p.pre-refrao { color: #0f766e; }
+        .letra p.ponte { color: #7e22ce; }
+        .letra span.instrucao { color: #dc2626; font-weight: 700; }
         .letra { font-size: 16px; }
         @media print {
             body { margin: 12mm; }

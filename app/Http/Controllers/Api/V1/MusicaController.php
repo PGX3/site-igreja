@@ -21,8 +21,8 @@ class MusicaController extends Controller
         $musicas = Musica::query()
             ->when($request->filled('q'), fn ($q) => $q->where('nome', 'like', '%'.$request->input('q').'%'))
             ->orderBy('nome')
-            ->get(['id', 'nome', 'tom', 'link'])
-            ->map(fn (Musica $m) => $m->only('id', 'nome', 'tom', 'link'));
+            ->get(['id', 'nome', 'artista', 'tom', 'bpm', 'categoria', 'link'])
+            ->map(fn (Musica $m) => $m->only('id', 'nome', 'artista', 'tom', 'bpm', 'categoria', 'link'));
 
         return response()->json(['data' => $musicas]);
     }
@@ -48,8 +48,13 @@ class MusicaController extends Controller
             'data' => [
                 'id' => $musica->id,
                 'nome' => $musica->nome,
+                'artista' => $musica->artista,
                 'tom' => $musica->tom,
-                'letra' => $musica->letra,
+                'bpm' => $musica->bpm,
+                'categoria' => $musica->categoria,
+                'letra' => $musica->letraComCores(),
+                'letra_crua' => $musica->letraCrua(),
+                'secoes_publico' => $musica->secoes_publico ?? [],
                 'link' => $musica->link,
                 'vezes' => $historico->count(),
                 'historico' => $historico,

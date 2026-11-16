@@ -317,7 +317,7 @@ class EscalaController extends Controller
         return Inertia::render('Admin/Escalas/Show', [
             'can_manage' => $user->canManageGrupo($escala->grupo_id),
             'musicas' => $temMusicas
-                ? Musica::orderBy('nome')->get(['id', 'nome', 'tom'])
+                ? Musica::orderBy('nome')->orderBy('artista')->get(['id', 'nome', 'artista', 'tom'])
                 : [],
             'biblioteca_assets' => Asset::latest()->get()->map(fn ($a) => [
                 'id' => $a->id,

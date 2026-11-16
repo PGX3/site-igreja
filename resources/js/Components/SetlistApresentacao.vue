@@ -119,4 +119,9 @@ onBeforeUnmount(() => {
 .letra-apresentacao :deep(h3) { font-size: 1.1em; font-weight: 700; margin: 0.7em 0 0.2em; color: #fbbf24; }
 .letra-apresentacao :deep(ul) { list-style: disc; padding-left: 1.5em; }
 .letra-apresentacao :deep(strong) { font-weight: 800; }
+/* Tags da letra: a tela é sempre escura, então usa os tons claros nos dois temas */
+.letra-apresentacao :deep(p.refrao) { color: #4ade80; }
+.letra-apresentacao :deep(p.pre-refrao) { color: #2dd4bf; }
+.letra-apresentacao :deep(p.ponte) { color: #c084fc; }
+.letra-apresentacao :deep(span.instrucao) { color: #f87171; font-weight: 700; }
 </style>

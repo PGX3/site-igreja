@@ -58,6 +58,7 @@
           <div class="flex-1 min-w-0">
             <p class="font-semibold text-gray-900 dark:text-white text-sm truncate">{{ m.nome }}</p>
             <p class="text-xs text-gray-400 dark:text-slate-500 mt-0.5 truncate">
+              <template v-if="m.artista">{{ m.artista }} · </template>
               <template v-if="m.vezes">Tocada {{ m.vezes }}x · última: {{ m.ultima }}</template>
               <template v-else>Nunca tocada</template>
             </p>
@@ -142,7 +143,7 @@ function ultimaValor(m) {
 
 const musicasFiltradas = computed(() => {
   const q = busca.value.trim().toLowerCase()
-  let lista = q ? props.musicas.filter(m => m.nome.toLowerCase().includes(q)) : [...props.musicas]
+  let lista = q ? props.musicas.filter(m => `${m.nome} ${m.artista ?? ''}`.toLowerCase().includes(q)) : [...props.musicas]
 
   if (ordenacao.value === 'mais') {
     lista.sort((a, b) => (b.vezes ?? 0) - (a.vezes ?? 0))
